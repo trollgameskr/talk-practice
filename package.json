@@ -23,6 +23,7 @@
   "author": "trollgameskr",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/text-to-speech": "^6.3.1",
     "@google/generative-ai": "^0.19.0",
     "@react-native-async-storage/async-storage": "^1.19.3",
     "@react-native-community/voice": "^1.1.9",
