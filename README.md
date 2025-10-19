@@ -39,12 +39,36 @@ GeminiTalk is a real-time English conversation practice app powered by Google's 
 
 ## 🚀 시작하기 (Getting Started)
 
-### 필수 요구사항 (Prerequisites)
+### 💻 웹 버전 (Web Version) - **NEW!**
+
+**Windows OS 사용자를 위한 웹 버전이 추가되었습니다!**  
+Web version now available for Windows OS users!
+
+브라우저에서 바로 사용하기:
+
+```bash
+# 저장소 클론
+git clone https://github.com/trollgameskr/talk-practice.git
+cd talk-practice
+
+# 의존성 설치
+npm install
+
+# 웹 버전 실행
+npm run web
+```
+
+웹 버전은 http://localhost:3000 에서 실행됩니다.  
+자세한 사용법은 [WEB_SETUP.md](./WEB_SETUP.md)를 참조하세요.
+
+### 📱 모바일 앱 (Mobile App)
+
+#### 필수 요구사항 (Prerequisites)
 - Node.js 18 이상 (16+ 호환)
 - React Native 개발 환경
 - Gemini API 키 ([Google AI Studio](https://makersuite.google.com/app/apikey)에서 발급)
 
-### 설치 (Installation)
+#### 설치 (Installation)
 
 ```bash
 # 저장소 클론
@@ -98,11 +122,14 @@ talk-practice/
 
 ## 🔧 기술 스택 (Tech Stack)
 
-- **Frontend**: React Native + TypeScript
+- **Frontend**: React Native + TypeScript + React Native Web
 - **AI/ML**: Google Gemini Live API
-- **Storage**: AsyncStorage
-- **Voice**: React Native Voice, React Native TTS
+- **Storage**: AsyncStorage (mobile) / localStorage (web)
+- **Voice**: 
+  - Mobile: React Native Voice, React Native TTS
+  - Web: Web Speech API (SpeechRecognition & SpeechSynthesis)
 - **Navigation**: React Navigation v6
+- **Web Build**: Webpack 5
 - **CI/CD**: GitHub Actions
 
 ## 📊 성과 지표 (Performance Metrics)

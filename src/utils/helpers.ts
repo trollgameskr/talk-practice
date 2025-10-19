@@ -111,5 +111,5 @@ export function truncate(text: string, length: number): string {
  * Validate API key format
  */
 export function isValidApiKey(apiKey: string): boolean {
-  return apiKey && apiKey.length > 20 && apiKey.startsWith('AI');
+  return !!(apiKey && apiKey.length > 20 && apiKey.startsWith('AI'));
 }
