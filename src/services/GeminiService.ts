@@ -5,14 +5,28 @@
 
 import {GoogleGenerativeAI} from '@google/generative-ai';
 import {GEMINI_CONFIG} from '../config/gemini.config';
-import {ConversationTopic, Message, Feedback} from '../types';
+import {ConversationTopic, Message, Feedback, TokenUsage} from '../types';
 import {conversationPrompts} from '../data/conversationPrompts';
+
+// Gemini 1.5 Pro pricing (as of 2024)
+// Input: $0.00125 per 1K tokens (for prompts <= 128K tokens)
+// Output: $0.005 per 1K tokens
+const GEMINI_PRICING = {
+  inputPer1K: 0.00125,
+  outputPer1K: 0.005,
+};
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
   private model: any;
   private chat: any;
   private currentTopic: ConversationTopic | null = null;
+  private sessionTokenUsage: TokenUsage = {
+    inputTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
+    estimatedCost: 0,
+  };
 
   constructor(apiKey: string) {
     this.genAI = new GoogleGenerativeAI(apiKey || GEMINI_CONFIG.apiKey);
@@ -61,11 +75,54 @@ export class GeminiService {
     try {
       const result = await this.chat.sendMessage(userMessage);
       const response = result.response;
+      
+      // Track token usage if available
+      if (response.usageMetadata) {
+        this.updateTokenUsage(response.usageMetadata);
+      }
+      
       return response.text();
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
     }
+  }
+
+  /**
+   * Update token usage tracking
+   */
+  private updateTokenUsage(usageMetadata: any) {
+    const inputTokens = usageMetadata.promptTokenCount || 0;
+    const outputTokens = usageMetadata.candidatesTokenCount || 0;
+    const totalTokens = usageMetadata.totalTokenCount || (inputTokens + outputTokens);
+
+    this.sessionTokenUsage.inputTokens += inputTokens;
+    this.sessionTokenUsage.outputTokens += outputTokens;
+    this.sessionTokenUsage.totalTokens += totalTokens;
+    
+    // Calculate cost
+    const inputCost = (inputTokens / 1000) * GEMINI_PRICING.inputPer1K;
+    const outputCost = (outputTokens / 1000) * GEMINI_PRICING.outputPer1K;
+    this.sessionTokenUsage.estimatedCost += inputCost + outputCost;
+  }
+
+  /**
+   * Get current session token usage
+   */
+  getSessionTokenUsage(): TokenUsage {
+    return {...this.sessionTokenUsage};
+  }
+
+  /**
+   * Reset session token usage
+   */
+  resetSessionTokenUsage() {
+    this.sessionTokenUsage = {
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      estimatedCost: 0,
+    };
   }
 
   /**
@@ -191,6 +248,7 @@ Provide an encouraging summary in 2-3 sentences.`;
   endConversation() {
     this.chat = null;
     this.currentTopic = null;
+    this.resetSessionTokenUsage();
   }
 }
 

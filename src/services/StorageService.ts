@@ -117,6 +117,12 @@ export class StorageService {
       progress.averageSessionDuration = 
         progress.totalDuration / progress.totalSessions;
 
+      // Update cost tracking
+      if (session.tokenUsage) {
+        progress.totalCost += session.tokenUsage.estimatedCost;
+        progress.totalTokens += session.tokenUsage.totalTokens;
+      }
+
       // Update topic progress
       const topicProg = progress.topicProgress[session.topic];
       topicProg.sessionsCompleted += 1;
@@ -184,6 +190,8 @@ export class StorageService {
       overallScore: 0,
       achievements: [],
       retentionRate: 0,
+      totalCost: 0,
+      totalTokens: 0,
     };
   }
 

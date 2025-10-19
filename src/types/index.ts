@@ -58,6 +58,14 @@ export interface ConversationSession {
   messages: Message[];
   feedback?: Feedback;
   duration: number; // in seconds
+  tokenUsage?: TokenUsage;
+}
+
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  estimatedCost: number; // in USD
 }
 
 export interface UserProgress {
@@ -69,6 +77,8 @@ export interface UserProgress {
   overallScore: number;
   achievements: Achievement[];
   retentionRate: number; // 0-100
+  totalCost: number; // Total cost in USD
+  totalTokens: number; // Total tokens used
 }
 
 export interface TopicProgress {
