@@ -73,6 +73,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed bug where microphone button stays disabled after AI voice synthesis error
+  - Added try-finally block to ensure `isSpeaking` state is properly reset
+  - Prevents conversation from becoming stuck when AI speech fails
+
 ### Planned Features
 - Offline mode with cached responses
 - Multi-language support
