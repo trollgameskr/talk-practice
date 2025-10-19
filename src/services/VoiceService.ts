@@ -79,7 +79,9 @@ export class VoiceService {
     try {
       await this.aiVoiceService.speak(text);
     } catch (error) {
+      // Log error but don't throw - speech failure shouldn't break the app
       console.error('Error speaking text:', error);
+      // Could emit an event here for UI to show a message if needed
     }
   }
 

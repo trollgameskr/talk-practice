@@ -194,18 +194,22 @@ export class AIVoiceService {
         
         utterance.onerror = (event: any) => {
           this.isSpeaking = false;
-          // Don't log error if it's just the user cancelling
-          if (event.error !== 'interrupted' && event.error !== 'canceled') {
-            console.warn('Speech synthesis error:', event.error);
+          // User cancellations are expected behavior, not errors
+          if (event.error === 'interrupted' || event.error === 'canceled') {
+            resolve();
+            return;
           }
-          resolve(); // Resolve instead of reject to avoid breaking the flow
+          // Log other errors but don't break the user experience
+          console.warn('Speech synthesis error:', event.error);
+          // Reject so caller knows speech failed, but they can handle gracefully
+          reject(new Error(`Speech synthesis failed: ${event.error}`));
         };
         
         win.speechSynthesis.speak(utterance);
       } catch (error) {
         this.isSpeaking = false;
         console.warn('Error in speech synthesis:', error);
-        resolve(); // Resolve instead of reject
+        reject(error);
       }
     });
   }
