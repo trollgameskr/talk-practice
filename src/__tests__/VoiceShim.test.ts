@@ -33,7 +33,8 @@ describe('VoiceShim', () => {
 
     // Clear the module cache and dynamically re-import
     jest.resetModules();
-    // Using require here because dynamic import with top-level await is not supported in Jest
+    // Using require() here to ensure synchronous module loading after mocking window
+    // This guarantees the mock is in place before the module is loaded
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     Voice = require('../services/web/VoiceShim.web.js').default;
   });
