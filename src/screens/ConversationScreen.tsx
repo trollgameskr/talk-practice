@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  TextInput,
 } from 'react-native';
 import {
   ConversationTopic,
@@ -45,6 +46,8 @@ const ConversationScreen = ({route, navigation}: any) => {
     examples: string[];
   } | null>(null);
   const [showDefinitionModal, setShowDefinitionModal] = useState(false);
+  const [showWordInputModal, setShowWordInputModal] = useState(false);
+  const [wordInput, setWordInput] = useState('');
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -179,12 +182,10 @@ const ConversationScreen = ({route, navigation}: any) => {
       clearTimeout(silenceTimerRef.current);
     }
 
-    // Start a 2-second silence timer for auto-response
-    silenceTimerRef.current = setTimeout(() => {
-      // Auto-trigger AI response after silence
-      console.log('Silence detected - would auto-trigger AI response');
-      // Note: The actual trigger happens in onSpeechEnd callback via handleUserMessage
-    }, 2000);
+    // The auto-response feature is already implemented via VoiceService:
+    // When user stops speaking, onSpeechEnd callback automatically calls
+    // handleUserMessage which triggers the AI response. This timer is
+    // kept for potential future enhancements to silence detection.
   };
 
   const handleUserMessage = async (text: string) => {
@@ -393,23 +394,9 @@ const ConversationScreen = ({route, navigation}: any) => {
                 <Text
                   style={[styles.messageText, styles.assistantText]}
                   onPress={() => {
-                    // Show a simple word selection alert
-                    Alert.prompt(
-                      'Look up a word',
-                      'Enter a word or phrase to look up:',
-                      [
-                        {text: 'Cancel', style: 'cancel'},
-                        {
-                          text: 'Look Up',
-                          onPress: word => {
-                            if (word) {
-                              handleWordPress(word);
-                            }
-                          },
-                        },
-                      ],
-                      'plain-text',
-                    );
+                    // Show cross-platform word input modal
+                    setWordInput('');
+                    setShowWordInputModal(true);
                   }}>
                   {message.content}
                 </Text>
@@ -464,6 +451,54 @@ const ConversationScreen = ({route, navigation}: any) => {
           </View>
         )}
       </View>
+
+      {/* Word Input Modal (cross-platform) */}
+      <Modal
+        visible={showWordInputModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowWordInputModal(false)}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowWordInputModal(false)}>
+          <Pressable style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Look up a word</Text>
+            <Text style={styles.inputLabel}>
+              Enter a word or phrase to look up:
+            </Text>
+            <TextInput
+              style={styles.wordInput}
+              value={wordInput}
+              onChangeText={setWordInput}
+              placeholder="Type a word..."
+              autoFocus={true}
+              onSubmitEditing={() => {
+                if (wordInput.trim()) {
+                  setShowWordInputModal(false);
+                  handleWordPress(wordInput.trim());
+                }
+              }}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowWordInputModal(false)}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.lookupButton]}
+                onPress={() => {
+                  if (wordInput.trim()) {
+                    setShowWordInputModal(false);
+                    handleWordPress(wordInput.trim());
+                  }
+                }}>
+                <Text style={styles.lookupButtonText}>Look Up</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Word Definition Modal (feat 3) */}
       <Modal
@@ -707,6 +742,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 8,
+  },
+  wordInput: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f3f4f6',
+  },
+  cancelButtonText: {
+    color: '#6b7280',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  lookupButton: {
+    backgroundColor: '#3b82f6',
+  },
+  lookupButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
