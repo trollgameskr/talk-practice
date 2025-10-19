@@ -3,6 +3,8 @@
  * Provides browser-based audio recording
  */
 
+/* eslint-env browser */
+
 class AudioRecorderPlayer {
   constructor() {
     this.mediaRecorder = null;
@@ -12,11 +14,11 @@ class AudioRecorderPlayer {
 
   async startRecorder(path, audioSet, meteringEnabled) {
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
       this.mediaRecorder = new MediaRecorder(this.stream);
       this.audioChunks = [];
 
-      this.mediaRecorder.ondataavailable = (event) => {
+      this.mediaRecorder.ondataavailable = event => {
         if (event.data.size > 0) {
           this.audioChunks.push(event.data);
         }
@@ -31,20 +33,20 @@ class AudioRecorderPlayer {
   }
 
   async stopRecorder() {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
         this.mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+          const audioBlob = new Blob(this.audioChunks, {type: 'audio/webm'});
           const audioUrl = URL.createObjectURL(audioBlob);
-          
+
           if (this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
             this.stream = null;
           }
-          
+
           resolve(audioUrl);
         };
-        
+
         this.mediaRecorder.stop();
       } else {
         resolve(null);
@@ -71,7 +73,8 @@ class AudioRecorderPlayer {
   async startPlayer(path) {
     return new Promise((resolve, reject) => {
       const audio = new Audio(path);
-      audio.play()
+      audio
+        .play()
         .then(() => resolve('playing'))
         .catch(reject);
     });

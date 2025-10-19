@@ -3,17 +3,23 @@
  * Provides browser-based sound playback
  */
 
+/* eslint-env browser */
+
 class Sound {
   constructor(filename, basePath, callback) {
     this.audio = new Audio();
     this.filename = filename;
-    
+
     if (typeof basePath === 'function') {
       callback = basePath;
       basePath = '';
     }
 
-    if (basePath === Sound.MAIN_BUNDLE || basePath === Sound.DOCUMENT || basePath === Sound.LIBRARY) {
+    if (
+      basePath === Sound.MAIN_BUNDLE ||
+      basePath === Sound.DOCUMENT ||
+      basePath === Sound.LIBRARY
+    ) {
       // Use filename as-is for bundled resources
       this.audio.src = filename;
     } else if (basePath) {
@@ -23,34 +29,47 @@ class Sound {
     }
 
     this.audio.oncanplaythrough = () => {
-      if (callback) callback(null);
+      if (callback) {
+        callback(null);
+      }
     };
 
-    this.audio.onerror = (error) => {
-      if (callback) callback(error);
+    this.audio.onerror = error => {
+      if (callback) {
+        callback(error);
+      }
     };
   }
 
   play(callback) {
-    this.audio.play()
+    this.audio
+      .play()
       .then(() => {
-        if (callback) callback(true);
+        if (callback) {
+          callback(true);
+        }
       })
-      .catch((error) => {
-        if (callback) callback(false);
+      .catch(error => {
+        if (callback) {
+          callback(false);
+        }
         console.error('Error playing sound:', error);
       });
   }
 
   pause(callback) {
     this.audio.pause();
-    if (callback) callback();
+    if (callback) {
+      callback();
+    }
   }
 
   stop(callback) {
     this.audio.pause();
     this.audio.currentTime = 0;
-    if (callback) callback();
+    if (callback) {
+      callback();
+    }
   }
 
   release() {
@@ -63,7 +82,9 @@ class Sound {
   }
 
   getCurrentTime(callback) {
-    if (callback) callback(this.audio.currentTime);
+    if (callback) {
+      callback(this.audio.currentTime);
+    }
   }
 
   setCurrentTime(time) {
@@ -75,7 +96,9 @@ class Sound {
   }
 
   getVolume(callback) {
-    if (callback) callback(this.audio.volume);
+    if (callback) {
+      callback(this.audio.volume);
+    }
   }
 
   setNumberOfLoops(loops) {

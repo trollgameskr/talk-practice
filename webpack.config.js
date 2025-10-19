@@ -12,12 +12,33 @@ module.exports = {
   resolve: {
     alias: {
       'react-native$': 'react-native-web',
-      'react-native-tts': path.resolve(__dirname, 'src/services/web/TTSShim.web.js'),
-      '@react-native-community/voice': path.resolve(__dirname, 'src/services/web/VoiceShim.web.js'),
-      'react-native-audio-recorder-player': path.resolve(__dirname, 'src/services/web/AudioRecorderShim.web.js'),
-      'react-native-sound': path.resolve(__dirname, 'src/services/web/SoundShim.web.js'),
+      'react-native-tts': path.resolve(
+        __dirname,
+        'src/services/web/TTSShim.web.js',
+      ),
+      '@react-native-community/voice': path.resolve(
+        __dirname,
+        'src/services/web/VoiceShim.web.js',
+      ),
+      'react-native-audio-recorder-player': path.resolve(
+        __dirname,
+        'src/services/web/AudioRecorderShim.web.js',
+      ),
+      'react-native-sound': path.resolve(
+        __dirname,
+        'src/services/web/SoundShim.web.js',
+      ),
     },
-    extensions: ['.web.tsx', '.web.ts', '.web.jsx', '.web.js', '.tsx', '.ts', '.jsx', '.js'],
+    extensions: [
+      '.web.tsx',
+      '.web.ts',
+      '.web.jsx',
+      '.web.js',
+      '.tsx',
+      '.ts',
+      '.jsx',
+      '.js',
+    ],
   },
   module: {
     rules: [

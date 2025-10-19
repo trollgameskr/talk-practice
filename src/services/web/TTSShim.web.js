@@ -3,6 +3,8 @@
  * Provides browser-based text-to-speech
  */
 
+/* eslint-env browser */
+
 const Tts = {
   getInitStatus: async () => {
     return 'speechSynthesis' in window ? 'success' : 'error';
@@ -16,15 +18,23 @@ const Tts = {
 
     return new Promise((resolve, reject) => {
       const utterance = new SpeechSynthesisUtterance(text);
-      
+
       // Apply options
-      if (options.language) utterance.lang = options.language;
-      if (options.rate) utterance.rate = options.rate;
-      if (options.pitch) utterance.pitch = options.pitch;
-      if (options.volume) utterance.volume = options.volume;
+      if (options.language) {
+        utterance.lang = options.language;
+      }
+      if (options.rate) {
+        utterance.rate = options.rate;
+      }
+      if (options.pitch) {
+        utterance.pitch = options.pitch;
+      }
+      if (options.volume) {
+        utterance.volume = options.volume;
+      }
 
       utterance.onend = () => resolve();
-      utterance.onerror = (event) => reject(event);
+      utterance.onerror = event => reject(event);
 
       window.speechSynthesis.speak(utterance);
     });
@@ -51,18 +61,18 @@ const Tts = {
     return Promise.resolve();
   },
 
-  setDefaultLanguage: (language) => {
+  setDefaultLanguage: language => {
     // Store for future use
     Tts.defaultLanguage = language;
     return Promise.resolve();
   },
 
-  setDefaultRate: (rate) => {
+  setDefaultRate: rate => {
     Tts.defaultRate = rate;
     return Promise.resolve();
   },
 
-  setDefaultPitch: (pitch) => {
+  setDefaultPitch: pitch => {
     Tts.defaultPitch = pitch;
     return Promise.resolve();
   },
