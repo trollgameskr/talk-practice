@@ -6,6 +6,8 @@
 /* eslint-env browser */
 
 const Tts = {
+  listeners: {},
+
   getInitStatus: async () => {
     return 'speechSynthesis' in window ? 'success' : 'error';
   },
@@ -33,8 +35,19 @@ const Tts = {
         utterance.volume = options.volume;
       }
 
-      utterance.onend = () => resolve();
-      utterance.onerror = event => reject(event);
+      utterance.onstart = () => {
+        Tts._emit('tts-start', {});
+      };
+
+      utterance.onend = () => {
+        Tts._emit('tts-finish', {});
+        resolve();
+      };
+
+      utterance.onerror = event => {
+        Tts._emit('tts-error', event);
+        reject(event);
+      };
 
       window.speechSynthesis.speak(utterance);
     });
@@ -89,8 +102,24 @@ const Tts = {
     }));
   },
 
-  addEventListener: () => {},
-  removeEventListener: () => {},
+  addEventListener: (event, handler) => {
+    if (!Tts.listeners[event]) {
+      Tts.listeners[event] = [];
+    }
+    Tts.listeners[event].push(handler);
+  },
+
+  removeEventListener: (event, handler) => {
+    if (Tts.listeners[event]) {
+      Tts.listeners[event] = Tts.listeners[event].filter(h => h !== handler);
+    }
+  },
+
+  _emit: (event, data) => {
+    if (Tts.listeners[event]) {
+      Tts.listeners[event].forEach(handler => handler(data));
+    }
+  },
 };
 
 // Defaults
