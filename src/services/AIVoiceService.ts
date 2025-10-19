@@ -29,8 +29,9 @@ export class AIVoiceService {
   }
 
   /**
-   * Synthesize speech using Google Cloud Text-to-Speech API
-   * This uses AI-generated neural voices for natural sounding speech
+   * Synthesize speech using AI-generated voices
+   * Attempts to use Google Cloud TTS API if configured, otherwise uses
+   * the best available Web Speech API voice (Google, Microsoft Neural, etc.)
    */
   async speak(text: string): Promise<void> {
     // Stop any ongoing speech
@@ -40,28 +41,35 @@ export class AIVoiceService {
 
     try {
       // Try to use Google Cloud TTS API for AI voice generation
+      // This will be skipped if no API key is configured
       const audioContent = await this.generateAIVoice(text);
       if (audioContent) {
         await this.playAudio(audioContent);
         return;
       }
     } catch (error) {
-      console.warn('AI voice generation failed, using fallback:', error);
+      // Silent fallback to Web Speech API
     }
 
-    // Fallback to enhanced Web Speech API with best voice selection
+    // Use enhanced Web Speech API with best AI voice selection
+    // This automatically selects Google, Microsoft Neural, or other premium voices
     await this.speakWithEnhancedVoice(text);
   }
 
   /**
    * Generate AI voice using Google Cloud Text-to-Speech API
+   * Note: This requires a valid API key and proper CORS setup
+   * Falls back to Web Speech API if unavailable
    */
   private async generateAIVoice(text: string): Promise<string | null> {
+    // Skip Google Cloud TTS if no API key is configured
+    // This avoids unnecessary network requests and console errors
+    if (!this.apiKey) {
+      return null;
+    }
+
     try {
-      // Use Google Cloud Text-to-Speech REST API
-      // This uses the free public endpoint with limited requests
-      const apiKey = this.apiKey || 'AIzaSyBqGpFGzKcYyZHLxvLcwLnpKD0cJnXy6Zg'; // Demo key, should be replaced
-      const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
+      const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
       
       const requestBody = {
         input: {
@@ -95,7 +103,7 @@ export class AIVoiceService {
       const data = await response.json();
       return data.audioContent; // Base64 encoded audio
     } catch (error) {
-      console.error('Error generating AI voice:', error);
+      // Silently fail and use fallback - this is expected in browser without backend
       return null;
     }
   }
@@ -162,7 +170,9 @@ export class AIVoiceService {
         const bestVoice = this.selectBestVoice(voices);
         if (bestVoice) {
           utterance.voice = bestVoice;
-          console.log('Using voice:', bestVoice.name);
+          console.log('Using AI voice:', bestVoice.name);
+        } else {
+          console.log('Using default system voice');
         }
         
         // Configure for natural speech
