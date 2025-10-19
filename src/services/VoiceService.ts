@@ -74,14 +74,16 @@ export class VoiceService {
 
   /**
    * Speak text using AI voice generation
+   * Note: Errors are logged but not propagated to maintain smooth UX.
+   * Speech synthesis failures should not interrupt the conversation flow.
    */
   async speak(text: string): Promise<void> {
     try {
       await this.aiVoiceService.speak(text);
     } catch (error) {
-      // Log error but don't throw - speech failure shouldn't break the app
-      console.error('Error speaking text:', error);
-      // Could emit an event here for UI to show a message if needed
+      // Log error for debugging but don't propagate
+      // Speech failure is non-critical - user can still read the text
+      console.error('AI voice synthesis failed:', error);
     }
   }
 
