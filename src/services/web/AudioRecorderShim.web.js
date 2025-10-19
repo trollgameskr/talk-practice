@@ -36,7 +36,9 @@ class AudioRecorderPlayer {
     return new Promise(resolve => {
       if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
         this.mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(this.audioChunks, {type: 'audio/webm'});
+          // Use mimeType if available, otherwise default to webm
+          const mimeType = this.mediaRecorder.mimeType || 'audio/webm';
+          const audioBlob = new Blob(this.audioChunks, {type: mimeType});
           const audioUrl = URL.createObjectURL(audioBlob);
 
           if (this.stream) {
