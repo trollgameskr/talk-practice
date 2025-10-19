@@ -214,21 +214,19 @@ export class VoiceService {
 
   private onTtsFinish(e: any) {
     console.log('TTS finished:', e);
-    this.isSpeaking = false;
     if (this.ttsFinishResolve) {
-      this.ttsFinishResolve();
-      this.ttsFinishResolve = null;
-      this.ttsErrorReject = null;
+      const resolve = this.ttsFinishResolve;
+      this.cleanupTtsState();
+      resolve();
     }
   }
 
   private onTtsError(e: any) {
     console.error('TTS error:', e);
-    this.isSpeaking = false;
     if (this.ttsErrorReject) {
-      this.ttsErrorReject(e);
-      this.ttsFinishResolve = null;
-      this.ttsErrorReject = null;
+      const reject = this.ttsErrorReject;
+      this.cleanupTtsState();
+      reject(e);
     }
   }
 
