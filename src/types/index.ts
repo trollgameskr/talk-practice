@@ -102,3 +102,13 @@ export interface ConversationPrompt {
   starterPrompts: string[];
   keywords: string[];
 }
+
+export interface VocabularyWord {
+  id: string;
+  word: string;
+  definition: string;
+  examples: string[];
+  addedDate: Date;
+  fromSession?: string; // session ID where this word was encountered
+  reviewed: boolean;
+}
