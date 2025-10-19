@@ -14,6 +14,7 @@ import {
 import StorageService from '../services/StorageService';
 import {UserProgress} from '../types';
 import {formatDuration} from '../utils/helpers';
+import CostDisplay from '../components/CostDisplay';
 
 const storageService = new StorageService();
 
@@ -40,24 +41,30 @@ const HomeScreen = ({navigation}: any) => {
         </View>
 
         {progress && (
-          <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{progress.totalSessions}</Text>
-              <Text style={styles.statLabel}>Total Sessions</Text>
+          <>
+            <View style={styles.statsContainer}>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{progress.totalSessions}</Text>
+                <Text style={styles.statLabel}>Total Sessions</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>
+                  {formatDuration(progress.totalDuration)}
+                </Text>
+                <Text style={styles.statLabel}>Practice Time</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>
+                  {progress.overallScore.toFixed(0)}
+                </Text>
+                <Text style={styles.statLabel}>Overall Score</Text>
+              </View>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>
-                {formatDuration(progress.totalDuration)}
-              </Text>
-              <Text style={styles.statLabel}>Practice Time</Text>
+            
+            <View style={styles.costContainer}>
+              <CostDisplay />
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>
-                {progress.overallScore.toFixed(0)}
-              </Text>
-              <Text style={styles.statLabel}>Overall Score</Text>
-            </View>
-          </View>
+          </>
         )}
 
         <View style={styles.buttonContainer}>
@@ -248,6 +255,10 @@ const styles = StyleSheet.create({
   achievementDescription: {
     fontSize: 12,
     color: '#6b7280',
+  },
+  costContainer: {
+    marginHorizontal: 20,
+    marginBottom: 10,
   },
 });
 

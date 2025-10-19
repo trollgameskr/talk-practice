@@ -213,6 +213,9 @@ const ConversationScreen = ({route, navigation}: any) => {
         feedback = await geminiService.current.analyzeFeedback(userMessages);
       }
       
+      // Get token usage (provide default if not available)
+      const tokenUsage = geminiService.current?.getSessionTokenUsage() || undefined;
+      
       const session: ConversationSession = {
         id: generateId(),
         topic,
@@ -221,6 +224,7 @@ const ConversationScreen = ({route, navigation}: any) => {
         messages,
         feedback,
         duration: elapsedTime,
+        tokenUsage,
       };
       
       await storageService.saveSession(session);

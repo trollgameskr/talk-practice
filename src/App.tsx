@@ -14,6 +14,9 @@ import ConversationScreen from './screens/ConversationScreen';
 import ProgressScreen from './screens/ProgressScreen';
 import SettingsScreen from './screens/SettingsScreen';
 
+// Components
+import CostDisplay from './components/CostDisplay';
+
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -27,6 +30,7 @@ const App = () => {
             headerStyle: styles.header,
             headerTintColor: '#1f2937',
             headerTitleStyle: styles.headerTitle,
+            headerRight: () => <CostDisplay compact />,
           }}>
           <Stack.Screen
             name="Home"
