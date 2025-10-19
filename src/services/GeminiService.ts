@@ -4,17 +4,9 @@
  */
 
 import {GoogleGenerativeAI} from '@google/generative-ai';
-import {GEMINI_CONFIG} from '../config/gemini.config';
+import {GEMINI_CONFIG, GEMINI_PRICING} from '../config/gemini.config';
 import {ConversationTopic, Message, Feedback, TokenUsage} from '../types';
 import {conversationPrompts} from '../data/conversationPrompts';
-
-// Gemini 1.5 Pro pricing (as of 2024)
-// Input: $0.00125 per 1K tokens (for prompts <= 128K tokens)
-// Output: $0.005 per 1K tokens
-const GEMINI_PRICING = {
-  inputPer1K: 0.00125,
-  outputPer1K: 0.005,
-};
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
@@ -91,7 +83,11 @@ export class GeminiService {
   /**
    * Update token usage tracking
    */
-  private updateTokenUsage(usageMetadata: any) {
+  private updateTokenUsage(usageMetadata: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    totalTokenCount?: number;
+  }) {
     const inputTokens = usageMetadata.promptTokenCount || 0;
     const outputTokens = usageMetadata.candidatesTokenCount || 0;
     const totalTokens = usageMetadata.totalTokenCount || (inputTokens + outputTokens);

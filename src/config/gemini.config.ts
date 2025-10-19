@@ -49,3 +49,10 @@ export const CONVERSATION_CONFIG = {
   feedbackDelay: 2000, // 2 seconds
   autoSaveInterval: 30000, // 30 seconds
 };
+
+// Gemini 1.5 Pro pricing (as of 2024)
+// See: https://ai.google.dev/pricing
+export const GEMINI_PRICING = {
+  inputPer1K: 0.00125,  // $0.00125 per 1K input tokens (prompts <= 128K tokens)
+  outputPer1K: 0.005,    // $0.005 per 1K output tokens
+};
