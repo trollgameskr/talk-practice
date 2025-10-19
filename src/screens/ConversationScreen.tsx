@@ -169,8 +169,11 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Speak the response
       if (voiceService.current) {
         setIsSpeaking(true);
-        await voiceService.current.speak(response);
-        setIsSpeaking(false);
+        try {
+          await voiceService.current.speak(response);
+        } finally {
+          setIsSpeaking(false);
+        }
       }
       
       setIsLoading(false);
