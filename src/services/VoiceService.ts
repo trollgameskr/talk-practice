@@ -110,7 +110,7 @@ export class VoiceService {
     // Prevent overlapping TTS operations
     if (this.isSpeaking) {
       console.warn(
-        'TTS is already speaking. Waiting for current speech to finish.',
+        'TTS is already speaking. Stopping current speech to start new one.',
       );
       await this.stopSpeaking();
     }
@@ -134,12 +134,28 @@ export class VoiceService {
 
   /**
    * Stop speaking
+   * Cleans up TTS state and resolves any pending promises
    */
   async stopSpeaking(): Promise<void> {
     try {
       await Tts.stop();
+
+      // Clean up state since Tts.stop() may not trigger events
+      if (this.ttsFinishResolve) {
+        this.ttsFinishResolve();
+      }
+      this.isSpeaking = false;
+      this.ttsFinishResolve = null;
+      this.ttsErrorReject = null;
     } catch (error) {
       console.error('Error stopping TTS:', error);
+      // Clean up state even on error
+      this.isSpeaking = false;
+      if (this.ttsErrorReject) {
+        this.ttsErrorReject(error);
+      }
+      this.ttsFinishResolve = null;
+      this.ttsErrorReject = null;
     }
   }
 
