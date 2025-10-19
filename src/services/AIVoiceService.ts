@@ -158,9 +158,11 @@ export class AIVoiceService {
       return;
     }
 
+    // Ensure voices are loaded before speaking
+    await this.ensureVoicesLoaded();
+
     return new Promise((resolve, reject) => {
       try {
-        // Wait for voices to be loaded
         const voices = win.speechSynthesis.getVoices();
         
         const SpeechSynthesisUtteranceConstructor = win.SpeechSynthesisUtterance;
@@ -192,15 +194,51 @@ export class AIVoiceService {
         
         utterance.onerror = (event: any) => {
           this.isSpeaking = false;
-          console.error('Speech synthesis error:', event);
-          reject(event);
+          // Don't log error if it's just the user cancelling
+          if (event.error !== 'interrupted' && event.error !== 'canceled') {
+            console.warn('Speech synthesis error:', event.error);
+          }
+          resolve(); // Resolve instead of reject to avoid breaking the flow
         };
         
         win.speechSynthesis.speak(utterance);
       } catch (error) {
         this.isSpeaking = false;
-        reject(error);
+        console.warn('Error in speech synthesis:', error);
+        resolve(); // Resolve instead of reject
       }
+    });
+  }
+
+  /**
+   * Ensure voices are loaded before using them
+   */
+  private async ensureVoicesLoaded(): Promise<void> {
+    const win = globalThis as any;
+    if (!win.speechSynthesis) {
+      return;
+    }
+
+    return new Promise((resolve) => {
+      const voices = win.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        resolve();
+        return;
+      }
+
+      // Wait for voiceschanged event
+      const timeout = setTimeout(() => {
+        win.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+        resolve();
+      }, 1000);
+
+      const handleVoicesChanged = () => {
+        clearTimeout(timeout);
+        win.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+        resolve();
+      };
+      
+      win.speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
     });
   }
 
