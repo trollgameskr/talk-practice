@@ -40,7 +40,7 @@ GeminiTalk is a real-time English conversation practice app powered by Google's 
 ## 🚀 시작하기 (Getting Started)
 
 ### 필수 요구사항 (Prerequisites)
-- Node.js 16 이상
+- Node.js 18 이상 (16+ 호환)
 - React Native 개발 환경
 - Gemini API 키 ([Google AI Studio](https://makersuite.google.com/app/apikey)에서 발급)
 

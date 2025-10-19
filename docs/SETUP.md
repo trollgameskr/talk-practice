@@ -19,7 +19,7 @@ This guide will help you set up the GeminiTalk development environment from scra
 - **Internet**: Stable connection for API calls
 
 ### Software Requirements
-- **Node.js**: v16.0 or higher
+- **Node.js**: v18.0 or higher (v16.0+ will work, but v18+ recommended)
 - **npm**: v7.0 or higher (comes with Node.js)
 - **Git**: v2.0 or higher
 

@@ -4,7 +4,7 @@ Get GeminiTalk up and running in 5 minutes!
 
 ## Prerequisites
 
-✅ Node.js 16+ installed  
+✅ Node.js 18+ installed (16+ will work)
 ✅ React Native environment set up  
 ✅ Gemini API key ready
 
