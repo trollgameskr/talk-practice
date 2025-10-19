@@ -25,12 +25,16 @@ describe('VoiceShim', () => {
 
     mockSpeechRecognitionClass = jest.fn(() => mockRecognition);
 
+    // Mock window with SpeechRecognition API
     (global as any).window = {
       SpeechRecognition: mockSpeechRecognitionClass,
+      webkitSpeechRecognition: undefined,
     };
 
-    // Clear the module cache and re-import
+    // Clear the module cache and dynamically re-import
     jest.resetModules();
+    // Using require here because dynamic import with top-level await is not supported in Jest
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     Voice = require('../services/web/VoiceShim.web.js').default;
   });
 
