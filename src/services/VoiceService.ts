@@ -12,8 +12,19 @@ export class VoiceService {
   private onErrorCallback: ((error: any) => void) | null = null;
   private ttsFinishResolve: (() => void) | null = null;
   private ttsErrorReject: ((error: any) => void) | null = null;
+  private isSpeaking: boolean = false;
+
+  // Bound event handlers to maintain reference for removal
+  private boundTtsStart: (e: any) => void;
+  private boundTtsFinish: (e: any) => void;
+  private boundTtsError: (e: any) => void;
 
   constructor() {
+    // Bind event handlers once
+    this.boundTtsStart = this.onTtsStart.bind(this);
+    this.boundTtsFinish = this.onTtsFinish.bind(this);
+    this.boundTtsError = this.onTtsError.bind(this);
+
     this.initializeVoice();
     this.initializeTts();
   }
@@ -37,10 +48,10 @@ export class VoiceService {
       await Tts.setDefaultRate(0.5);
       await Tts.setDefaultPitch(1.0);
 
-      // Set up TTS event listeners
-      Tts.addEventListener('tts-start', this.onTtsStart.bind(this));
-      Tts.addEventListener('tts-finish', this.onTtsFinish.bind(this));
-      Tts.addEventListener('tts-error', this.onTtsError.bind(this));
+      // Set up TTS event listeners using bound functions
+      Tts.addEventListener('tts-start', this.boundTtsStart);
+      Tts.addEventListener('tts-finish', this.boundTtsFinish);
+      Tts.addEventListener('tts-error', this.boundTtsError);
     } catch (error) {
       console.error('Error initializing TTS:', error);
     }
@@ -96,7 +107,16 @@ export class VoiceService {
    * Returns a promise that resolves when TTS finishes speaking
    */
   async speak(text: string): Promise<void> {
+    // Prevent overlapping TTS operations
+    if (this.isSpeaking) {
+      console.warn(
+        'TTS is already speaking. Waiting for current speech to finish.',
+      );
+      await this.stopSpeaking();
+    }
+
     return new Promise((resolve, reject) => {
+      this.isSpeaking = true;
       this.ttsFinishResolve = resolve;
       this.ttsErrorReject = reject;
 
@@ -104,6 +124,7 @@ export class VoiceService {
         Tts.speak(text);
       } catch (error) {
         console.error('Error speaking text:', error);
+        this.isSpeaking = false;
         this.ttsFinishResolve = null;
         this.ttsErrorReject = null;
         reject(error);
@@ -165,6 +186,7 @@ export class VoiceService {
 
   private onTtsFinish(e: any) {
     console.log('TTS finished:', e);
+    this.isSpeaking = false;
     if (this.ttsFinishResolve) {
       this.ttsFinishResolve();
       this.ttsFinishResolve = null;
@@ -174,6 +196,7 @@ export class VoiceService {
 
   private onTtsError(e: any) {
     console.error('TTS error:', e);
+    this.isSpeaking = false;
     if (this.ttsErrorReject) {
       this.ttsErrorReject(e);
       this.ttsFinishResolve = null;
@@ -189,12 +212,13 @@ export class VoiceService {
       await Voice.destroy();
       await Tts.stop();
 
-      // Remove TTS event listeners
-      Tts.removeEventListener('tts-start', this.onTtsStart.bind(this));
-      Tts.removeEventListener('tts-finish', this.onTtsFinish.bind(this));
-      Tts.removeEventListener('tts-error', this.onTtsError.bind(this));
+      // Remove TTS event listeners using the same bound references
+      Tts.removeEventListener('tts-start', this.boundTtsStart);
+      Tts.removeEventListener('tts-finish', this.boundTtsFinish);
+      Tts.removeEventListener('tts-error', this.boundTtsError);
 
       // Clear any pending resolvers
+      this.isSpeaking = false;
       this.ttsFinishResolve = null;
       this.ttsErrorReject = null;
     } catch (error) {
