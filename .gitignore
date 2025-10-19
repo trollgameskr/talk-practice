@@ -69,3 +69,8 @@ logs
 
 # Misc
 .watchmanconfig
+
+# Web build
+web-build/
+public/*.js
+public/*.map
