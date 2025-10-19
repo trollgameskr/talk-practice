@@ -74,6 +74,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Fixed bug where AI doesn't respond automatically after user speaks
+  - Voice recognition now automatically stops when speech ends, triggering AI response
+  - User no longer needs to manually press the stop button after speaking
 - Fixed bug where microphone button stays disabled after AI voice synthesis error
   - Added try-finally block to ensure `isSpeaking` state is properly reset
   - Prevents conversation from becoming stuck when AI speech fails

@@ -122,6 +122,10 @@ export class VoiceService {
   private onSpeechEnd(e: any) {
     console.log('Speech ended:', e);
     this.isListening = false;
+    // Automatically stop listening when speech ends to finalize recognition
+    Voice.stop().catch((error) => {
+      console.error('Error auto-stopping voice recognition:', error);
+    });
   }
 
   private onSpeechResults(e: any) {
