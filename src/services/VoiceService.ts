@@ -143,30 +143,32 @@ export class VoiceService {
       // Clean up state since Tts.stop() may not trigger events
       if (this.ttsFinishResolve) {
         const resolve = this.ttsFinishResolve;
-        this.ttsFinishResolve = null;
-        this.ttsErrorReject = null;
-        this.isSpeaking = false;
+        this.cleanupTtsState();
         resolve();
       } else {
-        this.isSpeaking = false;
-        this.ttsFinishResolve = null;
-        this.ttsErrorReject = null;
+        this.cleanupTtsState();
       }
     } catch (error) {
       console.error('Error stopping TTS:', error);
       // Clean up state even on error
       if (this.ttsErrorReject) {
         const reject = this.ttsErrorReject;
-        this.ttsFinishResolve = null;
-        this.ttsErrorReject = null;
-        this.isSpeaking = false;
+        this.cleanupTtsState();
         reject(error);
       } else {
-        this.isSpeaking = false;
-        this.ttsFinishResolve = null;
-        this.ttsErrorReject = null;
+        this.cleanupTtsState();
       }
     }
+  }
+
+  /**
+   * Clean up TTS state
+   * Resets all TTS-related flags and callbacks
+   */
+  private cleanupTtsState(): void {
+    this.isSpeaking = false;
+    this.ttsFinishResolve = null;
+    this.ttsErrorReject = null;
   }
 
   /**
