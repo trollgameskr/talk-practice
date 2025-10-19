@@ -7,6 +7,8 @@
 
 let recognition = null;
 let isListening = false;
+let lastFinalTranscript = '';
+let lastInterimTranscript = '';
 
 const Voice = {
   onSpeechStart: null,
@@ -30,6 +32,10 @@ const Voice = {
     if (isListening) {
       await Voice.stop();
     }
+
+    // Reset accumulated transcripts
+    lastFinalTranscript = '';
+    lastInterimTranscript = '';
 
     recognition = new SpeechRecognition();
     recognition.lang = locale;
@@ -59,12 +65,19 @@ const Voice = {
         }
       }
 
-      if (results.length > 0 && Voice.onSpeechResults) {
-        Voice.onSpeechResults({value: results});
+      // Store the accumulated transcripts
+      if (results.length > 0) {
+        lastFinalTranscript = results.join(' ');
+        if (Voice.onSpeechResults) {
+          Voice.onSpeechResults({value: results});
+        }
       }
 
-      if (interim.length > 0 && Voice.onSpeechPartialResults) {
-        Voice.onSpeechPartialResults({value: interim});
+      if (interim.length > 0) {
+        lastInterimTranscript = interim.join(' ');
+        if (Voice.onSpeechPartialResults) {
+          Voice.onSpeechPartialResults({value: interim});
+        }
       }
     };
 
@@ -77,9 +90,26 @@ const Voice = {
 
     recognition.onend = () => {
       isListening = false;
+
+      // If we have accumulated transcripts but haven't sent final results yet,
+      // send them now. This handles the case where speech ends before a final
+      // result event is fired.
+      if (
+        !lastFinalTranscript &&
+        lastInterimTranscript &&
+        Voice.onSpeechResults
+      ) {
+        // Send the interim results as final results since recognition has ended
+        Voice.onSpeechResults({value: [lastInterimTranscript]});
+      }
+
       if (Voice.onSpeechEnd) {
         Voice.onSpeechEnd({error: false});
       }
+
+      // Reset transcripts
+      lastFinalTranscript = '';
+      lastInterimTranscript = '';
     };
 
     recognition.start();
@@ -89,6 +119,7 @@ const Voice = {
     if (recognition && isListening) {
       recognition.stop();
       isListening = false;
+      // Note: onend handler will take care of sending final results
     }
   },
 
@@ -96,6 +127,9 @@ const Voice = {
     if (recognition) {
       recognition.abort();
       isListening = false;
+      // Reset transcripts on cancel
+      lastFinalTranscript = '';
+      lastInterimTranscript = '';
     }
   },
 
@@ -104,6 +138,8 @@ const Voice = {
       recognition.abort();
       recognition = null;
       isListening = false;
+      lastFinalTranscript = '';
+      lastInterimTranscript = '';
     }
   },
 
