@@ -1,9 +1,45 @@
 /**
- * Web Speech Synthesis API Shim for react-native-tts
- * Provides browser-based text-to-speech
+ * Web AI Voice Synthesis Shim for react-native-tts
+ * Provides AI-generated voice using best available method
+ * This is a compatibility shim that is no longer actively used
+ * (AIVoiceService is used directly instead)
  */
 
 /* eslint-env browser */
+
+/**
+ * Select the best AI voice from available voices
+ */
+const selectBestVoice = () => {
+  if (!('speechSynthesis' in window)) {
+    return null;
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length === 0) return null;
+
+  // Priority order for AI/Neural voices
+  const voicePriorities = [
+    v => v.name.includes('Google') && v.name.includes('US'),
+    v => v.name.includes('Google') && v.lang === 'en-US',
+    v => v.name.includes('Microsoft') && v.name.includes('Neural'),
+    v => v.name.includes('Premium') && v.lang === 'en-US',
+    v => v.name.includes('Enhanced') && v.lang === 'en-US',
+    v => v.lang === 'en-US' && v.localService,
+    v => v.lang === 'en-US',
+    v => v.lang.startsWith('en'),
+  ];
+
+  for (const priorityCheck of voicePriorities) {
+    const voice = voices.find(priorityCheck);
+    if (voice) {
+      console.log('Selected AI voice:', voice.name);
+      return voice;
+    }
+  }
+
+  return voices[0];
+};
 
 const Tts = {
   getInitStatus: async () => {
@@ -19,19 +55,17 @@ const Tts = {
     return new Promise((resolve, reject) => {
       const utterance = new SpeechSynthesisUtterance(text);
 
-      // Apply options
-      if (options.language) {
-        utterance.lang = options.language;
+      // Select the best AI voice available
+      const bestVoice = selectBestVoice();
+      if (bestVoice) {
+        utterance.voice = bestVoice;
       }
-      if (options.rate) {
-        utterance.rate = options.rate;
-      }
-      if (options.pitch) {
-        utterance.pitch = options.pitch;
-      }
-      if (options.volume) {
-        utterance.volume = options.volume;
-      }
+
+      // Apply options with better defaults for AI-like speech
+      utterance.lang = options.language || Tts.defaultLanguage || 'en-US';
+      utterance.rate = options.rate !== undefined ? options.rate : (Tts.defaultRate || 0.95);
+      utterance.pitch = options.pitch !== undefined ? options.pitch : (Tts.defaultPitch || 1.0);
+      utterance.volume = options.volume !== undefined ? options.volume : 1.0;
 
       utterance.onend = () => resolve();
       utterance.onerror = event => reject(event);
@@ -62,7 +96,6 @@ const Tts = {
   },
 
   setDefaultLanguage: language => {
-    // Store for future use
     Tts.defaultLanguage = language;
     return Promise.resolve();
   },
@@ -93,9 +126,9 @@ const Tts = {
   removeEventListener: () => {},
 };
 
-// Defaults
+// Defaults optimized for natural AI-like speech
 Tts.defaultLanguage = 'en-US';
-Tts.defaultRate = 1.0;
+Tts.defaultRate = 0.95; // Slightly slower for clarity
 Tts.defaultPitch = 1.0;
 
 export default Tts;

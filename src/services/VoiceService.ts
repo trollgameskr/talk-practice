@@ -1,19 +1,20 @@
 /**
  * Voice Service
- * Handles voice recognition and text-to-speech
+ * Handles voice recognition and AI-generated speech
  */
 
 import Voice from '@react-native-community/voice';
-import Tts from 'react-native-tts';
+import AIVoiceService from './AIVoiceService';
 
 export class VoiceService {
   private isListening: boolean = false;
   private onResultCallback: ((text: string) => void) | null = null;
   private onErrorCallback: ((error: any) => void) | null = null;
+  private aiVoiceService: AIVoiceService;
 
-  constructor() {
+  constructor(apiKey?: string) {
     this.initializeVoice();
-    this.initializeTts();
+    this.aiVoiceService = new AIVoiceService(apiKey);
   }
 
   /**
@@ -24,19 +25,6 @@ export class VoiceService {
     Voice.onSpeechEnd = this.onSpeechEnd.bind(this);
     Voice.onSpeechResults = this.onSpeechResults.bind(this);
     Voice.onSpeechError = this.onSpeechError.bind(this);
-  }
-
-  /**
-   * Initialize text-to-speech
-   */
-  private async initializeTts() {
-    try {
-      await Tts.setDefaultLanguage('en-US');
-      await Tts.setDefaultRate(0.5);
-      await Tts.setDefaultPitch(1.0);
-    } catch (error) {
-      console.error('Error initializing TTS:', error);
-    }
   }
 
   /**
@@ -85,11 +73,11 @@ export class VoiceService {
   }
 
   /**
-   * Speak text using TTS
+   * Speak text using AI voice generation
    */
   async speak(text: string): Promise<void> {
     try {
-      await Tts.speak(text);
+      await this.aiVoiceService.speak(text);
     } catch (error) {
       console.error('Error speaking text:', error);
     }
@@ -100,10 +88,17 @@ export class VoiceService {
    */
   async stopSpeaking(): Promise<void> {
     try {
-      await Tts.stop();
+      await this.aiVoiceService.stopSpeaking();
     } catch (error) {
-      console.error('Error stopping TTS:', error);
+      console.error('Error stopping AI voice:', error);
     }
+  }
+  
+  /**
+   * Set API key for AI voice service
+   */
+  setApiKey(apiKey: string) {
+    this.aiVoiceService.setApiKey(apiKey);
   }
 
   /**
@@ -146,7 +141,7 @@ export class VoiceService {
   async destroy() {
     try {
       await Voice.destroy();
-      await Tts.stop();
+      await this.aiVoiceService.destroy();
     } catch (error) {
       console.error('Error destroying voice service:', error);
     }
