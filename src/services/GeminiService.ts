@@ -34,7 +34,7 @@ export class GeminiService {
   async startConversation(topic: ConversationTopic): Promise<string> {
     this.currentTopic = topic;
     const prompt = conversationPrompts[topic];
-    
+
     this.chat = this.model.startChat({
       history: [
         {
@@ -43,16 +43,20 @@ export class GeminiService {
         },
         {
           role: 'model',
-          parts: [{
-            text: `I understand. I'm ready to help you practice English conversation about ${topic}. Let's begin!`,
-          }],
+          parts: [
+            {
+              text: `I understand. I'm ready to help you practice English conversation about ${topic}. Let's begin!`,
+            },
+          ],
         },
       ],
       generationConfig: GEMINI_CONFIG.generation,
     });
 
     // Get a starter prompt
-    const starterIndex = Math.floor(Math.random() * prompt.starterPrompts.length);
+    const starterIndex = Math.floor(
+      Math.random() * prompt.starterPrompts.length,
+    );
     return prompt.starterPrompts[starterIndex];
   }
 
@@ -61,18 +65,20 @@ export class GeminiService {
    */
   async sendMessage(userMessage: string): Promise<string> {
     if (!this.chat) {
-      throw new Error('Conversation not started. Call startConversation first.');
+      throw new Error(
+        'Conversation not started. Call startConversation first.',
+      );
     }
 
     try {
       const result = await this.chat.sendMessage(userMessage);
       const response = result.response;
-      
+
       // Track token usage if available
       if (response.usageMetadata) {
         this.updateTokenUsage(response.usageMetadata);
       }
-      
+
       return response.text();
     } catch (error) {
       console.error('Error sending message:', error);
@@ -90,12 +96,13 @@ export class GeminiService {
   }) {
     const inputTokens = usageMetadata.promptTokenCount || 0;
     const outputTokens = usageMetadata.candidatesTokenCount || 0;
-    const totalTokens = usageMetadata.totalTokenCount || (inputTokens + outputTokens);
+    const totalTokens =
+      usageMetadata.totalTokenCount || inputTokens + outputTokens;
 
     this.sessionTokenUsage.inputTokens += inputTokens;
     this.sessionTokenUsage.outputTokens += outputTokens;
     this.sessionTokenUsage.totalTokens += totalTokens;
-    
+
     // Calculate cost
     const inputCost = (inputTokens / 1000) * GEMINI_PRICING.inputPer1K;
     const outputCost = (outputTokens / 1000) * GEMINI_PRICING.outputPer1K;
@@ -140,7 +147,7 @@ Be encouraging and constructive.`;
     try {
       const result = await this.model.generateContent(feedbackPrompt);
       const response = result.response.text();
-      
+
       // Parse the response to extract feedback
       // This is a simplified version - in production, you'd want more robust parsing
       return this.parseFeedbackResponse(response, userMessage);
@@ -154,7 +161,10 @@ Be encouraging and constructive.`;
   /**
    * Parse feedback response from Gemini
    */
-  private parseFeedbackResponse(response: string, originalMessage: string): Feedback {
+  private parseFeedbackResponse(
+    response: string,
+    _originalMessage: string,
+  ): Feedback {
     // Try to parse JSON response or extract information
     try {
       // Look for JSON in the response
@@ -235,6 +245,98 @@ Provide an encouraging summary in 2-3 sentences.`;
     } catch (error) {
       console.error('Error generating summary:', error);
       return 'Great conversation practice! Keep up the good work.';
+    }
+  }
+
+  /**
+   * Generate sample answers for the current conversation context
+   */
+  async generateSampleAnswers(
+    lastMessage: string,
+    count: number = 2,
+  ): Promise<string[]> {
+    if (!this.chat) {
+      throw new Error(
+        'Conversation not started. Call startConversation first.',
+      );
+    }
+
+    const samplePrompt = `Based on the question or statement: "${lastMessage}"
+
+Generate ${count} different sample responses that a learner could use to practice English. Make them:
+1. Natural and conversational
+2. At an intermediate English level
+3. Appropriate for the context
+4. Slightly different in tone or approach
+
+Format: Return only the sample responses, one per line, without numbering or extra text.`;
+
+    try {
+      const result = await this.model.generateContent(samplePrompt);
+      const response = result.response.text();
+
+      // Split by newlines and filter out empty lines
+      const samples = response
+        .split('\n')
+        .filter((line: string) => line.trim().length > 0)
+        .map((line: string) => line.replace(/^\d+\.\s*/, '').trim())
+        .slice(0, count);
+
+      return samples.length > 0
+        ? samples
+        : [
+            'I understand what you mean.',
+            'That sounds interesting, could you tell me more?',
+          ];
+    } catch (error) {
+      console.error('Error generating sample answers:', error);
+      // Return default samples on error
+      return [
+        'I understand what you mean.',
+        'That sounds interesting, could you tell me more?',
+      ];
+    }
+  }
+
+  /**
+   * Get word definition and explanation
+   */
+  async getWordDefinition(
+    word: string,
+  ): Promise<{definition: string; examples: string[]}> {
+    const definitionPrompt = `Provide a clear, concise definition and 2 example sentences for the English word or phrase: "${word}"
+
+Format your response as JSON:
+{
+  "definition": "simple definition here",
+  "examples": ["example sentence 1", "example sentence 2"]
+}`;
+
+    try {
+      const result = await this.model.generateContent(definitionPrompt);
+      const response = result.response.text();
+
+      // Try to parse JSON response
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return {
+          definition: parsed.definition || 'Definition not available',
+          examples: parsed.examples || [],
+        };
+      }
+
+      // Fallback if JSON parsing fails
+      return {
+        definition: 'Definition not available',
+        examples: [],
+      };
+    } catch (error) {
+      console.error('Error getting word definition:', error);
+      return {
+        definition: 'Definition not available',
+        examples: [],
+      };
     }
   }
 

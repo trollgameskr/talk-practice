@@ -12,10 +12,13 @@ import {
   Achievement,
 } from '../types';
 
+import {VocabularyWord} from '../types';
+
 const STORAGE_KEYS = {
   SESSIONS: '@gemini_talk_sessions',
   USER_PROGRESS: '@gemini_talk_progress',
   CURRENT_SESSION: '@gemini_talk_current_session',
+  VOCABULARY: '@gemini_talk_vocabulary',
 };
 
 export class StorageService {
@@ -30,7 +33,7 @@ export class StorageService {
         STORAGE_KEYS.SESSIONS,
         JSON.stringify(sessions),
       );
-      
+
       // Update user progress
       await this.updateUserProgress(session);
     } catch (error) {
@@ -58,7 +61,9 @@ export class StorageService {
   /**
    * Get sessions by topic
    */
-  async getSessionsByTopic(topic: ConversationTopic): Promise<ConversationSession[]> {
+  async getSessionsByTopic(
+    topic: ConversationTopic,
+  ): Promise<ConversationSession[]> {
     const sessions = await this.getAllSessions();
     return sessions.filter(s => s.topic === topic);
   }
@@ -66,7 +71,9 @@ export class StorageService {
   /**
    * Save current session (for auto-save)
    */
-  async saveCurrentSession(session: Partial<ConversationSession>): Promise<void> {
+  async saveCurrentSession(
+    session: Partial<ConversationSession>,
+  ): Promise<void> {
     try {
       await AsyncStorage.setItem(
         STORAGE_KEYS.CURRENT_SESSION,
@@ -82,7 +89,9 @@ export class StorageService {
    */
   async getCurrentSession(): Promise<Partial<ConversationSession> | null> {
     try {
-      const sessionJson = await AsyncStorage.getItem(STORAGE_KEYS.CURRENT_SESSION);
+      const sessionJson = await AsyncStorage.getItem(
+        STORAGE_KEYS.CURRENT_SESSION,
+      );
       if (!sessionJson) {
         return null;
       }
@@ -110,11 +119,11 @@ export class StorageService {
   async updateUserProgress(session: ConversationSession): Promise<void> {
     try {
       const progress = await this.getUserProgress();
-      
+
       // Update overall stats
       progress.totalSessions += 1;
       progress.totalDuration += session.duration;
-      progress.averageSessionDuration = 
+      progress.averageSessionDuration =
         progress.totalDuration / progress.totalSessions;
 
       // Update cost tracking
@@ -126,13 +135,16 @@ export class StorageService {
       // Update topic progress
       const topicProg = progress.topicProgress[session.topic];
       topicProg.sessionsCompleted += 1;
-      topicProg.lastSessionDate = new Date(session.endTime || session.startTime);
-      
+      topicProg.lastSessionDate = new Date(
+        session.endTime || session.startTime,
+      );
+
       // Calculate average score
       if (session.feedback) {
         const sessionScore = this.calculateSessionScore(session);
-        topicProg.averageScore = 
-          (topicProg.averageScore * (topicProg.sessionsCompleted - 1) + sessionScore) /
+        topicProg.averageScore =
+          (topicProg.averageScore * (topicProg.sessionsCompleted - 1) +
+            sessionScore) /
           topicProg.sessionsCompleted;
       }
 
@@ -144,7 +156,9 @@ export class StorageService {
       progress.achievements.push(...newAchievements);
 
       // Calculate retention rate (simplified)
-      progress.retentionRate = this.calculateRetentionRate(await this.getAllSessions());
+      progress.retentionRate = this.calculateRetentionRate(
+        await this.getAllSessions(),
+      );
 
       await AsyncStorage.setItem(
         STORAGE_KEYS.USER_PROGRESS,
@@ -160,7 +174,9 @@ export class StorageService {
    */
   async getUserProgress(): Promise<UserProgress> {
     try {
-      const progressJson = await AsyncStorage.getItem(STORAGE_KEYS.USER_PROGRESS);
+      const progressJson = await AsyncStorage.getItem(
+        STORAGE_KEYS.USER_PROGRESS,
+      );
       if (!progressJson) {
         return this.getDefaultProgress();
       }
@@ -214,14 +230,11 @@ export class StorageService {
     if (!session.feedback) {
       return 0;
     }
-    
+
     const {pronunciation, grammar, fluency, vocabulary} = session.feedback;
     return (
-      pronunciation.score +
-      grammar.score +
-      fluency +
-      vocabulary.score
-    ) / 4;
+      (pronunciation.score + grammar.score + fluency + vocabulary.score) / 4
+    );
   }
 
   /**
@@ -231,11 +244,11 @@ export class StorageService {
     const scores = Object.values(progress.topicProgress)
       .filter(tp => tp.sessionsCompleted > 0)
       .map(tp => tp.averageScore);
-    
+
     if (scores.length === 0) {
       return 0;
     }
-    
+
     return scores.reduce((a, b) => a + b, 0) / scores.length;
   }
 
@@ -305,7 +318,8 @@ export class StorageService {
     const now = new Date();
     const recentSessions = sessions.filter(s => {
       const sessionDate = new Date(s.startTime);
-      const daysDiff = (now.getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24);
+      const daysDiff =
+        (now.getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24);
       return daysDiff <= 30;
     });
 
@@ -321,9 +335,95 @@ export class StorageService {
         STORAGE_KEYS.SESSIONS,
         STORAGE_KEYS.USER_PROGRESS,
         STORAGE_KEYS.CURRENT_SESSION,
+        STORAGE_KEYS.VOCABULARY,
       ]);
     } catch (error) {
       console.error('Error clearing data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Save a vocabulary word
+   */
+  async saveVocabularyWord(word: VocabularyWord): Promise<void> {
+    try {
+      const vocabulary = await this.getVocabulary();
+
+      // Check if word already exists
+      const existingIndex = vocabulary.findIndex(
+        v => v.word.toLowerCase() === word.word.toLowerCase(),
+      );
+
+      if (existingIndex >= 0) {
+        // Update existing word
+        vocabulary[existingIndex] = word;
+      } else {
+        // Add new word
+        vocabulary.push(word);
+      }
+
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.VOCABULARY,
+        JSON.stringify(vocabulary),
+      );
+    } catch (error) {
+      console.error('Error saving vocabulary word:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all vocabulary words
+   */
+  async getVocabulary(): Promise<VocabularyWord[]> {
+    try {
+      const vocabularyJson = await AsyncStorage.getItem(
+        STORAGE_KEYS.VOCABULARY,
+      );
+      if (!vocabularyJson) {
+        return [];
+      }
+      return JSON.parse(vocabularyJson);
+    } catch (error) {
+      console.error('Error getting vocabulary:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Delete a vocabulary word
+   */
+  async deleteVocabularyWord(wordId: string): Promise<void> {
+    try {
+      const vocabulary = await this.getVocabulary();
+      const filtered = vocabulary.filter(v => v.id !== wordId);
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.VOCABULARY,
+        JSON.stringify(filtered),
+      );
+    } catch (error) {
+      console.error('Error deleting vocabulary word:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Mark vocabulary word as reviewed
+   */
+  async markVocabularyReviewed(wordId: string): Promise<void> {
+    try {
+      const vocabulary = await this.getVocabulary();
+      const word = vocabulary.find(v => v.id === wordId);
+      if (word) {
+        word.reviewed = true;
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.VOCABULARY,
+          JSON.stringify(vocabulary),
+        );
+      }
+    } catch (error) {
+      console.error('Error marking vocabulary as reviewed:', error);
       throw error;
     }
   }
@@ -334,12 +434,18 @@ export class StorageService {
   async exportData(): Promise<string> {
     const sessions = await this.getAllSessions();
     const progress = await this.getUserProgress();
-    
-    return JSON.stringify({
-      sessions,
-      progress,
-      exportDate: new Date().toISOString(),
-    }, null, 2);
+    const vocabulary = await this.getVocabulary();
+
+    return JSON.stringify(
+      {
+        sessions,
+        progress,
+        vocabulary,
+        exportDate: new Date().toISOString(),
+      },
+      null,
+      2,
+    );
   }
 }
 
