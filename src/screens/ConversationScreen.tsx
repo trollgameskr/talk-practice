@@ -14,7 +14,6 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
-  TextInput,
 } from 'react-native';
 import {
   ConversationTopic,
@@ -46,8 +45,6 @@ const ConversationScreen = ({route, navigation}: any) => {
     examples: string[];
   } | null>(null);
   const [showDefinitionModal, setShowDefinitionModal] = useState(false);
-  const [showWordInputModal, setShowWordInputModal] = useState(false);
-  const [wordInput, setWordInput] = useState('');
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -362,6 +359,66 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
+  /**
+   * Render text with clickable words
+   */
+  const renderClickableWords = (text: string) => {
+    // Split text into words while preserving spaces and punctuation
+    const parts: {text: string; isWord: boolean}[] = [];
+    let currentWord = '';
+    let currentNonWord = '';
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (/[a-zA-Z'-]/.test(char)) {
+        // It's part of a word
+        if (currentNonWord) {
+          parts.push({text: currentNonWord, isWord: false});
+          currentNonWord = '';
+        }
+        currentWord += char;
+      } else {
+        // It's not part of a word (space, punctuation, etc.)
+        if (currentWord) {
+          parts.push({text: currentWord, isWord: true});
+          currentWord = '';
+        }
+        currentNonWord += char;
+      }
+    }
+
+    // Push remaining text
+    if (currentWord) {
+      parts.push({text: currentWord, isWord: true});
+    }
+    if (currentNonWord) {
+      parts.push({text: currentNonWord, isWord: false});
+    }
+
+    return (
+      <Text style={[styles.messageText, styles.assistantText]}>
+        {parts.map((part, index) => {
+          if (part.isWord) {
+            return (
+              <Text
+                key={index}
+                style={styles.clickableWord}
+                onPress={() => handleWordPress(part.text)}>
+                {part.text}
+              </Text>
+            );
+          } else {
+            return (
+              <Text key={index} style={styles.normalText}>
+                {part.text}
+              </Text>
+            );
+          }
+        })}
+      </Text>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -391,15 +448,9 @@ const ConversationScreen = ({route, navigation}: any) => {
                   : styles.assistantBubble,
               ]}>
               {message.role === 'assistant' ? (
-                <Text
-                  style={[styles.messageText, styles.assistantText]}
-                  onPress={() => {
-                    // Show cross-platform word input modal
-                    setWordInput('');
-                    setShowWordInputModal(true);
-                  }}>
-                  {message.content}
-                </Text>
+                <View style={styles.clickableTextContainer}>
+                  {renderClickableWords(message.content)}
+                </View>
               ) : (
                 <Text style={[styles.messageText, styles.userText]}>
                   {message.content}
@@ -451,54 +502,6 @@ const ConversationScreen = ({route, navigation}: any) => {
           </View>
         )}
       </View>
-
-      {/* Word Input Modal (cross-platform) */}
-      <Modal
-        visible={showWordInputModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowWordInputModal(false)}>
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setShowWordInputModal(false)}>
-          <Pressable style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Look up a word</Text>
-            <Text style={styles.inputLabel}>
-              Enter a word or phrase to look up:
-            </Text>
-            <TextInput
-              style={styles.wordInput}
-              value={wordInput}
-              onChangeText={setWordInput}
-              placeholder="Type a word..."
-              autoFocus={true}
-              onSubmitEditing={() => {
-                if (wordInput.trim()) {
-                  setShowWordInputModal(false);
-                  handleWordPress(wordInput.trim());
-                }
-              }}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowWordInputModal(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.lookupButton]}
-                onPress={() => {
-                  if (wordInput.trim()) {
-                    setShowWordInputModal(false);
-                    handleWordPress(wordInput.trim());
-                  }
-                }}>
-                <Text style={styles.lookupButtonText}>Look Up</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
 
       {/* Word Definition Modal (feat 3) */}
       <Modal
@@ -613,6 +616,17 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   assistantText: {
+    color: '#1f2937',
+  },
+  clickableTextContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  clickableWord: {
+    color: '#3b82f6',
+    textDecorationLine: 'underline',
+  },
+  normalText: {
     color: '#1f2937',
   },
   loadingContainer: {
@@ -742,46 +756,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  inputLabel: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 8,
-  },
-  wordInput: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  modalButton: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#f3f4f6',
-  },
-  cancelButtonText: {
-    color: '#6b7280',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  lookupButton: {
-    backgroundColor: '#3b82f6',
-  },
-  lookupButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
