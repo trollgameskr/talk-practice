@@ -87,6 +87,41 @@ describe('GeminiService', () => {
     });
   });
 
+  describe('generateSampleAnswers', () => {
+    it('should generate sample answers for AI message', async () => {
+      await service.startConversation(ConversationTopic.DAILY);
+      const samples = await service.generateSampleAnswers(
+        'What did you do today?',
+        2,
+      );
+
+      expect(samples).toBeDefined();
+      expect(Array.isArray(samples)).toBe(true);
+      expect(samples.length).toBe(2);
+      samples.forEach(sample => {
+        expect(typeof sample).toBe('string');
+        expect(sample.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should throw error if conversation not started', async () => {
+      await expect(
+        service.generateSampleAnswers('Hello', 2)
+      ).rejects.toThrow('Conversation not started');
+    });
+
+    it('should generate specified number of samples', async () => {
+      await service.startConversation(ConversationTopic.DAILY);
+      const samples = await service.generateSampleAnswers(
+        'How was your day?',
+        3,
+      );
+
+      expect(samples.length).toBeGreaterThanOrEqual(2);
+      expect(samples.length).toBeLessThanOrEqual(3);
+    });
+  });
+
   describe('generateSummary', () => {
     it('should generate summary from messages', async () => {
       const messages = [
