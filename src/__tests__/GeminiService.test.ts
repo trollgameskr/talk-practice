@@ -76,10 +76,6 @@ describe('GeminiService', () => {
       expect(response3).toBeDefined();
       expect(typeof response3).toBe('string');
       expect(response3.length).toBeGreaterThan(0);
-      
-      // Verify that conversation can sustain multiple exchanges without errors
-      // All responses should be valid strings
-      expect([response1, response2, response3].every(r => typeof r === 'string' && r.length > 0)).toBe(true);
     });
   });
 
