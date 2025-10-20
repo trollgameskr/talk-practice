@@ -401,7 +401,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           if (part.isWord) {
             return (
               <Text
-                key={index}
+                key={`word-${index}-${part.text}`}
                 style={styles.clickableWord}
                 onPress={() => handleWordPress(part.text)}>
                 {part.text}
@@ -409,7 +409,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             );
           } else {
             return (
-              <Text key={index} style={styles.normalText}>
+              <Text key={`nonword-${index}-${part.text.length}`} style={styles.normalText}>
                 {part.text}
               </Text>
             );
