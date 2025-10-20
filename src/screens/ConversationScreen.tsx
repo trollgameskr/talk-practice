@@ -91,6 +91,9 @@ const ConversationScreen = ({route, navigation}: any) => {
 
       setMessages([assistantMessage]);
 
+      // Generate 2 sample answer options for the user
+      await generateSampleAnswers(starterMessage);
+
       // Speak the starter message
       if (voiceService.current) {
         await voiceService.current.speak(starterMessage);
@@ -217,7 +220,7 @@ const ConversationScreen = ({route, navigation}: any) => {
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Generate sample answers (feat 2)
+      // Generate 2 sample answer options for user to practice with
       await generateSampleAnswers(response);
 
       // Speak the response
@@ -431,16 +434,19 @@ const ConversationScreen = ({route, navigation}: any) => {
           </View>
         )}
 
-        {/* Sample Answers (feat 2) */}
+        {/* 2 Response Test Options - User can select one to practice */}
         {showSamples && sampleAnswers.length > 0 && (
           <View style={styles.samplesContainer}>
-            <Text style={styles.samplesTitle}>💡 Sample Responses:</Text>
+            <Text style={styles.samplesTitle}>💡 Response Options (Choose one to practice):</Text>
             {sampleAnswers.map((sample, index) => (
               <TouchableOpacity
                 key={index}
                 style={styles.sampleButton}
                 onPress={() => handleUseSample(sample)}>
-                <Text style={styles.sampleText}>{sample}</Text>
+                <View style={styles.sampleButtonContent}>
+                  <Text style={styles.sampleNumber}>{index + 1}</Text>
+                  <Text style={styles.sampleText}>{sample}</Text>
+                </View>
               </TouchableOpacity>
             ))}
             <TouchableOpacity
@@ -676,7 +682,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#3b82f6',
   },
+  sampleButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  sampleNumber: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#3b82f6',
+    marginRight: 8,
+    minWidth: 20,
+  },
   sampleText: {
+    flex: 1,
     fontSize: 14,
     color: '#1f2937',
   },
