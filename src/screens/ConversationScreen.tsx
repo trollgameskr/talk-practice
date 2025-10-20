@@ -624,7 +624,6 @@ const styles = StyleSheet.create({
   },
   clickableWord: {
     color: '#3b82f6',
-    textDecorationLine: 'underline',
   },
   normalText: {
     color: '#1f2937',
