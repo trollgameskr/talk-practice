@@ -55,6 +55,32 @@ describe('GeminiService', () => {
         service.sendMessage('Hello')
       ).rejects.toThrow('Conversation not started');
     });
+
+    it('should handle multiple back-and-forth exchanges (2+ responses)', async () => {
+      await service.startConversation(ConversationTopic.DAILY);
+      
+      // First exchange
+      const response1 = await service.sendMessage('Hello, how are you?');
+      expect(response1).toBeDefined();
+      expect(typeof response1).toBe('string');
+      expect(response1.length).toBeGreaterThan(0);
+      
+      // Second exchange
+      const response2 = await service.sendMessage('That sounds great!');
+      expect(response2).toBeDefined();
+      expect(typeof response2).toBe('string');
+      expect(response2.length).toBeGreaterThan(0);
+      
+      // Third exchange to confirm continuity
+      const response3 = await service.sendMessage('Can you tell me more?');
+      expect(response3).toBeDefined();
+      expect(typeof response3).toBe('string');
+      expect(response3.length).toBeGreaterThan(0);
+      
+      // Verify that conversation can sustain multiple exchanges without errors
+      // All responses should be valid strings
+      expect([response1, response2, response3].every(r => typeof r === 'string' && r.length > 0)).toBe(true);
+    });
   });
 
   describe('analyzeFeedback', () => {
