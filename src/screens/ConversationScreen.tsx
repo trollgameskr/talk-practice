@@ -91,6 +91,9 @@ const ConversationScreen = ({route, navigation}: any) => {
 
       setMessages([assistantMessage]);
 
+      // Generate 2 sample answer options for the user
+      await generateSampleAnswers(starterMessage);
+
       // Speak the starter message
       if (voiceService.current) {
         await voiceService.current.speak(starterMessage);
