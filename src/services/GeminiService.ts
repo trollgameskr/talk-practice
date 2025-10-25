@@ -94,6 +94,9 @@ export class GeminiService {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: userMessage }),
         });
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+        }
         const json = await resp.json();
         if (json.error) {
           throw new Error(json.error);
@@ -196,6 +199,9 @@ Be encouraging and constructive.`;
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: feedbackPrompt }),
         });
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+        }
         const json = await resp.json();
         if (json.error) {
           throw new Error(json.error);
@@ -304,6 +310,9 @@ Provide an encouraging summary in 2-3 sentences.`;
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: summaryPrompt }),
         });
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+        }
         const json = await resp.json();
         if (json.error) {
           throw new Error(json.error);
@@ -337,6 +346,11 @@ Generate ${count} different sample responses that a learner could use to practic
 Format: Return only the sample responses, one per line, without numbering or extra text.`;
 
     const isBrowser = typeof (globalThis as any).window !== 'undefined' && typeof (globalThis as any).window.document !== 'undefined';
+    // Ensure conversation started for non-browser environments
+    if (!this.chat && !isBrowser) {
+      throw new Error('Conversation not started');
+    }
+
     try {
       if (isBrowser) {
         const resp = await fetch('/api/generateContent', {
@@ -344,6 +358,9 @@ Format: Return only the sample responses, one per line, without numbering or ext
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: samplePrompt }),
         });
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+        }
         const json = await resp.json();
         if (json.error) {
           throw new Error(json.error);
@@ -354,12 +371,20 @@ Format: Return only the sample responses, one per line, without numbering or ext
           .filter((line: string) => line.trim().length > 0)
           .map((line: string) => line.replace(/^\d+\.\s*/, '').trim())
           .slice(0, count);
-        return samples.length > 0
-          ? samples
-          : [
-              'I understand what you mean.',
-              'That sounds interesting, could you tell me more?',
-            ];
+
+        // Ensure a minimum of 2 samples (or the requested count if it's less than 2)
+        const defaultSamples = [
+          'I understand what you mean.',
+          'That sounds interesting, could you tell me more?',
+        ];
+        const minNeeded = Math.min(Math.max(2, 2), count);
+        while (samples.length < Math.min(2, count)) {
+          const next = defaultSamples.shift();
+          if (!next) break;
+          samples.push(next);
+        }
+
+        return samples.length > 0 ? samples : defaultSamples.slice(0, Math.min(2, count));
       }
 
       const result = await this.model.generateContent(samplePrompt);
@@ -372,12 +397,19 @@ Format: Return only the sample responses, one per line, without numbering or ext
         .map((line: string) => line.replace(/^\d+\.\s*/, '').trim())
         .slice(0, count);
 
-      return samples.length > 0
-        ? samples
-        : [
-            'I understand what you mean.',
-            'That sounds interesting, could you tell me more?',
-          ];
+      const defaultSamples = [
+        'I understand what you mean.',
+        'That sounds interesting, could you tell me more?',
+      ];
+
+      // Ensure at least 2 samples (or requested count if it's less than 2)
+      while (samples.length < Math.min(2, count)) {
+        const next = defaultSamples.shift();
+        if (!next) break;
+        samples.push(next);
+      }
+
+      return samples.length > 0 ? samples : defaultSamples.slice(0, Math.min(2, count));
     } catch (error) {
       console.error('Error generating sample answers:', error);
       // Return default samples on error
@@ -410,6 +442,9 @@ Format your response as JSON:
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: definitionPrompt }),
         });
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+        }
         const json = await resp.json();
         if (json.error) {
           throw new Error(json.error);
