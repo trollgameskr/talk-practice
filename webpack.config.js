@@ -9,6 +9,12 @@ module.exports = {
     path: path.resolve(__dirname, 'web-build'),
     filename: 'bundle.js',
     publicPath: process.env.GITHUB_PAGES ? '/talk-practice/' : '/',
+    clean: true, // Clean the output directory before emit
+  },
+  optimization: {
+    // Disable code splitting to ensure single bundle output
+    splitChunks: false,
+    runtimeChunk: false,
   },
   resolve: {
     alias: {

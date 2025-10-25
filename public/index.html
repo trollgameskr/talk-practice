@@ -117,6 +117,23 @@
           navigator.serviceWorker.register(swUrl)
             .then((registration) => {
               console.log('Service Worker registered successfully:', registration.scope);
+              
+              // Check for updates periodically
+              setInterval(() => {
+                registration.update();
+              }, 60000); // Check every minute during development
+              
+              // Listen for service worker updates
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'activated') {
+                    console.log('New service worker activated, reloading page...');
+                    // Reload the page to use the new service worker
+                    window.location.reload();
+                  }
+                });
+              });
             })
             .catch((error) => {
               console.log('Service Worker registration failed:', error);
