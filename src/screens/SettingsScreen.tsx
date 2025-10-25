@@ -15,19 +15,30 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StorageService from '../services/StorageService';
+import FirebaseService from '../services/FirebaseService';
 import {isValidApiKey} from '../utils/helpers';
 import {BUILD_INFO} from '../config/buildInfo';
 
 const storageService = new StorageService();
+const firebaseService = new FirebaseService();
 const API_KEY_STORAGE = '@gemini_api_key';
 
 const SettingsScreen = () => {
   const [apiKey, setApiKey] = useState('');
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     loadApiKey();
+    loadUserInfo();
   }, []);
+
+  const loadUserInfo = () => {
+    const user = firebaseService.getCurrentUser();
+    if (user) {
+      setUserEmail(user.email);
+    }
+  };
 
   const loadApiKey = async () => {
     try {
@@ -99,6 +110,28 @@ const SettingsScreen = () => {
     }
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await firebaseService.logout();
+              Alert.alert('Success', 'Logged out successfully');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to logout');
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const formatDate = (isoString: string) => {
     try {
       const date = new Date(isoString);
@@ -117,6 +150,23 @@ const SettingsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
+        {userEmail && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Account</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Logged in as</Text>
+              <Text style={styles.infoValue}>{userEmail}</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.secondaryButton, styles.dangerButton]}
+              onPress={handleLogout}>
+              <Text style={[styles.secondaryButtonText, styles.dangerText]}>
+                🚪 Logout
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>API Configuration</Text>
           <Text style={styles.sectionDescription}>
