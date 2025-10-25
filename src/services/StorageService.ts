@@ -1,6 +1,6 @@
 /**
  * Storage Service
- * Handles learning log and achievement tracking with AsyncStorage
+ * Handles learning log and achievement tracking with AsyncStorage and Firebase
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,6 +13,7 @@ import {
 } from '../types';
 
 import {VocabularyWord} from '../types';
+import FirebaseService from './FirebaseService';
 
 const STORAGE_KEYS = {
   SESSIONS: '@gemini_talk_sessions',
@@ -22,17 +23,29 @@ const STORAGE_KEYS = {
 };
 
 export class StorageService {
+  private firebaseService: FirebaseService;
+
+  constructor() {
+    this.firebaseService = new FirebaseService();
+  }
+
   /**
    * Save a conversation session
    */
   async saveSession(session: ConversationSession): Promise<void> {
     try {
+      // Save to local storage
       const sessions = await this.getAllSessions();
       sessions.push(session);
       await AsyncStorage.setItem(
         STORAGE_KEYS.SESSIONS,
         JSON.stringify(sessions),
       );
+
+      // Save to Firebase if authenticated
+      if (this.firebaseService.isAuthenticated()) {
+        await this.firebaseService.saveSession(session);
+      }
 
       // Update user progress
       await this.updateUserProgress(session);
@@ -47,6 +60,15 @@ export class StorageService {
    */
   async getAllSessions(): Promise<ConversationSession[]> {
     try {
+      // Try to get from Firebase first if authenticated
+      if (this.firebaseService.isAuthenticated()) {
+        const firebaseSessions = await this.firebaseService.getAllSessions();
+        if (firebaseSessions.length > 0) {
+          return firebaseSessions;
+        }
+      }
+
+      // Fallback to local storage
       const sessionsJson = await AsyncStorage.getItem(STORAGE_KEYS.SESSIONS);
       if (!sessionsJson) {
         return [];

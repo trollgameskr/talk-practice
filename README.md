@@ -37,6 +37,13 @@ GeminiTalk is a real-time English conversation practice app powered by Google's 
 - 성취도 배지 시스템
 - 학습 일관성 분석 (Retention Rate)
 
+### 🔐 Firebase 통합 (Firebase Integration) - **NEW!**
+- **사용자 인증**: 이메일/비밀번호 기반 로그인 및 회원가입
+- **클라우드 저장**: 대화 기록 및 학습 진도를 클라우드에 안전하게 저장
+- **토큰 사용량 추적**: API 사용량 및 비용을 실시간으로 모니터링
+- **다중 기기 동기화**: 모든 기기에서 데이터 자동 동기화
+- 자세한 설정 방법은 [Firebase Setup Guide](./docs/FIREBASE_SETUP.md) 참조
+
 ## 🚀 시작하기 (Getting Started)
 
 ### 🌐 온라인 웹 버전 (Online Web Version) - **LIVE!**
@@ -124,9 +131,18 @@ npm run android # Android
 
 ### API 키 설정 (API Key Configuration)
 
+#### Gemini API 키
 1. [Google AI Studio](https://makersuite.google.com/app/apikey)에서 Gemini API 키 발급
 2. 앱 실행 후 설정(Settings) 화면에서 API 키 입력
-3. 저장 후 대화 시작!
+
+#### Firebase 설정 (선택사항)
+Firebase를 사용하면 클라우드 저장 및 다중 기기 동기화가 가능합니다.
+
+1. [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)를 따라 Firebase 프로젝트 생성
+2. Firebase 설정 정보를 `.env` 파일에 추가
+3. 앱 실행 후 로그인 화면에서 계정 생성 또는 로그인
+
+**참고**: Firebase 설정 없이도 앱을 사용할 수 있으며, 이 경우 데이터는 로컬에만 저장됩니다.
 
 ## 📱 사용 방법 (How to Use)
 
@@ -145,14 +161,20 @@ talk-practice/
 │   ├── services/          # 핵심 서비스
 │   │   ├── GeminiService.ts     # Gemini API 통합
 │   │   ├── VoiceService.ts      # 음성 인식/TTS
-│   │   └── StorageService.ts    # 데이터 저장
+│   │   ├── StorageService.ts    # 데이터 저장
+│   │   └── FirebaseService.ts   # Firebase 통합
 │   ├── screens/           # 화면 컴포넌트
+│   │   ├── LoginScreen.tsx      # 로그인 화면
+│   │   ├── HomeScreen.tsx       # 홈 화면
+│   │   └── ...
 │   ├── types/             # TypeScript 타입 정의
 │   ├── utils/             # 유틸리티 함수
 │   ├── config/            # 설정 파일
+│   │   └── firebase.config.ts   # Firebase 설정
 │   └── data/              # 정적 데이터
 ├── .github/workflows/     # GitHub Actions CI/CD
 ├── docs/                  # 문서
+│   └── FIREBASE_SETUP.md  # Firebase 설정 가이드
 └── README.md
 ```
 
@@ -160,7 +182,9 @@ talk-practice/
 
 - **Frontend**: React Native + TypeScript + React Native Web
 - **AI/ML**: Google Gemini Live API
-- **Storage**: AsyncStorage (mobile) / localStorage (web)
+- **Authentication**: Firebase Authentication
+- **Database**: Firebase Firestore
+- **Storage**: AsyncStorage (mobile) / localStorage (web) + Firebase sync
 - **Voice**: 
   - Mobile: React Native Voice, React Native TTS
   - Web: Web Speech API (SpeechRecognition & SpeechSynthesis)
