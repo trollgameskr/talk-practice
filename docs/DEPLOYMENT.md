@@ -3,11 +3,88 @@
 This guide covers deploying GeminiTalk to various platforms.
 
 ## Table of Contents
+- [GitHub Pages Deployment (Web)](#github-pages-deployment-web)
 - [Android Deployment](#android-deployment)
 - [iOS Deployment](#ios-deployment)
 - [Environment Configuration](#environment-configuration)
 - [CI/CD Setup](#cicd-setup)
 - [Release Process](#release-process)
+
+## GitHub Pages Deployment (Web)
+
+GeminiTalk can be deployed as a web application using GitHub Pages.
+
+### Automatic Deployment
+
+The repository is configured to automatically deploy to GitHub Pages when changes are pushed to the `main` branch.
+
+**Live URL**: [https://trollgameskr.github.io/talk-practice/](https://trollgameskr.github.io/talk-practice/)
+
+### How It Works
+
+1. **GitHub Actions Workflow** (`.github/workflows/deploy-pages.yml`):
+   - Triggers on push to `main` branch
+   - Installs dependencies
+   - Builds the web application with `npm run build:web`
+   - Uploads the build to GitHub Pages
+   - Deploys automatically
+
+2. **Build Configuration**:
+   - Webpack is configured to use `/talk-practice/` as the base path
+   - The `GITHUB_PAGES` environment variable enables the correct publicPath
+   - Production build is optimized and minified
+
+### Manual Deployment
+
+If you need to deploy manually:
+
+1. **Build the web application**:
+   ```bash
+   GITHUB_PAGES=true npm run build:web
+   ```
+
+2. **The output will be in the `web-build/` directory**
+
+3. **Deploy using GitHub Pages**:
+   - Go to repository Settings > Pages
+   - Select "GitHub Actions" as the source
+   - The workflow will handle deployment automatically
+
+### Local Testing
+
+To test the production build locally:
+
+```bash
+# Build for GitHub Pages
+GITHUB_PAGES=true npm run build:web
+
+# Serve the build directory
+npx serve web-build
+```
+
+### Configuration
+
+The web version is configured in:
+- `webpack.config.js`: Build configuration
+- `.github/workflows/deploy-pages.yml`: Deployment workflow
+- `public/index.html`: HTML template
+
+### Requirements
+
+- Node.js 18 or higher
+- GitHub repository with Pages enabled
+- GitHub Actions enabled in repository settings
+
+### Troubleshooting
+
+**Issue**: Assets not loading
+- **Solution**: Ensure the `publicPath` in `webpack.config.js` matches your repository name
+
+**Issue**: 404 errors on page refresh
+- **Solution**: The workflow includes a `.nojekyll` file to prevent Jekyll processing
+
+**Issue**: Build fails in GitHub Actions
+- **Solution**: Check the Actions logs and ensure all dependencies are properly listed in `package.json`
 
 ## Android Deployment
 
