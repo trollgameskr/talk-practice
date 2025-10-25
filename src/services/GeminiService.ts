@@ -21,14 +21,14 @@ export class GeminiService {
   };
 
   constructor(apiKey: string) {
-    // The GoogleGenerativeAI constructor expects a config object with an apiKey property
-    // (passing a bare string can fail silently). Wrap in try/catch to surface errors.
+    // The GoogleGenerativeAI constructor expects a plain string API key
+    // Wrap in try/catch to surface errors.
     try {
       // Initialize the Google client with the provided API key
       // This works both in browser and non-browser environments when an API key is provided
       if (apiKey) {
-        // Cast to any to avoid strict type mismatch in some builds
-        this.genAI = new (GoogleGenerativeAI as any)({apiKey: apiKey});
+        // Pass the API key directly as a string to the constructor
+        this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({
           model: GEMINI_CONFIG.model,
           generationConfig: GEMINI_CONFIG.generation,
