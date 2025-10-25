@@ -47,8 +47,9 @@ self.addEventListener('install', (event) => {
       }
     }
   })());
-  // Force the waiting service worker to become the active service worker
-  self.skipWaiting();
+  // Don't force activation - let the service worker activate naturally on next page load
+  // to avoid infinite reload loops
+  // self.skipWaiting();
 });
 
 // Fetch event - serve from cache when possible
@@ -114,6 +115,7 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // Claim clients to make the service worker take control immediately
-  return self.clients.claim();
+  // Don't claim clients immediately - let the service worker take control on next page load
+  // to avoid infinite reload loops
+  // return self.clients.claim();
 });
