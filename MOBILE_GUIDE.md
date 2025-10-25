@@ -172,7 +172,7 @@ Progressive Web App은 웹 기술로 만들어진 앱이 네이티브 앱처럼 
 
 문제가 계속되거나 질문이 있으시면:
 - [GitHub Issues](https://github.com/trollgameskr/talk-practice/issues)에 문의
-- [문서](./docs/README.md) 참조
+- [메인 문서](./README.md) 또는 [상세 문서](./docs/README.md) 참조
 
 ---
 
