@@ -1,6 +1,6 @@
 /**
  * Build Information
- * This file is auto-generated during the build process
+ * The __BUILD_TIMESTAMP__ constant is injected by webpack during build
  */
 
 export const BUILD_INFO = {
