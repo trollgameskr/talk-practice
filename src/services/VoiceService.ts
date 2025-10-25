@@ -97,7 +97,7 @@ export class VoiceService {
       console.error('Error stopping AI voice:', error);
     }
   }
-  
+
   /**
    * Set API key for AI voice service
    */

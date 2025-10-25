@@ -29,7 +29,7 @@ describe('StorageService', () => {
 
       await service.saveSession(session);
       const sessions = await service.getAllSessions();
-      
+
       expect(sessions).toHaveLength(1);
       expect(sessions[0].id).toBe('test-session-1');
     });
@@ -53,7 +53,7 @@ describe('StorageService', () => {
 
       await service.saveSession(session1);
       await service.saveSession(session2);
-      
+
       const sessions = await service.getAllSessions();
       expect(sessions).toHaveLength(2);
     });
@@ -76,7 +76,7 @@ describe('StorageService', () => {
 
       await service.saveSession(session);
       const sessions = await service.getAllSessions();
-      
+
       expect(sessions).toHaveLength(1);
     });
   });
@@ -101,8 +101,10 @@ describe('StorageService', () => {
 
       await service.saveSession(dailySession);
       await service.saveSession(travelSession);
-      
-      const dailySessions = await service.getSessionsByTopic(ConversationTopic.DAILY);
+
+      const dailySessions = await service.getSessionsByTopic(
+        ConversationTopic.DAILY,
+      );
       expect(dailySessions).toHaveLength(1);
       expect(dailySessions[0].topic).toBe(ConversationTopic.DAILY);
     });
@@ -111,7 +113,7 @@ describe('StorageService', () => {
   describe('getUserProgress', () => {
     it('should return default progress for new user', async () => {
       const progress = await service.getUserProgress();
-      
+
       expect(progress.totalSessions).toBe(0);
       expect(progress.totalDuration).toBe(0);
       expect(progress.overallScore).toBe(0);
@@ -130,7 +132,7 @@ describe('StorageService', () => {
 
       await service.saveSession(session);
       const progress = await service.getUserProgress();
-      
+
       expect(progress.totalSessions).toBe(1);
       expect(progress.totalDuration).toBe(300);
     });
@@ -147,7 +149,7 @@ describe('StorageService', () => {
 
       await service.saveCurrentSession(partialSession);
       const retrieved = await service.getCurrentSession();
-      
+
       expect(retrieved).toBeDefined();
       expect(retrieved?.id).toBe('current-session');
     });
@@ -165,7 +167,7 @@ describe('StorageService', () => {
 
       await service.saveCurrentSession(partialSession);
       await service.clearCurrentSession();
-      
+
       const retrieved = await service.getCurrentSession();
       expect(retrieved).toBeNull();
     });
@@ -183,10 +185,10 @@ describe('StorageService', () => {
 
       await service.saveSession(session);
       await service.clearAllData();
-      
+
       const sessions = await service.getAllSessions();
       const progress = await service.getUserProgress();
-      
+
       expect(sessions).toEqual([]);
       expect(progress.totalSessions).toBe(0);
     });
@@ -204,10 +206,10 @@ describe('StorageService', () => {
 
       await service.saveSession(session);
       const jsonData = await service.exportData();
-      
+
       expect(jsonData).toBeDefined();
       expect(typeof jsonData).toBe('string');
-      
+
       const parsed = JSON.parse(jsonData);
       expect(parsed.sessions).toBeDefined();
       expect(parsed.progress).toBeDefined();

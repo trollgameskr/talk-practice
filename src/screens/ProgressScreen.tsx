@@ -26,7 +26,9 @@ const storageService = new StorageService();
 
 const ProgressScreen = () => {
   const [progress, setProgress] = useState<UserProgress | null>(null);
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'topics'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'topics'>(
+    'overview',
+  );
 
   useEffect(() => {
     loadProgress();
@@ -89,7 +91,9 @@ const OverviewTab = ({progress}: {progress: UserProgress}) => {
   return (
     <View style={styles.tabContent}>
       <View style={styles.scoreCard}>
-        <Text style={styles.scoreValue}>{progress.overallScore.toFixed(0)}</Text>
+        <Text style={styles.scoreValue}>
+          {progress.overallScore.toFixed(0)}
+        </Text>
         <Text style={styles.scoreLabel}>Overall Score</Text>
         <Text
           style={[
@@ -128,7 +132,7 @@ const OverviewTab = ({progress}: {progress: UserProgress}) => {
       {progress.achievements.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Achievements 🏆</Text>
-          {progress.achievements.map((achievement) => (
+          {progress.achievements.map(achievement => (
             <View key={achievement.id} style={styles.achievementItem}>
               <Text style={styles.achievementIcon}>{achievement.icon}</Text>
               <View style={styles.achievementDetails}>
@@ -159,11 +163,11 @@ const OverviewTab = ({progress}: {progress: UserProgress}) => {
 
 const TopicsTab = ({progress}: {progress: UserProgress}) => {
   const topics = Object.keys(progress.topicProgress) as ConversationTopic[];
-  
+
   return (
     <View style={styles.tabContent}>
       <Text style={styles.sectionTitle}>Topic Progress</Text>
-      {topics.map((topic) => {
+      {topics.map(topic => {
         const topicProgress = progress.topicProgress[topic];
         return (
           <View key={topic} style={styles.topicCard}>
@@ -179,7 +183,7 @@ const TopicsTab = ({progress}: {progress: UserProgress}) => {
                 </Text>
               </View>
             </View>
-            
+
             {topicProgress.sessionsCompleted > 0 && (
               <View style={styles.topicStats}>
                 <View style={styles.topicStat}>
@@ -200,7 +204,7 @@ const TopicsTab = ({progress}: {progress: UserProgress}) => {
                 </View>
               </View>
             )}
-            
+
             {topicProgress.sessionsCompleted === 0 && (
               <View style={styles.topicEmpty}>
                 <Text style={styles.topicEmptyText}>

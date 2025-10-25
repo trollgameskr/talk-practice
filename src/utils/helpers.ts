@@ -72,7 +72,10 @@ export function getTopicIcon(topic: string): string {
 /**
  * Calculate percentage improvement
  */
-export function calculateImprovement(oldScore: number, newScore: number): number {
+export function calculateImprovement(
+  oldScore: number,
+  newScore: number,
+): number {
   if (oldScore === 0) {
     return newScore > 0 ? 100 : 0;
   }
@@ -83,9 +86,15 @@ export function calculateImprovement(oldScore: number, newScore: number): number
  * Get score color based on value
  */
 export function getScoreColor(score: number): string {
-  if (score >= 90) return '#22c55e'; // green
-  if (score >= 75) return '#3b82f6'; // blue
-  if (score >= 60) return '#f59e0b'; // orange
+  if (score >= 90) {
+    return '#22c55e';
+  } // green
+  if (score >= 75) {
+    return '#3b82f6';
+  } // blue
+  if (score >= 60) {
+    return '#f59e0b';
+  } // orange
   return '#ef4444'; // red
 }
 
@@ -93,9 +102,15 @@ export function getScoreColor(score: number): string {
  * Get score label
  */
 export function getScoreLabel(score: number): string {
-  if (score >= 90) return 'Excellent';
-  if (score >= 75) return 'Good';
-  if (score >= 60) return 'Fair';
+  if (score >= 90) {
+    return 'Excellent';
+  }
+  if (score >= 75) {
+    return 'Good';
+  }
+  if (score >= 60) {
+    return 'Fair';
+  }
   return 'Needs Improvement';
 }
 
@@ -103,7 +118,9 @@ export function getScoreLabel(score: number): string {
  * Truncate text
  */
 export function truncate(text: string, length: number): string {
-  if (text.length <= length) return text;
+  if (text.length <= length) {
+    return text;
+  }
   return text.substring(0, length) + '...';
 }
 
