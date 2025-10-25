@@ -495,10 +495,13 @@ const ConversationScreen = ({route, navigation}: any) => {
       <View style={styles.controls}>
         <TouchableOpacity
           style={[styles.micButton, isListening && styles.micButtonActive]}
-          onPress={isListening ? handleStopListening : handleStartListening}
+          onPressIn={handleStartListening}
+          onPressOut={handleStopListening}
           disabled={isLoading || isSpeaking}>
           <Text style={styles.micIcon}>{isListening ? '⏸️' : '🎤'}</Text>
-          <Text style={styles.micText}>{isListening ? 'Stop' : 'Speak'}</Text>
+          <Text style={styles.micText}>
+            {isListening ? 'Recording...' : 'Hold to Speak'}
+          </Text>
         </TouchableOpacity>
 
         {isSpeaking && (
