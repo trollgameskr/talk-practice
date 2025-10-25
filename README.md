@@ -49,6 +49,32 @@ Directly available on GitHub Pages!
 별도의 설치 없이 브라우저에서 바로 접속하여 사용하실 수 있습니다.  
 Access directly from your browser without any installation.
 
+### 📱 모바일에서 바로 사용하기 (Mobile Access) - **NEW!**
+
+**모바일 기기에서 앱처럼 사용하세요!**  
+Use it like a native app on your mobile device!
+
+#### 📲 설치 방법 (Installation Guide)
+
+**iOS (iPhone/iPad):**
+1. Safari 브라우저로 https://trollgameskr.github.io/talk-practice/ 접속
+2. 하단 공유 버튼(□↑) 탭
+3. "홈 화면에 추가" 선택
+4. "추가" 탭하여 설치 완료
+5. 홈 화면의 GeminiTalk 아이콘으로 앱 실행!
+
+**Android:**
+1. Chrome 브라우저로 https://trollgameskr.github.io/talk-practice/ 접속
+2. 메뉴(⋮) → "홈 화면에 추가" 또는 "앱 설치" 선택
+3. "설치" 탭하여 완료
+4. 홈 화면 또는 앱 서랍의 GeminiTalk 아이콘으로 앱 실행!
+
+**주요 기능:**
+- 📱 앱처럼 전체 화면으로 실행
+- 🔄 오프라인에서도 기본 기능 사용 가능
+- 🚀 빠른 로딩과 부드러운 성능
+- 🏠 홈 화면에서 바로 실행
+
 ### 💻 로컬 웹 버전 (Local Web Version)
 
 **Windows OS 사용자를 위한 웹 버전이 추가되었습니다!**  
