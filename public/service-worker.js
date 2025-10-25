@@ -47,9 +47,9 @@ self.addEventListener('install', (event) => {
       }
     }
   })());
-  // Don't force activation - let the service worker activate naturally on next page load
-  // to avoid infinite reload loops
-  // self.skipWaiting();
+  // Skip waiting to activate new service worker immediately
+  // This ensures old cached files are cleared promptly
+  self.skipWaiting();
 });
 
 // Fetch event - serve from cache when possible
@@ -109,13 +109,15 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
+    }).then(() => {
+      // Take control of all pages immediately
+      // This ensures the new service worker serves content right away
+      return self.clients.claim();
     })
   );
-  // Don't claim clients immediately - let the service worker take control on next page load
-  // to avoid infinite reload loops
-  // return self.clients.claim();
 });
