@@ -15,6 +15,7 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   ConversationTopic,
   Message,
@@ -27,6 +28,7 @@ import StorageService from '../services/StorageService';
 import {generateId, formatDuration} from '../utils/helpers';
 
 const storageService = new StorageService();
+const API_KEY_STORAGE = '@gemini_api_key';
 
 const ConversationScreen = ({route, navigation}: any) => {
   const {topic} = route.params as {topic: ConversationTopic};
@@ -68,8 +70,26 @@ const ConversationScreen = ({route, navigation}: any) => {
     try {
       setIsLoading(true);
 
-      // Initialize Gemini service
-      geminiService.current = new GeminiService('');
+      // Load API key from storage
+      const apiKey = await AsyncStorage.getItem(API_KEY_STORAGE);
+      if (!apiKey) {
+        Alert.alert(
+          'API Key Required',
+          'Please set your Gemini API key in Settings before starting a conversation.',
+          [
+            {text: 'Cancel', onPress: () => navigation.goBack()},
+            {
+              text: 'Go to Settings',
+              onPress: () => navigation.navigate('Settings'),
+            },
+          ],
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // Initialize Gemini service with API key
+      geminiService.current = new GeminiService(apiKey);
 
       // Initialize Voice service
       voiceService.current = new VoiceService();
