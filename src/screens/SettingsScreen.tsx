@@ -16,6 +16,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StorageService from '../services/StorageService';
 import {isValidApiKey} from '../utils/helpers';
+import {BUILD_INFO} from '../config/buildInfo';
 
 const storageService = new StorageService();
 const API_KEY_STORAGE = '@gemini_api_key';
@@ -98,6 +99,21 @@ const SettingsScreen = () => {
     }
   };
 
+  const formatDate = (isoString: string) => {
+    try {
+      const date = new Date(isoString);
+      return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      return 'Unknown';
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -169,6 +185,12 @@ const SettingsScreen = () => {
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Version</Text>
             <Text style={styles.infoValue}>1.0.0</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Last Modified</Text>
+            <Text style={styles.infoValue}>
+              {formatDate(BUILD_INFO.timestamp)}
+            </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Description</Text>
