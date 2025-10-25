@@ -9,7 +9,7 @@ import {ConversationTopic, Message, Feedback, TokenUsage} from '../types';
 import {conversationPrompts} from '../data/conversationPrompts';
 
 export class GeminiService {
-  private genAI: GoogleGenerativeAI;
+  private genAI!: GoogleGenerativeAI;
   private model: any;
   private chat: any;
   private currentTopic: ConversationTopic | null = null;
