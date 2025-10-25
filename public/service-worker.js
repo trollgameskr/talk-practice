@@ -1,5 +1,5 @@
 // Service Worker for GeminiTalk PWA
-const CACHE_NAME = 'geminitalk-v1';
+const CACHE_NAME = 'geminitalk-__BUILD_TIMESTAMP__';
 const urlsToCache = [
   '/talk-practice/',
   '/talk-practice/index.html',
