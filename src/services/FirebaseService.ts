@@ -22,13 +22,12 @@ import {
   getDoc,
   getDocs,
   query,
-  where,
   orderBy,
   Timestamp,
   Firestore,
 } from 'firebase/firestore';
 import {firebaseConfig} from '../config/firebase.config';
-import {ConversationSession, UserProgress, TokenUsage} from '../types';
+import {ConversationSession, TokenUsage} from '../types';
 
 export class FirebaseService {
   private app: FirebaseApp;
@@ -211,8 +210,8 @@ export class FirebaseService {
       const q = query(sessionsRef, orderBy('startTime', 'desc'));
       const querySnapshot = await getDocs(q);
 
-      return querySnapshot.docs.map(doc => {
-        const data = doc.data();
+      return querySnapshot.docs.map(document => {
+        const data = document.data();
         return {
           ...data,
           startTime:
@@ -246,10 +245,10 @@ export class FirebaseService {
 
     try {
       const userRef = doc(this.db, 'users', user.uid);
-      const userDoc = await getDoc(userRef);
+      const userDocument = await getDoc(userRef);
 
-      if (userDoc.exists()) {
-        const data = userDoc.data();
+      if (userDocument.exists()) {
+        const data = userDocument.data();
         return {
           totalSessions: data.totalSessions || 0,
           totalTokens: data.totalTokens || 0,
@@ -277,13 +276,7 @@ export class FirebaseService {
     }
 
     try {
-      const usageRef = doc(
-        this.db,
-        'users',
-        user.uid,
-        'tokenUsage',
-        sessionId,
-      );
+      const usageRef = doc(this.db, 'users', user.uid, 'tokenUsage', sessionId);
 
       await setDoc(usageRef, {
         ...tokenUsage,
@@ -308,7 +301,7 @@ export class FirebaseService {
       const usageRef = collection(this.db, 'users', user.uid, 'tokenUsage');
       const querySnapshot = await getDocs(usageRef);
 
-      return querySnapshot.docs.map(doc => doc.data() as TokenUsage);
+      return querySnapshot.docs.map(document => document.data() as TokenUsage);
     } catch (error) {
       console.error('Error getting token usage history:', error);
       return [];

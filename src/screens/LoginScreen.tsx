@@ -19,7 +19,7 @@ import FirebaseService from '../services/FirebaseService';
 
 const firebaseService = new FirebaseService();
 
-const LoginScreen = ({navigation}: any) => {
+const LoginScreen = ({navigation: _navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
