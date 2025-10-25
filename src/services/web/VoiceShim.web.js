@@ -7,6 +7,7 @@
 
 let recognition = null;
 let isListening = false;
+let lastResultIndex = 0;
 
 const Voice = {
   onSpeechStart: null,
@@ -39,6 +40,7 @@ const Voice = {
 
     recognition.onstart = () => {
       isListening = true;
+      lastResultIndex = 0;
       if (Voice.onSpeechStart) {
         Voice.onSpeechStart({error: false});
       }
@@ -48,12 +50,14 @@ const Voice = {
       const results = [];
       const interim = [];
 
-      for (let i = 0; i < event.results.length; i++) {
+      // Process only new results since lastResultIndex
+      for (let i = lastResultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         const transcript = result[0].transcript;
 
         if (result.isFinal) {
           results.push(transcript);
+          lastResultIndex = i + 1;
         } else {
           interim.push(transcript);
         }
@@ -104,6 +108,7 @@ const Voice = {
       recognition.abort();
       recognition = null;
       isListening = false;
+      lastResultIndex = 0;
     }
   },
 
