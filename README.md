@@ -39,7 +39,17 @@ GeminiTalk is a real-time English conversation practice app powered by Google's 
 
 ## 🚀 시작하기 (Getting Started)
 
-### 💻 웹 버전 (Web Version) - **NEW!**
+### 🌐 온라인 웹 버전 (Online Web Version) - **LIVE!**
+
+**GitHub Pages에서 바로 사용할 수 있습니다!**  
+Directly available on GitHub Pages!
+
+🔗 **[https://trollgameskr.github.io/talk-practice/](https://trollgameskr.github.io/talk-practice/)**
+
+별도의 설치 없이 브라우저에서 바로 접속하여 사용하실 수 있습니다.  
+Access directly from your browser without any installation.
+
+### 💻 로컬 웹 버전 (Local Web Version)
 
 **Windows OS 사용자를 위한 웹 버전이 추가되었습니다!**  
 Web version now available for Windows OS users!
