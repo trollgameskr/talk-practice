@@ -72,5 +72,4 @@ logs
 
 # Web build
 web-build/
-public/*.js
 public/*.map
