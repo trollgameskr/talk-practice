@@ -16,7 +16,9 @@ const selectBestVoice = () => {
   }
 
   const voices = window.speechSynthesis.getVoices();
-  if (voices.length === 0) return null;
+  if (voices.length === 0) {
+    return null;
+  }
 
   // Priority order for AI/Neural voices
   const voicePriorities = [
@@ -63,8 +65,10 @@ const Tts = {
 
       // Apply options with better defaults for AI-like speech
       utterance.lang = options.language || Tts.defaultLanguage || 'en-US';
-      utterance.rate = options.rate !== undefined ? options.rate : (Tts.defaultRate || 0.95);
-      utterance.pitch = options.pitch !== undefined ? options.pitch : (Tts.defaultPitch || 1.0);
+      utterance.rate =
+        options.rate !== undefined ? options.rate : Tts.defaultRate || 0.95;
+      utterance.pitch =
+        options.pitch !== undefined ? options.pitch : Tts.defaultPitch || 1.0;
       utterance.volume = options.volume !== undefined ? options.volume : 1.0;
 
       utterance.onend = () => resolve();

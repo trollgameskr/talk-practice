@@ -44,23 +44,25 @@ describe('GeminiService', () => {
     it('should send message and get response', async () => {
       await service.startConversation(ConversationTopic.DAILY);
       const response = await service.sendMessage('Hello, how are you?');
-      
+
       expect(response).toBeDefined();
       expect(typeof response).toBe('string');
       expect(response.length).toBeGreaterThan(0);
     });
 
     it('should throw error if conversation not started', async () => {
-      await expect(
-        service.sendMessage('Hello')
-      ).rejects.toThrow('Conversation not started');
+      await expect(service.sendMessage('Hello')).rejects.toThrow(
+        'Conversation not started',
+      );
     });
   });
 
   describe('analyzeFeedback', () => {
     it('should analyze user message', async () => {
-      const feedback = await service.analyzeFeedback('I go to school yesterday');
-      
+      const feedback = await service.analyzeFeedback(
+        'I go to school yesterday',
+      );
+
       expect(feedback).toBeDefined();
       expect(feedback.pronunciation).toBeDefined();
       expect(feedback.grammar).toBeDefined();
@@ -70,7 +72,7 @@ describe('GeminiService', () => {
 
     it('should return scores between 0 and 100', async () => {
       const feedback = await service.analyzeFeedback('This is a test sentence');
-      
+
       expect(feedback.pronunciation.score).toBeGreaterThanOrEqual(0);
       expect(feedback.pronunciation.score).toBeLessThanOrEqual(100);
       expect(feedback.grammar.score).toBeGreaterThanOrEqual(0);
@@ -105,9 +107,9 @@ describe('GeminiService', () => {
     });
 
     it('should throw error if conversation not started', async () => {
-      await expect(
-        service.generateSampleAnswers('Hello', 2)
-      ).rejects.toThrow('Conversation not started');
+      await expect(service.generateSampleAnswers('Hello', 2)).rejects.toThrow(
+        'Conversation not started',
+      );
     });
 
     it('should generate specified number of samples', async () => {
@@ -159,7 +161,7 @@ describe('GeminiService', () => {
     it('should allow starting new conversation after ending', async () => {
       await service.startConversation(ConversationTopic.DAILY);
       service.endConversation();
-      
+
       const result = await service.startConversation(ConversationTopic.TRAVEL);
       expect(result).toBeDefined();
     });

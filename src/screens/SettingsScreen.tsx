@@ -48,7 +48,7 @@ const SettingsScreen = () => {
     if (!isValidApiKey(apiKey)) {
       Alert.alert(
         'Invalid API Key',
-        'The API key format appears to be invalid. Please check and try again.'
+        'The API key format appears to be invalid. Please check and try again.',
       );
       return;
     }
@@ -80,7 +80,7 @@ const SettingsScreen = () => {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -88,7 +88,10 @@ const SettingsScreen = () => {
     try {
       const data = await storageService.exportData();
       // In a real app, you'd implement file saving or sharing here
-      Alert.alert('Export Data', 'Data exported successfully!\n\nIn a production app, this would save to a file or share via email.');
+      Alert.alert(
+        'Export Data',
+        'Data exported successfully!\n\nIn a production app, this would save to a file or share via email.',
+      );
       console.log('Exported data:', data);
     } catch (error) {
       Alert.alert('Error', 'Failed to export data');
@@ -103,7 +106,7 @@ const SettingsScreen = () => {
           <Text style={styles.sectionDescription}>
             Enter your Gemini API key to enable conversation features
           </Text>
-          
+
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Gemini API Key</Text>
             <TextInput
@@ -141,7 +144,7 @@ const SettingsScreen = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Data Management</Text>
-          
+
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={handleExportData}>

@@ -412,7 +412,9 @@ const ConversationScreen = ({route, navigation}: any) => {
             );
           } else {
             return (
-              <Text key={`nonword-${index}-${part.text.length}`} style={styles.normalText}>
+              <Text
+                key={`nonword-${index}-${part.text.length}`}
+                style={styles.normalText}>
                 {part.text}
               </Text>
             );
@@ -488,7 +490,9 @@ const ConversationScreen = ({route, navigation}: any) => {
         {/* 2 Response Test Options - User can select one to practice */}
         {showSamples && sampleAnswers.length > 0 && (
           <View style={styles.samplesContainer}>
-            <Text style={styles.samplesTitle}>💡 Response Options (Choose one to practice):</Text>
+            <Text style={styles.samplesTitle}>
+              💡 Response Options (Choose one to practice):
+            </Text>
             {sampleAnswers.map((sample, index) => (
               <TouchableOpacity
                 key={index}

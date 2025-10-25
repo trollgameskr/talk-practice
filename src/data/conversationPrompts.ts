@@ -4,7 +4,10 @@
 
 import {ConversationPrompt, ConversationTopic} from '../types';
 
-export const conversationPrompts: Record<ConversationTopic, ConversationPrompt> = {
+export const conversationPrompts: Record<
+  ConversationTopic,
+  ConversationPrompt
+> = {
   [ConversationTopic.DAILY]: {
     topic: ConversationTopic.DAILY,
     systemPrompt: `You are an English conversation coach helping a student practice daily English conversation. 
@@ -21,15 +24,23 @@ Focus on topics like: daily routines, hobbies, weather, food, family, friends, a
 
 After each user response, provide brief feedback on their pronunciation or grammar if needed, then continue the conversation naturally.`,
     starterPrompts: [
-      "Tell me about your typical day. What do you usually do in the morning?",
-      "What are your hobbies? What do you like to do in your free time?",
+      'Tell me about your typical day. What do you usually do in the morning?',
+      'What are your hobbies? What do you like to do in your free time?',
       "What's your favorite food? Can you describe it to me?",
-      "How has your week been so far? Anything interesting happen?",
-      "What kind of weather do you prefer and why?",
+      'How has your week been so far? Anything interesting happen?',
+      'What kind of weather do you prefer and why?',
     ],
-    keywords: ['daily', 'routine', 'hobbies', 'food', 'weather', 'family', 'friends'],
+    keywords: [
+      'daily',
+      'routine',
+      'hobbies',
+      'food',
+      'weather',
+      'family',
+      'friends',
+    ],
   },
-  
+
   [ConversationTopic.TRAVEL]: {
     topic: ConversationTopic.TRAVEL,
     systemPrompt: `You are an English conversation coach helping a student practice travel-related English.
@@ -45,15 +56,23 @@ Focus on: booking accommodations, asking for directions, ordering food, emergenc
 
 Maintain a helpful, patient tone suitable for travelers.`,
     starterPrompts: [
-      "Have you traveled anywhere recently? Tell me about your experience.",
-      "If you could visit any country, where would you go and why?",
+      'Have you traveled anywhere recently? Tell me about your experience.',
+      'If you could visit any country, where would you go and why?',
       "Let's practice ordering food at a restaurant. What would you like to order?",
       "Imagine you're lost in a foreign city. How would you ask for directions?",
-      "Tell me about your most memorable travel experience.",
+      'Tell me about your most memorable travel experience.',
     ],
-    keywords: ['travel', 'hotel', 'airport', 'restaurant', 'directions', 'booking', 'tourism'],
+    keywords: [
+      'travel',
+      'hotel',
+      'airport',
+      'restaurant',
+      'directions',
+      'booking',
+      'tourism',
+    ],
   },
-  
+
   [ConversationTopic.BUSINESS]: {
     topic: ConversationTopic.BUSINESS,
     systemPrompt: `You are an English conversation coach helping a student practice business English.
@@ -69,15 +88,23 @@ Focus on: meetings, presentations, phone calls, emails, negotiations, networking
 
 Maintain a professional yet supportive tone.`,
     starterPrompts: [
-      "Tell me about your job or your field of study.",
+      'Tell me about your job or your field of study.',
       "Let's practice a job interview. Can you introduce yourself professionally?",
       "Imagine you're presenting a project to your team. Can you give me a brief overview?",
-      "How do you usually handle disagreements with colleagues?",
-      "What are your career goals for the next few years?",
+      'How do you usually handle disagreements with colleagues?',
+      'What are your career goals for the next few years?',
     ],
-    keywords: ['business', 'meeting', 'presentation', 'negotiation', 'email', 'professional', 'career'],
+    keywords: [
+      'business',
+      'meeting',
+      'presentation',
+      'negotiation',
+      'email',
+      'professional',
+      'career',
+    ],
   },
-  
+
   [ConversationTopic.CASUAL]: {
     topic: ConversationTopic.CASUAL,
     systemPrompt: `You are an English conversation coach helping a student practice casual, informal English.
@@ -93,15 +120,23 @@ Focus on: movies, music, sports, social media, trends, and informal social inter
 
 Be friendly, enthusiastic, and supportive.`,
     starterPrompts: [
-      "What kind of movies or TV shows do you enjoy watching?",
+      'What kind of movies or TV shows do you enjoy watching?',
       "Do you follow any sports? What's your favorite team?",
-      "What music have you been listening to lately?",
-      "Are you into any social media platforms? Which ones?",
-      "What do you like to do with your friends?",
+      'What music have you been listening to lately?',
+      'Are you into any social media platforms? Which ones?',
+      'What do you like to do with your friends?',
     ],
-    keywords: ['casual', 'movies', 'music', 'sports', 'social', 'entertainment', 'fun'],
+    keywords: [
+      'casual',
+      'movies',
+      'music',
+      'sports',
+      'social',
+      'entertainment',
+      'fun',
+    ],
   },
-  
+
   [ConversationTopic.PROFESSIONAL]: {
     topic: ConversationTopic.PROFESSIONAL,
     systemPrompt: `You are an English conversation coach helping a student practice professional workplace communication.
@@ -117,12 +152,19 @@ Focus on: team collaboration, conflict resolution, performance reviews, professi
 
 Maintain a coaching mindset - supportive but professional.`,
     starterPrompts: [
-      "Describe a challenging project you worked on. How did you handle it?",
-      "How do you typically collaborate with your team members?",
-      "Tell me about a time when you had to give difficult feedback to someone.",
-      "What skills are you currently working to improve?",
-      "How do you manage stress in a professional environment?",
+      'Describe a challenging project you worked on. How did you handle it?',
+      'How do you typically collaborate with your team members?',
+      'Tell me about a time when you had to give difficult feedback to someone.',
+      'What skills are you currently working to improve?',
+      'How do you manage stress in a professional environment?',
     ],
-    keywords: ['professional', 'workplace', 'teamwork', 'feedback', 'collaboration', 'skills'],
+    keywords: [
+      'professional',
+      'workplace',
+      'teamwork',
+      'feedback',
+      'collaboration',
+      'skills',
+    ],
   },
 };

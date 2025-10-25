@@ -19,10 +19,10 @@ const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
 
   useEffect(() => {
     loadCostData();
-    
+
     // Refresh every 5 seconds
     const interval = setInterval(loadCostData, 5000);
-    
+
     return () => clearInterval(interval);
   }, []);
 

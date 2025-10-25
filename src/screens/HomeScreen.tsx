@@ -60,7 +60,7 @@ const HomeScreen = ({navigation}: any) => {
                 <Text style={styles.statLabel}>Overall Score</Text>
               </View>
             </View>
-            
+
             <View style={styles.costContainer}>
               <CostDisplay />
             </View>
@@ -99,22 +99,23 @@ const HomeScreen = ({navigation}: any) => {
 
         {progress && progress.achievements.length > 0 && (
           <View style={styles.achievementsContainer}>
-            <Text style={styles.achievementsTitle}>
-              Recent Achievements 🏆
-            </Text>
-            {progress.achievements.slice(-3).reverse().map((achievement) => (
-              <View key={achievement.id} style={styles.achievementCard}>
-                <Text style={styles.achievementIcon}>{achievement.icon}</Text>
-                <View style={styles.achievementInfo}>
-                  <Text style={styles.achievementTitle}>
-                    {achievement.title}
-                  </Text>
-                  <Text style={styles.achievementDescription}>
-                    {achievement.description}
-                  </Text>
+            <Text style={styles.achievementsTitle}>Recent Achievements 🏆</Text>
+            {progress.achievements
+              .slice(-3)
+              .reverse()
+              .map(achievement => (
+                <View key={achievement.id} style={styles.achievementCard}>
+                  <Text style={styles.achievementIcon}>{achievement.icon}</Text>
+                  <View style={styles.achievementInfo}>
+                    <Text style={styles.achievementTitle}>
+                      {achievement.title}
+                    </Text>
+                    <Text style={styles.achievementDescription}>
+                      {achievement.description}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
           </View>
         )}
       </ScrollView>

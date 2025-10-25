@@ -19,6 +19,8 @@ import CostDisplay from './components/CostDisplay';
 
 const Stack = createStackNavigator();
 
+const HeaderRight = () => <CostDisplay compact />;
+
 const App = () => {
   return (
     <>
@@ -30,7 +32,7 @@ const App = () => {
             headerStyle: styles.header,
             headerTintColor: '#1f2937',
             headerTitleStyle: styles.headerTitle,
-            headerRight: () => <CostDisplay compact />,
+            headerRight: HeaderRight,
           }}>
           <Stack.Screen
             name="Home"

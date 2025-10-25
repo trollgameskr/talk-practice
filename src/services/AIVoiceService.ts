@@ -70,22 +70,22 @@ export class AIVoiceService {
 
     try {
       const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
-      
+
       const requestBody = {
         input: {
-          text: text
+          text: text,
         },
         voice: {
           languageCode: 'en-US',
           name: 'en-US-Neural2-F', // Neural2 voices are AI-generated
-          ssmlGender: 'FEMALE'
+          ssmlGender: 'FEMALE',
         },
         audioConfig: {
           audioEncoding: 'MP3',
           speakingRate: 0.95,
           pitch: 0.0,
-          volumeGainDb: 0.0
-        }
+          volumeGainDb: 0.0,
+        },
       };
 
       const response = await fetch(url, {
@@ -93,7 +93,7 @@ export class AIVoiceService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -115,30 +115,30 @@ export class AIVoiceService {
     return new Promise((resolve, reject) => {
       try {
         this.isSpeaking = true;
-        
+
         // Create audio element with base64 data (browser only)
         const audioSrc = `data:audio/mp3;base64,${base64Audio}`;
-        
+
         // Use any type to avoid TypeScript DOM type issues
         const AudioConstructor = (globalThis as any).Audio;
         if (!AudioConstructor) {
           throw new Error('Audio API not available');
         }
-        
+
         this.currentAudio = new AudioConstructor(audioSrc);
-        
+
         this.currentAudio.onended = () => {
           this.isSpeaking = false;
           this.currentAudio = null;
           resolve();
         };
-        
+
         this.currentAudio.onerror = (error: any) => {
           this.isSpeaking = false;
           this.currentAudio = null;
           reject(error);
         };
-        
+
         this.currentAudio.play().catch(reject);
       } catch (error) {
         this.isSpeaking = false;
@@ -164,10 +164,11 @@ export class AIVoiceService {
     return new Promise((resolve, reject) => {
       try {
         const voices = win.speechSynthesis.getVoices();
-        
-        const SpeechSynthesisUtteranceConstructor = win.SpeechSynthesisUtterance;
+
+        const SpeechSynthesisUtteranceConstructor =
+          win.SpeechSynthesisUtterance;
         const utterance = new SpeechSynthesisUtteranceConstructor(text);
-        
+
         // Select the best AI voice available
         const bestVoice = this.selectBestVoice(voices);
         if (bestVoice) {
@@ -176,22 +177,22 @@ export class AIVoiceService {
         } else {
           console.log('Using default system voice');
         }
-        
+
         // Configure for natural speech
         utterance.lang = 'en-US';
         utterance.rate = 0.95; // Slightly slower for clarity
         utterance.pitch = 1.0; // Natural pitch
         utterance.volume = 1.0; // Full volume
-        
+
         utterance.onstart = () => {
           this.isSpeaking = true;
         };
-        
+
         utterance.onend = () => {
           this.isSpeaking = false;
           resolve();
         };
-        
+
         utterance.onerror = (event: any) => {
           this.isSpeaking = false;
           // User cancellations are expected behavior, not errors
@@ -204,7 +205,7 @@ export class AIVoiceService {
           // Reject so caller knows speech failed, but they can handle gracefully
           reject(new Error(`Speech synthesis failed: ${event.error}`));
         };
-        
+
         win.speechSynthesis.speak(utterance);
       } catch (error) {
         this.isSpeaking = false;
@@ -223,7 +224,7 @@ export class AIVoiceService {
       return;
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const voices = win.speechSynthesis.getVoices();
       if (voices.length > 0) {
         resolve();
@@ -232,17 +233,26 @@ export class AIVoiceService {
 
       // Wait for voiceschanged event
       const timeout = setTimeout(() => {
-        win.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+        win.speechSynthesis.removeEventListener(
+          'voiceschanged',
+          handleVoicesChanged,
+        );
         resolve();
       }, 1000);
 
       const handleVoicesChanged = () => {
         clearTimeout(timeout);
-        win.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+        win.speechSynthesis.removeEventListener(
+          'voiceschanged',
+          handleVoicesChanged,
+        );
         resolve();
       };
-      
-      win.speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
+
+      win.speechSynthesis.addEventListener(
+        'voiceschanged',
+        handleVoicesChanged,
+      );
     });
   }
 
@@ -250,7 +260,9 @@ export class AIVoiceService {
    * Select the best AI/Neural voice from available voices
    */
   private selectBestVoice(voices: any[]): any {
-    if (voices.length === 0) return null;
+    if (voices.length === 0) {
+      return null;
+    }
 
     // Priority order for AI/Neural voices:
     // 1. Google voices (highest quality)
@@ -270,7 +282,9 @@ export class AIVoiceService {
 
     for (const priorityCheck of voicePriorities) {
       const voice = voices.find(priorityCheck);
-      if (voice) return voice;
+      if (voice) {
+        return voice;
+      }
     }
 
     return voices[0];

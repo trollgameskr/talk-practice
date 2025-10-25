@@ -5,14 +5,14 @@
 export const GEMINI_CONFIG = {
   apiKey: process.env.GEMINI_API_KEY || '',
   model: 'gemini-1.5-pro',
-  
+
   // Voice settings
   voice: {
     sampleRate: 16000,
     encoding: 'LINEAR16',
     languageCode: 'en-US',
   },
-  
+
   // Generation settings
   generation: {
     temperature: 0.7,
@@ -21,7 +21,7 @@ export const GEMINI_CONFIG = {
     maxOutputTokens: 1024,
     candidateCount: 1,
   },
-  
+
   // Safety settings
   safety: [
     {
@@ -53,6 +53,6 @@ export const CONVERSATION_CONFIG = {
 // Gemini 1.5 Pro pricing (as of 2024)
 // See: https://ai.google.dev/pricing
 export const GEMINI_PRICING = {
-  inputPer1K: 0.00125,  // $0.00125 per 1K input tokens (prompts <= 128K tokens)
-  outputPer1K: 0.005,    // $0.005 per 1K output tokens
+  inputPer1K: 0.00125, // $0.00125 per 1K input tokens (prompts <= 128K tokens)
+  outputPer1K: 0.005, // $0.005 per 1K output tokens
 };
