@@ -198,7 +198,10 @@ talk-practice/
 - [사용 가이드](./docs/README.md#usage-guide)
 - [API 통합](./docs/README.md#api-integration)
 - [개발 가이드](./docs/README.md#development)
-- [문제 해결](./docs/README.md#troubleshooting)
+- [문제 해결](./TROUBLESHOOTING.md) - 404 에러, 서비스 워커 등 일반적인 문제 해결
+
+### 🔧 일반적인 문제 해결
+404 에러나 캐시 문제가 발생하나요? [문제 해결 가이드](./TROUBLESHOOTING.md)를 확인하거나, 브라우저에서 `/clear-cache.html`을 방문하세요.
 
 ## 🎯 대상 사용자 (Target Users)
 
@@ -230,6 +233,8 @@ talk-practice/
 ## 📧 지원 (Support)
 
 문제나 질문이 있으시면:
+- [Troubleshooting Guide](./TROUBLESHOOTING.md) - 일반적인 문제 해결
+- [Cache Clear Tool](http://localhost:3000/clear-cache.html) - 캐시/서비스 워커 문제 해결
 - [GitHub Issues](https://github.com/trollgameskr/talk-practice/issues)
 - [Documentation](./docs/README.md)
 
