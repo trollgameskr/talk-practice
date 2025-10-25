@@ -93,6 +93,30 @@ npm run web
 
 ## ❓ 문제 해결 (Troubleshooting)
 
+### "포트 3000이 이미 사용 중입니다" (Port 3000 Already in Use)
+다른 프로그램이 3000 포트를 사용 중일 경우:
+
+**방법 1: 다른 포트 사용**
+```bash
+# Windows (CMD)
+set PORT=3001 && npm run web
+
+# Windows (PowerShell)
+$env:PORT=3001; npm run web
+
+# Mac/Linux
+PORT=3001 npm run web
+```
+
+**방법 2: .env 파일 생성**
+```bash
+# .env 파일 생성 및 포트 설정
+echo PORT=3001 > .env
+npm run web
+```
+
+브라우저에서 설정한 포트로 접속 (예: http://localhost:3001)
+
 ### "마이크를 찾을 수 없습니다"
 1. 브라우저 설정에서 마이크 권한 확인
 2. 시스템 설정에서 마이크 활성화

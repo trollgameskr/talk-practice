@@ -38,6 +38,17 @@ The server will start and your browser will open automatically.
 
 기본 주소: **http://localhost:3000**
 
+**포트 3000이 사용 중인 경우:**  
+If port 3000 is already in use:
+
+```bash
+# Use a different port
+PORT=3001 npm run web
+
+# Or create a .env file with:
+# PORT=3001
+```
+
 ### 4. API 키 설정 (Configure API Key)
 
 1. 웹 앱이 열리면 Settings (⚙️) 메뉴로 이동

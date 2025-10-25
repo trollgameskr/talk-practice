@@ -95,6 +95,7 @@ npm run web
 ```
 
 웹 버전은 http://localhost:3000 에서 실행됩니다.  
+포트 3000이 사용 중인 경우: `PORT=3001 npm run web`  
 자세한 사용법은 [WEB_SETUP.md](./WEB_SETUP.md)를 참조하세요.
 
 ### 📱 모바일 앱 (Mobile App)

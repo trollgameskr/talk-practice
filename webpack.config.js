@@ -111,7 +111,7 @@ module.exports = {
       directory: path.join(__dirname, 'public'),
     },
     compress: true,
-    port: 3000,
+    port: process.env.PORT || process.env.WEB_PORT || 3000,
     proxy: [
       {
         context: ['/api'],
