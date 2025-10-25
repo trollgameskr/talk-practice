@@ -75,6 +75,7 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
+      __BUILD_TIMESTAMP__: JSON.stringify(new Date().toISOString()),
       'process.env': JSON.stringify({
         NODE_ENV: process.env.NODE_ENV || 'development',
         GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
