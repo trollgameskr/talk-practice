@@ -87,7 +87,7 @@ cd web-build
 python -m http.server 8000
 ```
 
-Then open http://localhost:8000/talk-practice/ in your browser.
+Then open http://localhost:8000 in your browser (without the /talk-practice/ path, as you're serving from the web-build directory root).
 
 ## 🛠️ Repository Settings
 
@@ -116,7 +116,10 @@ To enable GitHub Pages for your repository:
 ### 404 errors
 
 **Issue**: Getting 404 errors when refreshing the page  
-**Solution**: This is expected for client-side routing. The `.nojekyll` file helps, but for full SPA support, you may need to configure a 404.html that redirects to index.html
+**Solution**: This is a known limitation of GitHub Pages for SPAs with client-side routing. The `.nojekyll` file prevents Jekyll processing but doesn't solve client-side routing 404s. For a complete solution, you would need to:
+- Create a custom 404.html page that redirects to index.html
+- Configure the app to handle routing properly
+- Consider using hash-based routing instead of browser history API
 
 ### Deployment fails
 
