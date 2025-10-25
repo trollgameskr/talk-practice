@@ -175,7 +175,7 @@
       
       if ('caches' in window) {
         const cacheNames = await caches.keys();
-        info.push(`${cacheNames.length} cache(s) found: ${cacheNames.join(', ') || 'none'}`);
+        info.push(`${cacheNames.length} cache(s) found: ${cacheNames.length > 0 ? cacheNames.join(', ') : 'none'}`);
       }
       
       if ('serviceWorker' in navigator) {
