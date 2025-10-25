@@ -90,7 +90,17 @@ module.exports = {
           from: 'public',
           to: '',
           globOptions: {
-            ignore: ['**/index.html'], // index.html is handled by HtmlWebpackPlugin
+            ignore: ['**/index.html', '**/service-worker.js'], // index.html is handled by HtmlWebpackPlugin, service-worker.js is handled separately
+          },
+        },
+        {
+          from: 'public/service-worker.js',
+          to: 'service-worker.js',
+          transform(content) {
+            // Replace __BUILD_TIMESTAMP__ in service worker with actual timestamp
+            return content
+              .toString()
+              .replace(/__BUILD_TIMESTAMP__/g, new Date().toISOString());
           },
         },
       ],
