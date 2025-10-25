@@ -12,7 +12,7 @@ try {
 
 // Minimal local config for the proxy. Do not import TypeScript config file directly.
 const GEMINI_CONFIG = {
-  model: process.env.GEMINI_MODEL || 'gemini-1.5-pro',
+  model: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite-preview-09-2025',
   generation: {
     temperature: 0.7,
     topK: 40,

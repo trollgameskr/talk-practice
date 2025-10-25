@@ -4,7 +4,7 @@
 
 export const GEMINI_CONFIG = {
   apiKey: process.env.GEMINI_API_KEY || '',
-  model: 'gemini-1.5-pro',
+  model: 'gemini-2.5-flash-lite-preview-09-2025',
 
   // Voice settings
   voice: {

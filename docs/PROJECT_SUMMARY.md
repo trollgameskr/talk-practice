@@ -62,7 +62,7 @@ GeminiTalk solves these problems by providing:
 
 ### Backend/AI
 - **AI Provider**: Google Gemini Live API
-- **Model**: gemini-1.5-pro
+- **Model**: gemini-2.5-flash-lite-preview-09-2025
 - **Voice Recognition**: React Native Voice
 - **Text-to-Speech**: React Native TTS
 

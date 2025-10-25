@@ -133,7 +133,7 @@ GeminiTalk/
 - **UI**: StyleSheet API, custom components
 
 ### Backend/AI
-- **AI**: Google Gemini Live API (gemini-1.5-pro)
+- **AI**: Google Gemini Live API (gemini-2.5-flash-lite-preview-09-2025)
 - **Voice Input**: @react-native-community/voice
 - **Voice Output**: react-native-tts
 - **Audio**: react-native-audio-recorder-player
