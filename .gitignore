@@ -73,3 +73,10 @@ logs
 # Web build
 web-build/
 public/*.map
+.vscode
+.vs/talk-practice/v17
+.vs/talk-practice/FileContentIndex
+.vs/talk-practice/CopilotIndices
+.vs/VSWorkspaceState.json
+.vs/ProjectSettings.json
+.vs/slnx.sqlite

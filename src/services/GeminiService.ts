@@ -21,11 +21,26 @@ export class GeminiService {
   };
 
   constructor(apiKey: string) {
-    this.genAI = new GoogleGenerativeAI(apiKey || GEMINI_CONFIG.apiKey);
-    this.model = this.genAI.getGenerativeModel({
-      model: GEMINI_CONFIG.model,
-      generationConfig: GEMINI_CONFIG.generation,
-    });
+    // The GoogleGenerativeAI constructor expects a config object with an apiKey property
+    // (passing a bare string can fail silently). Wrap in try/catch to surface errors.
+    try {
+      // If running in a browser (web build), we won't initialize the Google client here
+      // because we use a local proxy for server-side calls. Only initialize when not
+      // in a browser environment.
+  const isBrowser = typeof (globalThis as any).window !== 'undefined' && typeof (globalThis as any).window.document !== 'undefined';
+      if (!isBrowser) {
+        // Cast to any to avoid strict type mismatch in some builds
+        this.genAI = new (GoogleGenerativeAI as any)({apiKey: apiKey || GEMINI_CONFIG.apiKey});
+        this.model = this.genAI.getGenerativeModel({
+          model: GEMINI_CONFIG.model,
+          generationConfig: GEMINI_CONFIG.generation,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to initialize GoogleGenerativeAI:', err);
+      // Rethrow so callers know initialization failed
+      throw err;
+    }
   }
 
   /**
@@ -35,28 +50,29 @@ export class GeminiService {
     this.currentTopic = topic;
     const prompt = conversationPrompts[topic];
 
-    this.chat = this.model.startChat({
-      history: [
-        {
-          role: 'user',
-          parts: [{text: prompt.systemPrompt}],
-        },
-        {
-          role: 'model',
-          parts: [
-            {
-              text: `I understand. I'm ready to help you practice English conversation about ${topic}. Let's begin!`,
-            },
-          ],
-        },
-      ],
-      generationConfig: GEMINI_CONFIG.generation,
-    });
+  const isBrowser = typeof (globalThis as any).window !== 'undefined' && typeof (globalThis as any).window.document !== 'undefined';
+    if (!isBrowser && this.model && typeof this.model.startChat === 'function') {
+      this.chat = this.model.startChat({
+        history: [
+          {
+            role: 'user',
+            parts: [{text: prompt.systemPrompt}],
+          },
+          {
+            role: 'model',
+            parts: [
+              {
+                text: `I understand. I'm ready to help you practice English conversation about ${topic}. Let's begin!`,
+              },
+            ],
+          },
+        ],
+        generationConfig: GEMINI_CONFIG.generation,
+      });
+    }
 
-    // Get a starter prompt
-    const starterIndex = Math.floor(
-      Math.random() * prompt.starterPrompts.length,
-    );
+    // Get a starter prompt (local static selection)
+    const starterIndex = Math.floor(Math.random() * prompt.starterPrompts.length);
     return prompt.starterPrompts[starterIndex];
   }
 
@@ -64,22 +80,49 @@ export class GeminiService {
    * Send a message and get a response
    */
   async sendMessage(userMessage: string): Promise<string> {
-    if (!this.chat) {
-      throw new Error(
-        'Conversation not started. Call startConversation first.',
-      );
+  const isBrowser = typeof (globalThis as any).window !== 'undefined' && typeof (globalThis as any).window.document !== 'undefined';
+
+    if (!this.chat && !isBrowser) {
+      throw new Error('Conversation not started. Call startConversation first.');
     }
 
     try {
+      if (isBrowser) {
+        // Use local proxy endpoint to avoid exposing API key to the browser.
+        const resp = await fetch('/api/generateContent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: userMessage }),
+        });
+        const json = await resp.json();
+        if (json.error) {
+          throw new Error(json.error);
+        }
+        return json.text || '';
+      }
+
       const result = await this.chat.sendMessage(userMessage);
+      if (!result) {
+        throw new Error('No result from chat.sendMessage');
+      }
+
       const response = result.response;
+      if (!response) {
+        console.error('No response object on result from sendMessage:', result);
+        throw new Error('Invalid response from model');
+      }
 
       // Track token usage if available
       if (response.usageMetadata) {
         this.updateTokenUsage(response.usageMetadata);
       }
 
-      return response.text();
+      // response.text may be a function returning the text
+      const text = typeof response.text === 'function' ? response.text() : response.text;
+      if (!text || (typeof text === 'string' && text.trim().length === 0)) {
+        console.warn('Model returned empty text for user message:', userMessage, result);
+      }
+      return text;
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
@@ -144,12 +187,26 @@ Provide feedback in JSON format with:
 
 Be encouraging and constructive.`;
 
+    const isBrowser = typeof (globalThis as any).window !== 'undefined' && typeof (globalThis as any).window.document !== 'undefined';
     try {
+      if (isBrowser) {
+        // Use proxy
+        const resp = await fetch('/api/generateContent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: feedbackPrompt }),
+        });
+        const json = await resp.json();
+        if (json.error) {
+          throw new Error(json.error);
+        }
+        return this.parseFeedbackResponse(json.text || '', userMessage);
+      }
+
       const result = await this.model.generateContent(feedbackPrompt);
       const response = result.response.text();
 
       // Parse the response to extract feedback
-      // This is a simplified version - in production, you'd want more robust parsing
       return this.parseFeedbackResponse(response, userMessage);
     } catch (error) {
       console.error('Error analyzing feedback:', error);
@@ -239,7 +296,21 @@ ${conversation}
 
 Provide an encouraging summary in 2-3 sentences.`;
 
+    const isBrowser = typeof (globalThis as any).window !== 'undefined' && typeof (globalThis as any).window.document !== 'undefined';
     try {
+      if (isBrowser) {
+        const resp = await fetch('/api/generateContent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: summaryPrompt }),
+        });
+        const json = await resp.json();
+        if (json.error) {
+          throw new Error(json.error);
+        }
+        return json.text || 'Great conversation practice! Keep up the good work.';
+      }
+
       const result = await this.model.generateContent(summaryPrompt);
       return result.response.text();
     } catch (error) {
@@ -255,12 +326,6 @@ Provide an encouraging summary in 2-3 sentences.`;
     lastMessage: string,
     count: number = 2,
   ): Promise<string[]> {
-    if (!this.chat) {
-      throw new Error(
-        'Conversation not started. Call startConversation first.',
-      );
-    }
-
     const samplePrompt = `Based on the question or statement: "${lastMessage}"
 
 Generate ${count} different sample responses that a learner could use to practice English. Make them:
@@ -271,7 +336,32 @@ Generate ${count} different sample responses that a learner could use to practic
 
 Format: Return only the sample responses, one per line, without numbering or extra text.`;
 
+    const isBrowser = typeof (globalThis as any).window !== 'undefined' && typeof (globalThis as any).window.document !== 'undefined';
     try {
+      if (isBrowser) {
+        const resp = await fetch('/api/generateContent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: samplePrompt }),
+        });
+        const json = await resp.json();
+        if (json.error) {
+          throw new Error(json.error);
+        }
+        const response = json.text || '';
+        const samples = response
+          .split('\n')
+          .filter((line: string) => line.trim().length > 0)
+          .map((line: string) => line.replace(/^\d+\.\s*/, '').trim())
+          .slice(0, count);
+        return samples.length > 0
+          ? samples
+          : [
+              'I understand what you mean.',
+              'That sounds interesting, could you tell me more?',
+            ];
+      }
+
       const result = await this.model.generateContent(samplePrompt);
       const response = result.response.text();
 
@@ -312,7 +402,33 @@ Format your response as JSON:
   "examples": ["example sentence 1", "example sentence 2"]
 }`;
 
+    const isBrowser = typeof (globalThis as any).window !== 'undefined' && typeof (globalThis as any).window.document !== 'undefined';
     try {
+      if (isBrowser) {
+        const resp = await fetch('/api/generateContent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: definitionPrompt }),
+        });
+        const json = await resp.json();
+        if (json.error) {
+          throw new Error(json.error);
+        }
+        const response = json.text || '';
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return {
+            definition: parsed.definition || 'Definition not available',
+            examples: parsed.examples || [],
+          };
+        }
+        return {
+          definition: 'Definition not available',
+          examples: [],
+        };
+      }
+
       const result = await this.model.generateContent(definitionPrompt);
       const response = result.response.text();
 

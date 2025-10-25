@@ -3,6 +3,27 @@ module.exports = function (api) {
 
   return {
     presets: ['module:metro-react-native-babel-preset'],
-    plugins: [],
+    plugins: [
+      // Ensure "loose" mode is consistent for private/class transforms to
+      // silence warnings from Babel about mismatched "loose" options.
+      [
+        '@babel/plugin-transform-class-properties',
+        {
+          loose: true,
+        },
+      ],
+      [
+        '@babel/plugin-transform-private-methods',
+        {
+          loose: true,
+        },
+      ],
+      [
+        '@babel/plugin-transform-private-property-in-object',
+        {
+          loose: true,
+        },
+      ],
+    ],
   };
 };
