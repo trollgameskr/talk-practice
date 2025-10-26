@@ -629,7 +629,6 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
-    flexGrow: 1,
     flexShrink: 1,
   },
   messagesContent: {
