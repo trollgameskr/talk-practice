@@ -12,7 +12,20 @@ import {
   getScoreLabel,
   truncate,
   isValidApiKey,
+  openURL,
 } from '../utils/helpers';
+import {Linking, Alert} from 'react-native';
+
+// Mock react-native modules
+jest.mock('react-native', () => ({
+  Linking: {
+    canOpenURL: jest.fn(),
+    openURL: jest.fn(),
+  },
+  Alert: {
+    alert: jest.fn(),
+  },
+}));
 
 describe('Utility Functions', () => {
   describe('formatDuration', () => {
@@ -127,6 +140,46 @@ describe('Utility Functions', () => {
       expect(isValidApiKey('')).toBe(false);
       expect(isValidApiKey('short')).toBe(false);
       expect(isValidApiKey('DoesNotStartWithAI1234567890')).toBe(false);
+    });
+  });
+
+  describe('openURL', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should open URL when supported', async () => {
+      (Linking.canOpenURL as jest.Mock).mockResolvedValue(true);
+      (Linking.openURL as jest.Mock).mockResolvedValue(undefined);
+
+      await openURL('https://example.com');
+
+      expect(Linking.canOpenURL).toHaveBeenCalledWith('https://example.com');
+      expect(Linking.openURL).toHaveBeenCalledWith('https://example.com');
+      expect(Alert.alert).not.toHaveBeenCalled();
+    });
+
+    it('should show alert when URL is not supported', async () => {
+      (Linking.canOpenURL as jest.Mock).mockResolvedValue(false);
+
+      await openURL('https://example.com');
+
+      expect(Linking.canOpenURL).toHaveBeenCalledWith('https://example.com');
+      expect(Linking.openURL).not.toHaveBeenCalled();
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Error',
+        'Cannot open URL: https://example.com',
+      );
+    });
+
+    it('should handle errors gracefully', async () => {
+      (Linking.canOpenURL as jest.Mock).mockRejectedValue(
+        new Error('Network error'),
+      );
+
+      await openURL('https://example.com');
+
+      expect(Alert.alert).toHaveBeenCalledWith('Error', 'Failed to open URL');
     });
   });
 });
