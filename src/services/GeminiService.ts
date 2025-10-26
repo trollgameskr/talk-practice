@@ -378,14 +378,14 @@ Format: Return only the sample responses, one per line, without numbering or ext
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
         return {
-          definition: parsed.definition || '정의를 사용할 수 없습니다',
+          definition: parsed.definition || '정의를 불러올 수 없습니다',
           examples: parsed.examples || [],
         };
       }
 
       // Fallback if JSON parsing fails
       return {
-        definition: '정의를 사용할 수 없습니다',
+        definition: '정의를 불러올 수 없습니다',
         examples: [],
       };
     } catch (error) {
