@@ -29,15 +29,24 @@ const HeaderRight = () => <CostDisplay compact />;
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isFirebaseConfigured] = useState<boolean>(
+    firebaseService.isFirebaseConfigured(),
+  );
 
   useEffect(() => {
-    // Set up auth state listener
+    // If Firebase is not configured, skip authentication
+    if (!isFirebaseConfigured) {
+      setIsAuthenticated(true); // Allow access without authentication
+      return;
+    }
+
+    // Set up auth state listener when Firebase is configured
     const unsubscribe = firebaseService.onAuthStateChange(user => {
       setIsAuthenticated(user !== null);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isFirebaseConfigured]);
 
   // Show loading indicator while checking auth state
   if (isAuthenticated === null) {
@@ -60,7 +69,7 @@ const App = () => {
             headerTitleStyle: styles.headerTitle,
             headerRight: isAuthenticated ? HeaderRight : undefined,
           }}>
-          {!isAuthenticated ? (
+          {!isAuthenticated && isFirebaseConfigured ? (
             <Stack.Screen
               name="Login"
               component={LoginScreen}

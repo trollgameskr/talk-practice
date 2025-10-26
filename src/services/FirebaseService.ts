@@ -30,26 +30,69 @@ import {firebaseConfig} from '../config/firebase.config';
 import {ConversationSession, TokenUsage} from '../types';
 
 export class FirebaseService {
-  private app: FirebaseApp;
-  private auth: Auth;
-  private db: Firestore;
+  private app: FirebaseApp | null = null;
+  private auth: Auth | null = null;
+  private db: Firestore | null = null;
   private currentUser: User | null = null;
+  private isConfigured: boolean = false;
 
   constructor() {
-    this.app = initializeApp(firebaseConfig);
-    this.auth = getAuth(this.app);
-    this.db = getFirestore(this.app);
+    // Check if Firebase is properly configured
+    this.isConfigured = this.validateFirebaseConfig();
 
-    // Set up auth state listener
-    onAuthStateChanged(this.auth, user => {
-      this.currentUser = user;
-    });
+    if (this.isConfigured) {
+      try {
+        this.app = initializeApp(firebaseConfig);
+        this.auth = getAuth(this.app);
+        this.db = getFirestore(this.app);
+
+        // Set up auth state listener
+        onAuthStateChanged(this.auth, user => {
+          this.currentUser = user;
+        });
+      } catch (error) {
+        console.warn('Firebase initialization failed:', error);
+        this.isConfigured = false;
+      }
+    } else {
+      console.warn(
+        'Firebase is not configured. App will run with local storage only.',
+      );
+    }
+  }
+
+  /**
+   * Validate Firebase configuration
+   */
+  private validateFirebaseConfig(): boolean {
+    // Check if all required Firebase config values are present and non-empty
+    return !!(
+      firebaseConfig.apiKey &&
+      firebaseConfig.authDomain &&
+      firebaseConfig.projectId &&
+      firebaseConfig.appId &&
+      firebaseConfig.apiKey !== '' &&
+      firebaseConfig.authDomain !== '' &&
+      firebaseConfig.projectId !== '' &&
+      firebaseConfig.appId !== ''
+    );
+  }
+
+  /**
+   * Check if Firebase is properly configured and initialized
+   */
+  isFirebaseConfigured(): boolean {
+    return this.isConfigured;
   }
 
   /**
    * Register a new user with email and password
    */
   async register(email: string, password: string): Promise<UserCredential> {
+    if (!this.isConfigured || !this.auth) {
+      throw new Error('Firebase is not configured');
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(
         this.auth,
@@ -71,6 +114,10 @@ export class FirebaseService {
    * Sign in with email and password
    */
   async login(email: string, password: string): Promise<UserCredential> {
+    if (!this.isConfigured || !this.auth) {
+      throw new Error('Firebase is not configured');
+    }
+
     try {
       return await signInWithEmailAndPassword(this.auth, email, password);
     } catch (error) {
@@ -83,6 +130,10 @@ export class FirebaseService {
    * Sign out current user
    */
   async logout(): Promise<void> {
+    if (!this.isConfigured || !this.auth) {
+      throw new Error('Firebase is not configured');
+    }
+
     try {
       await signOut(this.auth);
       this.currentUser = null;
@@ -96,6 +147,9 @@ export class FirebaseService {
    * Get current authenticated user
    */
   getCurrentUser(): User | null {
+    if (!this.isConfigured || !this.auth) {
+      return null;
+    }
     return this.auth.currentUser || this.currentUser;
   }
 
@@ -110,6 +164,10 @@ export class FirebaseService {
    * Initialize user profile in Firestore
    */
   private async initializeUserProfile(userId: string): Promise<void> {
+    if (!this.isConfigured || !this.db) {
+      throw new Error('Firebase is not configured');
+    }
+
     try {
       const userRef = doc(this.db, 'users', userId);
       await setDoc(userRef, {
@@ -128,6 +186,11 @@ export class FirebaseService {
    * Save conversation session to Firestore
    */
   async saveSession(session: ConversationSession): Promise<void> {
+    if (!this.isConfigured || !this.db) {
+      console.warn('Firebase not configured, session not saved to cloud');
+      return;
+    }
+
     const user = this.getCurrentUser();
     if (!user) {
       throw new Error('User not authenticated');
@@ -163,6 +226,10 @@ export class FirebaseService {
    * Update user statistics
    */
   private async updateUserStats(session: ConversationSession): Promise<void> {
+    if (!this.isConfigured || !this.db) {
+      return;
+    }
+
     const user = this.getCurrentUser();
     if (!user) {
       return;
@@ -200,6 +267,11 @@ export class FirebaseService {
    * Get all sessions for current user
    */
   async getAllSessions(): Promise<ConversationSession[]> {
+    if (!this.isConfigured || !this.db) {
+      console.warn('Firebase not configured, returning empty sessions');
+      return [];
+    }
+
     const user = this.getCurrentUser();
     if (!user) {
       throw new Error('User not authenticated');
@@ -238,6 +310,10 @@ export class FirebaseService {
     totalTokens: number;
     totalCost: number;
   }> {
+    if (!this.isConfigured || !this.db) {
+      return {totalSessions: 0, totalTokens: 0, totalCost: 0};
+    }
+
     const user = this.getCurrentUser();
     if (!user) {
       return {totalSessions: 0, totalTokens: 0, totalCost: 0};
@@ -270,6 +346,11 @@ export class FirebaseService {
     sessionId: string,
     tokenUsage: TokenUsage,
   ): Promise<void> {
+    if (!this.isConfigured || !this.db) {
+      console.warn('Firebase not configured, token usage not saved to cloud');
+      return;
+    }
+
     const user = this.getCurrentUser();
     if (!user) {
       return;
@@ -292,6 +373,10 @@ export class FirebaseService {
    * Get token usage history
    */
   async getTokenUsageHistory(): Promise<TokenUsage[]> {
+    if (!this.isConfigured || !this.db) {
+      return [];
+    }
+
     const user = this.getCurrentUser();
     if (!user) {
       return [];
@@ -312,6 +397,10 @@ export class FirebaseService {
    * Set up auth state listener
    */
   onAuthStateChange(callback: (user: User | null) => void): () => void {
+    if (!this.isConfigured || !this.auth) {
+      // Return empty unsubscribe function if Firebase is not configured
+      return () => {};
+    }
     return onAuthStateChanged(this.auth, callback);
   }
 }
