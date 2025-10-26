@@ -14,6 +14,9 @@ export class VoiceService {
   private lastProcessedResult: string = '';
   private resultProcessingTimeout: NodeJS.Timeout | null = null;
 
+  // Debounce delay for speech result processing (in milliseconds)
+  private static readonly RESULT_DEBOUNCE_DELAY = 100;
+
   constructor(apiKey?: string) {
     this.initializeVoice();
     this.aiVoiceService = new AIVoiceService(apiKey);
@@ -157,12 +160,13 @@ export class VoiceService {
       }
 
       // Debounce result processing to avoid rapid duplicates
-      // If another result comes within 100ms, the previous one will be cancelled
+      // If another result comes within the debounce delay, the previous one will be cancelled
       this.resultProcessingTimeout = setTimeout(() => {
         this.lastProcessedResult = result;
-        this.onResultCallback!(result);
+        // Use optional chaining to safely call the callback
+        this.onResultCallback?.(result);
         this.resultProcessingTimeout = null;
-      }, 100);
+      }, VoiceService.RESULT_DEBOUNCE_DELAY);
     }
   }
 
