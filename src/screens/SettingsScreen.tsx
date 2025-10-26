@@ -19,12 +19,14 @@ import FirebaseService from '../services/FirebaseService';
 import {isValidApiKey, openURL} from '../utils/helpers';
 import {BUILD_INFO} from '../config/buildInfo';
 import {GUEST_MODE_KEY} from './LoginScreen';
-import {SentenceLength, SENTENCE_LENGTH_CONFIG} from '../config/gemini.config';
+import {
+  SentenceLength,
+  SENTENCE_LENGTH_CONFIG,
+  STORAGE_KEYS,
+} from '../config/gemini.config';
 
 const storageService = new StorageService();
 const firebaseService = new FirebaseService();
-const API_KEY_STORAGE = '@gemini_api_key';
-const SENTENCE_LENGTH_STORAGE = '@sentence_length';
 const GEMINI_API_KEY_URL = 'https://makersuite.google.com/app/apikey';
 
 const SettingsScreen = () => {
@@ -53,7 +55,7 @@ const SettingsScreen = () => {
 
   const loadApiKey = async () => {
     try {
-      const savedKey = await AsyncStorage.getItem(API_KEY_STORAGE);
+      const savedKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
       if (savedKey) {
         setApiKey(savedKey);
       }
@@ -64,7 +66,9 @@ const SettingsScreen = () => {
 
   const loadSentenceLength = async () => {
     try {
-      const savedLength = await AsyncStorage.getItem(SENTENCE_LENGTH_STORAGE);
+      const savedLength = await AsyncStorage.getItem(
+        STORAGE_KEYS.SENTENCE_LENGTH,
+      );
       if (savedLength) {
         setSentenceLength(savedLength as SentenceLength);
       }
@@ -88,7 +92,7 @@ const SettingsScreen = () => {
     }
 
     try {
-      await AsyncStorage.setItem(API_KEY_STORAGE, apiKey);
+      await AsyncStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
       Alert.alert('Success', 'API key saved successfully!');
     } catch (error) {
       console.error('Error saving API key:', error);
@@ -98,7 +102,7 @@ const SettingsScreen = () => {
 
   const handleSentenceLengthChange = async (length: SentenceLength) => {
     try {
-      await AsyncStorage.setItem(SENTENCE_LENGTH_STORAGE, length);
+      await AsyncStorage.setItem(STORAGE_KEYS.SENTENCE_LENGTH, length);
       setSentenceLength(length);
       Alert.alert('Success', 'Sentence length preference saved!');
     } catch (error) {

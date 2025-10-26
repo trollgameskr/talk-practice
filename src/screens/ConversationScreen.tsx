@@ -26,10 +26,9 @@ import GeminiService from '../services/GeminiService';
 import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
 import {generateId, formatDuration} from '../utils/helpers';
+import {STORAGE_KEYS} from '../config/gemini.config';
 
 const storageService = new StorageService();
-const API_KEY_STORAGE = '@gemini_api_key';
-const SENTENCE_LENGTH_STORAGE = '@sentence_length';
 
 const ConversationScreen = ({route, navigation}: any) => {
   const {topic} = route.params as {topic: ConversationTopic};
@@ -72,7 +71,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       setIsLoading(true);
 
       // Load API key from storage
-      const apiKey = await AsyncStorage.getItem(API_KEY_STORAGE);
+      const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
       if (!apiKey) {
         Alert.alert(
           'API Key Required',
@@ -91,7 +90,7 @@ const ConversationScreen = ({route, navigation}: any) => {
 
       // Load sentence length preference from storage
       const sentenceLengthPref = await AsyncStorage.getItem(
-        SENTENCE_LENGTH_STORAGE,
+        STORAGE_KEYS.SENTENCE_LENGTH,
       );
       const sentenceLength = (sentenceLengthPref as any) || 'medium';
 
