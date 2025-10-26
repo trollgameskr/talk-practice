@@ -91,6 +91,8 @@ Then open http://localhost:8000 in your browser (without the /talk-practice/ pat
 
 ## 🛠️ Repository Settings
 
+### Enable GitHub Pages
+
 To enable GitHub Pages for your repository:
 
 1. Go to repository Settings
@@ -98,6 +100,23 @@ To enable GitHub Pages for your repository:
 3. Under "Build and deployment":
    - Source: Select "GitHub Actions"
 4. The workflow will handle the rest automatically
+
+### Configure Firebase (Optional but Recommended)
+
+To enable Firebase features (authentication, cloud storage, cross-device sync):
+
+1. Go to repository **Settings** → **Secrets and variables** → **Actions**
+2. Click **New repository secret** and add each of the following secrets:
+   - `FIREBASE_API_KEY` - Your Firebase API key
+   - `FIREBASE_AUTH_DOMAIN` - Your Firebase auth domain (e.g., `your-project.firebaseapp.com`)
+   - `FIREBASE_PROJECT_ID` - Your Firebase project ID
+   - `FIREBASE_STORAGE_BUCKET` - Your Firebase storage bucket (e.g., `your-project.appspot.com`)
+   - `FIREBASE_MESSAGING_SENDER_ID` - Your Firebase messaging sender ID
+   - `FIREBASE_APP_ID` - Your Firebase app ID
+
+To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md).
+
+**Note**: If Firebase secrets are not configured, the app will run in local-only mode with a console warning: "Firebase is not configured. App will run with local storage only." The app will function normally but without cloud features.
 
 ## ⚠️ Important Notes
 
