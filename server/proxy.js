@@ -58,7 +58,12 @@ app.post('/api/generateContent', async (req, res) => {
     });
 
     const result = await model.generateContent(prompt);
-    const text = result && result.response ? (typeof result.response.text === 'function' ? result.response.text() : result.response.text) : '';
+    const text =
+      result && result.response
+        ? typeof result.response.text === 'function'
+          ? result.response.text()
+          : result.response.text
+        : '';
     res.json({text});
   } catch (err) {
     console.error('Proxy generateContent error:', err?.message || err);

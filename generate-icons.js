@@ -1,16 +1,16 @@
 /**
  * Icon Generator Script for GeminiTalk PWA
- * 
+ *
  * This script generates app icons in various sizes for the Progressive Web App.
  * It requires the 'canvas' package which is installed as a dev dependency.
- * 
+ *
  * Usage: node generate-icons.js
- * 
+ *
  * This script only needs to be run when creating or updating app icons.
  * The generated icons are committed to the repository.
  */
 
-const { createCanvas } = require('canvas');
+const {createCanvas} = require('canvas');
 const fs = require('fs');
 const path = require('path');
 
