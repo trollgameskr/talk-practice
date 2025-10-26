@@ -3,8 +3,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const API_KEY_STORAGE = '@gemini_api_key';
+import {STORAGE_KEYS} from '../config/gemini.config';
 
 describe('HomeScreen API Key Check', () => {
   beforeEach(() => {
@@ -18,13 +17,13 @@ describe('HomeScreen API Key Check', () => {
 
     // Simulate the checkApiKey function
     const checkApiKey = async () => {
-      const apiKey = await AsyncStorage.getItem(API_KEY_STORAGE);
+      const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
       return apiKey;
     };
 
     const result = await checkApiKey();
 
-    expect(mockGetItem).toHaveBeenCalledWith(API_KEY_STORAGE);
+    expect(mockGetItem).toHaveBeenCalledWith(STORAGE_KEYS.API_KEY);
     expect(result).toBeNull();
   });
 
@@ -34,13 +33,13 @@ describe('HomeScreen API Key Check', () => {
     mockGetItem.mockResolvedValue('test-api-key-123');
 
     const checkApiKey = async () => {
-      const apiKey = await AsyncStorage.getItem(API_KEY_STORAGE);
+      const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
       return apiKey !== null;
     };
 
     const hasKey = await checkApiKey();
 
-    expect(mockGetItem).toHaveBeenCalledWith(API_KEY_STORAGE);
+    expect(mockGetItem).toHaveBeenCalledWith(STORAGE_KEYS.API_KEY);
     expect(hasKey).toBe(true);
   });
 
@@ -50,13 +49,13 @@ describe('HomeScreen API Key Check', () => {
     mockGetItem.mockResolvedValue(null);
 
     const checkApiKey = async () => {
-      const apiKey = await AsyncStorage.getItem(API_KEY_STORAGE);
+      const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
       return apiKey === null;
     };
 
     const isMissing = await checkApiKey();
 
-    expect(mockGetItem).toHaveBeenCalledWith(API_KEY_STORAGE);
+    expect(mockGetItem).toHaveBeenCalledWith(STORAGE_KEYS.API_KEY);
     expect(isMissing).toBe(true);
   });
 

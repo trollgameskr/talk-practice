@@ -78,3 +78,9 @@ export const GEMINI_PRICING = {
   inputPer1K: 0.00125, // $0.00125 per 1K input tokens (prompts <= 128K tokens)
   outputPer1K: 0.005, // $0.005 per 1K output tokens
 };
+
+// Storage keys
+export const STORAGE_KEYS = {
+  API_KEY: '@gemini_api_key',
+  SENTENCE_LENGTH: '@sentence_length',
+} as const;

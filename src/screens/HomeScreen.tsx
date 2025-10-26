@@ -17,9 +17,9 @@ import StorageService from '../services/StorageService';
 import {UserProgress} from '../types';
 import {formatDuration} from '../utils/helpers';
 import CostDisplay from '../components/CostDisplay';
+import {STORAGE_KEYS} from '../config/gemini.config';
 
 const storageService = new StorageService();
-const API_KEY_STORAGE = '@gemini_api_key';
 
 const HomeScreen = ({navigation}: any) => {
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -36,7 +36,7 @@ const HomeScreen = ({navigation}: any) => {
   };
 
   const checkApiKey = async () => {
-    const apiKey = await AsyncStorage.getItem(API_KEY_STORAGE);
+    const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
     if (!apiKey) {
       Alert.alert(
         'API Key Required',
