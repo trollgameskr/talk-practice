@@ -357,11 +357,11 @@ Format: Return only the sample responses, one per line, without numbering or ext
   async getWordDefinition(
     word: string,
   ): Promise<{definition: string; examples: string[]}> {
-    const definitionPrompt = `Provide a clear, concise definition and 2 example sentences for the English word or phrase: "${word}"
+    const definitionPrompt = `영어 단어 또는 구문 "${word}"에 대한 명확하고 간결한 한글 설명과 영어 예문 2개를 제공해주세요.
 
-Format your response as JSON:
+응답을 다음과 같은 JSON 형식으로 작성해주세요:
 {
-  "definition": "simple definition here",
+  "definition": "한글로 작성된 간단한 설명",
   "examples": ["example sentence 1", "example sentence 2"]
 }`;
 
@@ -378,20 +378,20 @@ Format your response as JSON:
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
         return {
-          definition: parsed.definition || 'Definition not available',
+          definition: parsed.definition || '정의를 사용할 수 없습니다',
           examples: parsed.examples || [],
         };
       }
 
       // Fallback if JSON parsing fails
       return {
-        definition: 'Definition not available',
+        definition: '정의를 사용할 수 없습니다',
         examples: [],
       };
     } catch (error) {
       console.error('Error getting word definition:', error);
       return {
-        definition: 'Definition not available',
+        definition: '정의를 불러올 수 없습니다',
         examples: [],
       };
     }

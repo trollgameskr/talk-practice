@@ -330,7 +330,7 @@ const ConversationScreen = ({route, navigation}: any) => {
     } catch (error) {
       console.error('Error getting word definition:', error);
       setWordDefinition({
-        definition: 'Unable to load definition',
+        definition: '정의를 불러올 수 없습니다',
         examples: [],
       });
     }
