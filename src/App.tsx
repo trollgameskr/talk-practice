@@ -6,6 +6,7 @@ import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {StatusBar, StyleSheet, ActivityIndicator, View} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -13,7 +14,7 @@ import TopicSelectionScreen from './screens/TopicSelectionScreen';
 import ConversationScreen from './screens/ConversationScreen';
 import ProgressScreen from './screens/ProgressScreen';
 import SettingsScreen from './screens/SettingsScreen';
-import LoginScreen from './screens/LoginScreen';
+import LoginScreen, {GUEST_MODE_KEY} from './screens/LoginScreen';
 
 // Services
 import FirebaseService from './services/FirebaseService';
@@ -29,24 +30,58 @@ const HeaderRight = () => <CostDisplay compact />;
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isGuestMode, setIsGuestMode] = useState<boolean>(false);
   const [isFirebaseConfigured] = useState<boolean>(
     firebaseService.isFirebaseConfigured(),
   );
 
   useEffect(() => {
-    // If Firebase is not configured, skip authentication
-    if (!isFirebaseConfigured) {
-      setIsAuthenticated(true); // Allow access without authentication
-      return;
-    }
+    const checkAuthState = async () => {
+      // Check if user is in guest mode
+      const guestMode = await AsyncStorage.getItem(GUEST_MODE_KEY);
+      if (guestMode === 'true') {
+        setIsGuestMode(true);
+        setIsAuthenticated(true);
+        return;
+      }
 
-    // Set up auth state listener when Firebase is configured
-    const unsubscribe = firebaseService.onAuthStateChange(user => {
-      setIsAuthenticated(user !== null);
-    });
+      // If Firebase is not configured, skip authentication
+      if (!isFirebaseConfigured) {
+        setIsAuthenticated(true);
+        return;
+      }
 
-    return () => unsubscribe();
+      // Set up auth state listener when Firebase is configured
+      const unsubscribe = firebaseService.onAuthStateChange(user => {
+        setIsAuthenticated(user !== null);
+      });
+
+      return unsubscribe;
+    };
+
+    const unsubscribe = checkAuthState();
+    return () => {
+      if (unsubscribe && typeof unsubscribe.then === 'function') {
+        unsubscribe.then(unsub => unsub && unsub());
+      }
+    };
   }, [isFirebaseConfigured]);
+
+  // Listen for guest mode changes
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const guestMode = await AsyncStorage.getItem(GUEST_MODE_KEY);
+      if (guestMode === 'true' && !isGuestMode) {
+        setIsGuestMode(true);
+        setIsAuthenticated(true);
+      } else if (guestMode !== 'true' && isGuestMode) {
+        setIsGuestMode(false);
+        // Will be handled by auth state listener
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isGuestMode]);
 
   // Show loading indicator while checking auth state
   if (isAuthenticated === null) {

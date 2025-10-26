@@ -18,6 +18,7 @@ import StorageService from '../services/StorageService';
 import FirebaseService from '../services/FirebaseService';
 import {isValidApiKey} from '../utils/helpers';
 import {BUILD_INFO} from '../config/buildInfo';
+import {GUEST_MODE_KEY} from './LoginScreen';
 
 const storageService = new StorageService();
 const firebaseService = new FirebaseService();
@@ -27,13 +28,17 @@ const SettingsScreen = () => {
   const [apiKey, setApiKey] = useState('');
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   useEffect(() => {
     loadApiKey();
     loadUserInfo();
   }, []);
 
-  const loadUserInfo = () => {
+  const loadUserInfo = async () => {
+    const guestMode = await AsyncStorage.getItem(GUEST_MODE_KEY);
+    setIsGuestMode(guestMode === 'true');
+
     const user = firebaseService.getCurrentUser();
     if (user) {
       setUserEmail(user.email);
@@ -128,6 +133,31 @@ const SettingsScreen = () => {
     ]);
   };
 
+  const handleExitGuestMode = () => {
+    Alert.alert(
+      'Exit Guest Mode',
+      'Would you like to create an account to save your data in the cloud?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Exit Guest Mode',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem(GUEST_MODE_KEY);
+              Alert.alert(
+                'Guest Mode Exited',
+                'You will need to restart the app to sign in or create an account.',
+              );
+            } catch (error) {
+              Alert.alert('Error', 'Failed to exit guest mode');
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const formatDate = (isoString: string) => {
     try {
       const date = new Date(isoString);
@@ -146,6 +176,33 @@ const SettingsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
+        {isGuestMode && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>👤 Guest Mode</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Status</Text>
+              <Text style={styles.infoValue}>Using as Guest</Text>
+            </View>
+            <View style={styles.guestInfoBox}>
+              <Text style={styles.guestInfoText}>
+                ℹ️ You are using the app in guest mode. Your data is saved
+                locally on this device only.
+              </Text>
+              <Text style={styles.guestInfoText}>
+                💡 Create an account to sync your data across devices and keep
+                it safe in the cloud.
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.secondaryButton, styles.dangerButton]}
+              onPress={handleExitGuestMode}>
+              <Text style={[styles.secondaryButtonText, styles.dangerText]}>
+                🚪 Exit Guest Mode
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {userEmail && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Account</Text>
@@ -383,6 +440,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#9ca3af',
     textAlign: 'center',
+  },
+  guestInfoBox: {
+    backgroundColor: '#fef3c7',
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#f59e0b',
+    marginBottom: 12,
+  },
+  guestInfoText: {
+    fontSize: 13,
+    color: '#92400e',
+    lineHeight: 18,
+    marginBottom: 8,
   },
 });
 
