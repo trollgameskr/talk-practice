@@ -2,9 +2,6 @@
  * Tests for ConversationScreen voice input press-and-hold behavior
  */
 
-import React from 'react';
-import {fireEvent} from '@testing-library/react-native';
-
 describe('ConversationScreen Voice Input', () => {
   describe('Press-and-hold behavior', () => {
     it('should use onPressIn and onPressOut for voice button', () => {

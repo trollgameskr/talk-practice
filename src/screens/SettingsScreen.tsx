@@ -111,25 +111,21 @@ const SettingsScreen = () => {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await firebaseService.logout();
-              Alert.alert('Success', 'Logged out successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to logout');
-            }
-          },
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {text: 'Cancel', style: 'cancel'},
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await firebaseService.logout();
+            Alert.alert('Success', 'Logged out successfully');
+          } catch (error) {
+            Alert.alert('Error', 'Failed to logout');
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const formatDate = (isoString: string) => {

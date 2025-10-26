@@ -130,8 +130,12 @@ export function truncate(text: string, length: number): string {
 export function isValidApiKey(apiKey: string): boolean {
   // Strict validation: accept Google-like API keys that start with 'AIza' and are
   // reasonably long. Reject empty and obviously invalid keys.
-  if (!apiKey || typeof apiKey !== 'string') return false;
+  if (!apiKey || typeof apiKey !== 'string') {
+    return false;
+  }
   // Typical Google API keys start with 'AIza' and include an alphanumeric suffix.
-  if (apiKey.startsWith('AIza') && apiKey.length > 20) return true;
+  if (apiKey.startsWith('AIza') && apiKey.length > 20) {
+    return true;
+  }
   return false;
 }

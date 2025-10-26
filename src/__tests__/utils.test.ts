@@ -4,7 +4,6 @@
 
 import {
   formatDuration,
-  formatDate,
   generateId,
   getTopicDisplayName,
   getTopicIcon,
