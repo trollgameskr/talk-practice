@@ -165,7 +165,8 @@ const ConversationScreen = ({route, navigation}: any) => {
       setIsListening(true);
       await voiceService.current.startListening(
         async text => {
-          setIsListening(false);
+          // Don't set isListening to false here - let handleStopListening control it
+          // This prevents the button from appearing released while user is still holding it
           await handleUserMessage(text);
         },
         error => {

@@ -11,6 +11,11 @@ export class VoiceService {
   private onResultCallback: ((text: string) => void) | null = null;
   private onErrorCallback: ((error: any) => void) | null = null;
   private aiVoiceService: AIVoiceService;
+  private lastProcessedResult: string = '';
+  private resultProcessingTimeout: NodeJS.Timeout | null = null;
+
+  // Debounce delay for speech result processing (in milliseconds)
+  private static readonly RESULT_DEBOUNCE_DELAY = 100;
 
   constructor(apiKey?: string) {
     this.initializeVoice();
@@ -55,6 +60,16 @@ export class VoiceService {
     try {
       await Voice.stop();
       this.isListening = false;
+
+      // Clear the last processed result when stopping
+      // so next session starts fresh
+      this.lastProcessedResult = '';
+
+      // Clear any pending result processing
+      if (this.resultProcessingTimeout) {
+        clearTimeout(this.resultProcessingTimeout);
+        this.resultProcessingTimeout = null;
+      }
     } catch (error) {
       console.error('Error stopping voice recognition:', error);
     }
@@ -121,13 +136,37 @@ export class VoiceService {
 
   private onSpeechEnd(e: any) {
     console.log('Speech ended:', e);
-    this.isListening = false;
+    // Don't automatically set isListening to false here
+    // The user should control when to stop listening via stopListening()
+    // This prevents the button state from being released while user is still holding it
   }
 
   private onSpeechResults(e: any) {
     console.log('Speech results:', e);
     if (e.value && e.value.length > 0 && this.onResultCallback) {
-      this.onResultCallback(e.value[0]);
+      const result = e.value[0];
+
+      // Prevent duplicate processing of the same result
+      // This can happen when the speech recognition API fires multiple events
+      // for the same final result in continuous mode
+      if (result === this.lastProcessedResult) {
+        console.log('Skipping duplicate result:', result);
+        return;
+      }
+
+      // Clear any pending result processing timeout
+      if (this.resultProcessingTimeout) {
+        clearTimeout(this.resultProcessingTimeout);
+      }
+
+      // Debounce result processing to avoid rapid duplicates
+      // If another result comes within the debounce delay, the previous one will be cancelled
+      this.resultProcessingTimeout = setTimeout(() => {
+        this.lastProcessedResult = result;
+        // Use optional chaining to safely call the callback
+        this.onResultCallback?.(result);
+        this.resultProcessingTimeout = null;
+      }, VoiceService.RESULT_DEBOUNCE_DELAY);
     }
   }
 
@@ -144,6 +183,12 @@ export class VoiceService {
    */
   async destroy() {
     try {
+      // Clear any pending timeouts
+      if (this.resultProcessingTimeout) {
+        clearTimeout(this.resultProcessingTimeout);
+        this.resultProcessingTimeout = null;
+      }
+
       await Voice.destroy();
       await this.aiVoiceService.destroy();
     } catch (error) {

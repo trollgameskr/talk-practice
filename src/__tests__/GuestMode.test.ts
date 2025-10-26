@@ -38,10 +38,7 @@ describe('Guest Mode', () => {
   describe('Guest Mode Storage', () => {
     it('should save guest mode to AsyncStorage', async () => {
       await AsyncStorage.setItem(GUEST_MODE_KEY, 'true');
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-        GUEST_MODE_KEY,
-        'true',
-      );
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(GUEST_MODE_KEY, 'true');
     });
 
     it('should read guest mode from AsyncStorage', async () => {
