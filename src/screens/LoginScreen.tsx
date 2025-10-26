@@ -15,7 +15,10 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import FirebaseService from '../services/FirebaseService';
+
+export const GUEST_MODE_KEY = '@guest_mode';
 
 const firebaseService = new FirebaseService();
 
@@ -74,6 +77,15 @@ const LoginScreen = ({navigation: _navigation}: any) => {
     setIsLogin(!isLogin);
     setEmail('');
     setPassword('');
+  };
+
+  const handleGuestMode = async () => {
+    try {
+      await AsyncStorage.setItem(GUEST_MODE_KEY, 'true');
+      // Navigation will be handled by auth state listener in App.tsx
+    } catch (error) {
+      Alert.alert('Error', 'Failed to enter guest mode');
+    }
   };
 
   return (
@@ -135,9 +147,36 @@ const LoginScreen = ({navigation: _navigation}: any) => {
                   : 'Already have an account? Sign In'}
               </Text>
             </TouchableOpacity>
+
+            <View style={styles.guestDivider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.guestButton}
+              onPress={handleGuestMode}
+              disabled={isLoading}>
+              <Text style={styles.guestButtonText}>👤 Continue as Guest</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.infoContainer}>
+            <Text style={styles.infoTitle}>✨ Guest Mode</Text>
+            <Text style={styles.infoText}>
+              • Try the app without creating an account
+            </Text>
+            <Text style={styles.infoText}>
+              • Data saved locally on this device only
+            </Text>
+            <Text style={styles.infoText}>
+              • Create an account later to sync across devices
+            </Text>
+          </View>
+
+          <View style={styles.infoContainer}>
+            <Text style={styles.infoTitle}>🔑 Account Benefits</Text>
             <Text style={styles.infoText}>
               🔒 Your data is securely stored in Firebase
             </Text>
@@ -146,6 +185,9 @@ const LoginScreen = ({navigation: _navigation}: any) => {
             </Text>
             <Text style={styles.infoText}>
               💰 Monitor your token usage and costs
+            </Text>
+            <Text style={styles.infoText}>
+              🔄 Sync data across multiple devices
             </Text>
           </View>
         </View>
@@ -225,16 +267,51 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   infoContainer: {
-    marginTop: 32,
+    marginTop: 16,
     padding: 16,
     backgroundColor: '#eff6ff',
     borderRadius: 12,
+  },
+  infoTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
     color: '#4b5563',
     marginBottom: 8,
     lineHeight: 20,
+  },
+  guestDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e5e7eb',
+  },
+  dividerText: {
+    marginHorizontal: 12,
+    fontSize: 14,
+    color: '#9ca3af',
+    fontWeight: '500',
+  },
+  guestButton: {
+    backgroundColor: '#f9fafb',
+    borderWidth: 2,
+    borderColor: '#3b82f6',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  guestButtonText: {
+    color: '#3b82f6',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });
 
