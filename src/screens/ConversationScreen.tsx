@@ -528,17 +528,19 @@ const ConversationScreen = ({route, navigation}: any) => {
             <Text style={styles.samplesTitle}>
               💡 Response Options (Choose one to practice):
             </Text>
-            {sampleAnswers.map((sample, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.sampleButton}
-                onPress={() => handleUseSample(sample)}>
-                <View style={styles.sampleButtonContent}>
-                  <Text style={styles.sampleNumber}>{index + 1}</Text>
-                  <Text style={styles.sampleText}>{sample}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+            <ScrollView style={styles.samplesScrollView}>
+              {sampleAnswers.map((sample, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.sampleButton}
+                  onPress={() => handleUseSample(sample)}>
+                  <View style={styles.sampleButtonContent}>
+                    <Text style={styles.sampleNumber}>{index + 1}</Text>
+                    <Text style={styles.sampleText}>{sample}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
             <TouchableOpacity
               style={styles.dismissButton}
               onPress={() => setShowSamples(false)}>
@@ -627,9 +629,12 @@ const styles = StyleSheet.create({
   },
   messagesContainer: {
     flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
   },
   messagesContent: {
     padding: 16,
+    paddingBottom: 8,
   },
   messageRow: {
     marginBottom: 12,
@@ -682,6 +687,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
+    flexShrink: 0,
   },
   micButton: {
     backgroundColor: '#3b82f6',
@@ -719,12 +725,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#bfdbfe',
+    maxHeight: 250,
   },
   samplesTitle: {
     fontSize: 14,
     fontWeight: '600',
     color: '#1e40af',
     marginBottom: 8,
+  },
+  samplesScrollView: {
+    maxHeight: 180,
   },
   sampleButton: {
     backgroundColor: '#ffffff',
