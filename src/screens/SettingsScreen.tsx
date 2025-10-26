@@ -19,20 +19,25 @@ import FirebaseService from '../services/FirebaseService';
 import {isValidApiKey} from '../utils/helpers';
 import {BUILD_INFO} from '../config/buildInfo';
 import {GUEST_MODE_KEY} from './LoginScreen';
+import {SentenceLength, SENTENCE_LENGTH_CONFIG} from '../config/gemini.config';
 
 const storageService = new StorageService();
 const firebaseService = new FirebaseService();
 const API_KEY_STORAGE = '@gemini_api_key';
+const SENTENCE_LENGTH_STORAGE = '@sentence_length';
 
 const SettingsScreen = () => {
   const [apiKey, setApiKey] = useState('');
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isGuestMode, setIsGuestMode] = useState(false);
+  const [sentenceLength, setSentenceLength] =
+    useState<SentenceLength>('medium');
 
   useEffect(() => {
     loadApiKey();
     loadUserInfo();
+    loadSentenceLength();
   }, []);
 
   const loadUserInfo = async () => {
@@ -56,6 +61,17 @@ const SettingsScreen = () => {
     }
   };
 
+  const loadSentenceLength = async () => {
+    try {
+      const savedLength = await AsyncStorage.getItem(SENTENCE_LENGTH_STORAGE);
+      if (savedLength) {
+        setSentenceLength(savedLength as SentenceLength);
+      }
+    } catch (error) {
+      console.error('Error loading sentence length:', error);
+    }
+  };
+
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
       Alert.alert('Error', 'Please enter an API key');
@@ -76,6 +92,17 @@ const SettingsScreen = () => {
     } catch (error) {
       console.error('Error saving API key:', error);
       Alert.alert('Error', 'Failed to save API key');
+    }
+  };
+
+  const handleSentenceLengthChange = async (length: SentenceLength) => {
+    try {
+      await AsyncStorage.setItem(SENTENCE_LENGTH_STORAGE, length);
+      setSentenceLength(length);
+      Alert.alert('Success', 'Sentence length preference saved!');
+    } catch (error) {
+      console.error('Error saving sentence length:', error);
+      Alert.alert('Error', 'Failed to save sentence length preference');
     }
   };
 
@@ -257,6 +284,59 @@ const SettingsScreen = () => {
             <Text style={styles.infoText}>
               ℹ️ Get your Gemini API key from Google AI Studio:
               https://makersuite.google.com/app/apikey
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🗣️ Conversation Settings</Text>
+          <Text style={styles.sectionDescription}>
+            Adjust the length of AI responses and suggested user responses
+          </Text>
+
+          <View style={styles.optionGroup}>
+            <Text style={styles.optionLabel}>Response Length</Text>
+            {(Object.keys(SENTENCE_LENGTH_CONFIG) as SentenceLength[]).map(
+              length => (
+                <TouchableOpacity
+                  key={length}
+                  style={[
+                    styles.optionButton,
+                    sentenceLength === length && styles.optionButtonActive,
+                  ]}
+                  onPress={() => handleSentenceLengthChange(length)}>
+                  <View style={styles.optionContent}>
+                    <View style={styles.optionHeader}>
+                      <Text
+                        style={[
+                          styles.optionTitle,
+                          sentenceLength === length && styles.optionTitleActive,
+                        ]}>
+                        {SENTENCE_LENGTH_CONFIG[length].label}
+                      </Text>
+                      {sentenceLength === length && (
+                        <Text style={styles.checkMark}>✓</Text>
+                      )}
+                    </View>
+                    <Text
+                      style={[
+                        styles.optionDescription,
+                        sentenceLength === length &&
+                          styles.optionDescriptionActive,
+                      ]}>
+                      {SENTENCE_LENGTH_CONFIG[length].description}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ),
+            )}
+          </View>
+
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>
+              💡 Shorter responses are easier to follow and respond to, making
+              practice more engaging. Longer responses provide more context and
+              detail.
             </Text>
           </View>
         </View>
@@ -454,6 +534,56 @@ const styles = StyleSheet.create({
     color: '#92400e',
     lineHeight: 18,
     marginBottom: 8,
+  },
+  optionGroup: {
+    marginBottom: 16,
+  },
+  optionLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 12,
+  },
+  optionButton: {
+    backgroundColor: '#f9fafb',
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 10,
+  },
+  optionButtonActive: {
+    borderColor: '#3b82f6',
+    backgroundColor: '#eff6ff',
+  },
+  optionContent: {
+    flex: 1,
+  },
+  optionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  optionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  optionTitleActive: {
+    color: '#3b82f6',
+  },
+  optionDescription: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  optionDescriptionActive: {
+    color: '#1e40af',
+  },
+  checkMark: {
+    fontSize: 18,
+    color: '#3b82f6',
+    fontWeight: 'bold',
   },
 });
 

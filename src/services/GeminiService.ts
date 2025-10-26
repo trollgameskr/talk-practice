@@ -4,7 +4,12 @@
  */
 
 import {GoogleGenerativeAI} from '@google/generative-ai';
-import {GEMINI_CONFIG, GEMINI_PRICING} from '../config/gemini.config';
+import {
+  GEMINI_CONFIG,
+  GEMINI_PRICING,
+  SentenceLength,
+  SENTENCE_LENGTH_CONFIG,
+} from '../config/gemini.config';
 import {ConversationTopic, Message, Feedback, TokenUsage} from '../types';
 import {conversationPrompts} from '../data/conversationPrompts';
 
@@ -13,6 +18,7 @@ export class GeminiService {
   private model: any;
   private chat: any;
   private currentTopic: ConversationTopic | null = null;
+  private sentenceLength: SentenceLength = 'medium';
   private sessionTokenUsage: TokenUsage = {
     inputTokens: 0,
     outputTokens: 0,
@@ -20,7 +26,10 @@ export class GeminiService {
     estimatedCost: 0,
   };
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, sentenceLength?: SentenceLength) {
+    if (sentenceLength) {
+      this.sentenceLength = sentenceLength;
+    }
     // The GoogleGenerativeAI constructor expects a plain string API key
     // Wrap in try/catch to surface errors.
     try {
@@ -47,13 +56,19 @@ export class GeminiService {
   async startConversation(topic: ConversationTopic): Promise<string> {
     this.currentTopic = topic;
     const prompt = conversationPrompts[topic];
+    const lengthGuideline =
+      SENTENCE_LENGTH_CONFIG[this.sentenceLength].guideline;
 
     if (this.model && typeof this.model.startChat === 'function') {
       this.chat = this.model.startChat({
         history: [
           {
             role: 'user',
-            parts: [{text: prompt.systemPrompt}],
+            parts: [
+              {
+                text: `${prompt.systemPrompt}\n\nIMPORTANT: ${lengthGuideline}. This applies to all your responses.`,
+              },
+            ],
           },
           {
             role: 'model',
@@ -295,6 +310,8 @@ Provide an encouraging summary in 2-3 sentences.`;
     lastMessage: string,
     count: number = 2,
   ): Promise<string[]> {
+    const lengthGuideline =
+      SENTENCE_LENGTH_CONFIG[this.sentenceLength].guideline;
     const samplePrompt = `Based on the question or statement: "${lastMessage}"
 
 Generate ${count} different sample responses that a learner could use to practice English. Make them:
@@ -302,6 +319,7 @@ Generate ${count} different sample responses that a learner could use to practic
 2. At an intermediate English level
 3. Appropriate for the context
 4. Slightly different in tone or approach
+5. ${lengthGuideline}
 
 Format: Return only the sample responses, one per line, without numbering or extra text.`;
 

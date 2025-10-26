@@ -29,6 +29,7 @@ import {generateId, formatDuration} from '../utils/helpers';
 
 const storageService = new StorageService();
 const API_KEY_STORAGE = '@gemini_api_key';
+const SENTENCE_LENGTH_STORAGE = '@sentence_length';
 
 const ConversationScreen = ({route, navigation}: any) => {
   const {topic} = route.params as {topic: ConversationTopic};
@@ -88,8 +89,14 @@ const ConversationScreen = ({route, navigation}: any) => {
         return;
       }
 
-      // Initialize Gemini service with API key
-      geminiService.current = new GeminiService(apiKey);
+      // Load sentence length preference from storage
+      const sentenceLengthPref = await AsyncStorage.getItem(
+        SENTENCE_LENGTH_STORAGE,
+      );
+      const sentenceLength = (sentenceLengthPref as any) || 'medium';
+
+      // Initialize Gemini service with API key and sentence length
+      geminiService.current = new GeminiService(apiKey, sentenceLength);
 
       // Initialize Voice service
       voiceService.current = new VoiceService();

@@ -50,6 +50,28 @@ export const CONVERSATION_CONFIG = {
   autoSaveInterval: 30000, // 30 seconds
 };
 
+// Sentence length options for AI responses and suggested user responses
+export type SentenceLength = 'short' | 'medium' | 'long';
+
+export const SENTENCE_LENGTH_CONFIG = {
+  short: {
+    label: 'Short',
+    description: '1-2 sentences (Quick and easy)',
+    guideline: 'Keep responses to 1-2 short sentences (10-20 words total)',
+  },
+  medium: {
+    label: 'Medium',
+    description: '2-3 sentences (Balanced)',
+    guideline: 'Keep responses to 2-3 sentences (20-35 words total)',
+  },
+  long: {
+    label: 'Long',
+    description: '3-5 sentences (Detailed)',
+    guideline:
+      'Provide detailed responses with 3-5 sentences (35-60 words total)',
+  },
+};
+
 // Gemini 1.5 Pro pricing (as of 2024)
 // See: https://ai.google.dev/pricing
 export const GEMINI_PRICING = {
