@@ -4,6 +4,7 @@
 
 import GeminiService from '../services/GeminiService';
 import {ConversationTopic} from '../types';
+import {SentenceLength} from '../config/gemini.config';
 
 describe('GeminiService', () => {
   let service: GeminiService;
@@ -164,6 +165,51 @@ describe('GeminiService', () => {
 
       const result = await service.startConversation(ConversationTopic.TRAVEL);
       expect(result).toBeDefined();
+    });
+  });
+
+  describe('sentence length configuration', () => {
+    it('should initialize with default medium length', async () => {
+      const defaultService = new GeminiService('test-api-key');
+      const result = await defaultService.startConversation(
+        ConversationTopic.DAILY,
+      );
+      expect(result).toBeDefined();
+      defaultService.endConversation();
+    });
+
+    it('should initialize with short sentence length', async () => {
+      const shortService = new GeminiService('test-api-key', 'short');
+      const result = await shortService.startConversation(
+        ConversationTopic.DAILY,
+      );
+      expect(result).toBeDefined();
+      shortService.endConversation();
+    });
+
+    it('should initialize with medium sentence length', async () => {
+      const mediumService = new GeminiService('test-api-key', 'medium');
+      const result = await mediumService.startConversation(
+        ConversationTopic.DAILY,
+      );
+      expect(result).toBeDefined();
+      mediumService.endConversation();
+    });
+
+    it('should initialize with long sentence length', async () => {
+      const longService = new GeminiService('test-api-key', 'long');
+      const result = await longService.startConversation(
+        ConversationTopic.DAILY,
+      );
+      expect(result).toBeDefined();
+      longService.endConversation();
+    });
+
+    it('should accept all valid sentence length values', () => {
+      const lengths: SentenceLength[] = ['short', 'medium', 'long'];
+      lengths.forEach(length => {
+        expect(() => new GeminiService('test-api-key', length)).not.toThrow();
+      });
     });
   });
 });
