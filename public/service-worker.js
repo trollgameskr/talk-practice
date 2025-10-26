@@ -1,3 +1,4 @@
+/* global self, caches */
 // Service Worker for GeminiTalk PWA
 const CACHE_NAME = 'geminitalk-__BUILD_TIMESTAMP__';
 
