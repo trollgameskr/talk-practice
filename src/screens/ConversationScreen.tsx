@@ -507,7 +507,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           onPressOut={handleStopListening}
           disabled={isLoading || isSpeaking}
           // @ts-ignore - onContextMenu is a web-only prop
-          onContextMenu={(e: any) => e.preventDefault()}>
+          onContextMenu={(e: React.MouseEvent<HTMLElement>) => e.preventDefault()}>
           <Text style={styles.micIcon}>{isListening ? '⏸️' : '🎤'}</Text>
           <Text style={styles.micText}>
             {isListening ? 'Recording...' : 'Hold to Speak'}
