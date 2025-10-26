@@ -76,7 +76,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       if (!apiKey) {
         Alert.alert(
           'API Key Required',
-          'Please set your Gemini API key in Settings before starting a conversation.',
+          'You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nGo to Settings to configure your API key.',
           [
             {text: 'Cancel', onPress: () => navigation.goBack()},
             {
@@ -507,7 +507,9 @@ const ConversationScreen = ({route, navigation}: any) => {
           onPressOut={handleStopListening}
           disabled={isLoading || isSpeaking}
           // @ts-ignore - onContextMenu is a web-only prop
-          onContextMenu={(e: React.MouseEvent<HTMLElement>) => e.preventDefault()}>
+          onContextMenu={(e: React.MouseEvent<HTMLElement>) =>
+            e.preventDefault()
+          }>
           <Text style={styles.micIcon}>{isListening ? '⏸️' : '🎤'}</Text>
           <Text style={styles.micText}>
             {isListening ? 'Recording...' : 'Hold to Speak'}

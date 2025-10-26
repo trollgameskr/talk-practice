@@ -2,6 +2,25 @@
  * Helper utility functions
  */
 
+import {Linking, Alert} from 'react-native';
+
+/**
+ * Open URL in browser
+ */
+export async function openURL(url: string): Promise<void> {
+  try {
+    const supported = await Linking.canOpenURL(url);
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert('Error', `Cannot open URL: ${url}`);
+    }
+  } catch (error) {
+    console.error('Error opening URL:', error);
+    Alert.alert('Error', 'Failed to open URL');
+  }
+}
+
 /**
  * Format duration in seconds to readable string
  */

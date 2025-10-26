@@ -16,7 +16,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StorageService from '../services/StorageService';
 import FirebaseService from '../services/FirebaseService';
-import {isValidApiKey} from '../utils/helpers';
+import {isValidApiKey, openURL} from '../utils/helpers';
 import {BUILD_INFO} from '../config/buildInfo';
 import {GUEST_MODE_KEY} from './LoginScreen';
 import {SentenceLength, SENTENCE_LENGTH_CONFIG} from '../config/gemini.config';
@@ -25,6 +25,7 @@ const storageService = new StorageService();
 const firebaseService = new FirebaseService();
 const API_KEY_STORAGE = '@gemini_api_key';
 const SENTENCE_LENGTH_STORAGE = '@sentence_length';
+const GEMINI_API_KEY_URL = 'https://makersuite.google.com/app/apikey';
 
 const SettingsScreen = () => {
   const [apiKey, setApiKey] = useState('');
@@ -104,6 +105,10 @@ const SettingsScreen = () => {
       console.error('Error saving sentence length:', error);
       Alert.alert('Error', 'Failed to save sentence length preference');
     }
+  };
+
+  const handleGetApiKey = async () => {
+    await openURL(GEMINI_API_KEY_URL);
   };
 
   const handleClearData = () => {
@@ -280,10 +285,18 @@ const SettingsScreen = () => {
             <Text style={styles.primaryButtonText}>Save API Key</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={handleGetApiKey}>
+            <Text style={styles.secondaryButtonText}>
+              🔑 Get API Key from Google AI Studio
+            </Text>
+          </TouchableOpacity>
+
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              ℹ️ Get your Gemini API key from Google AI Studio:
-              https://makersuite.google.com/app/apikey
+              ℹ️ Don't have an API key? Click the button above to get one from
+              Google AI Studio (free with usage limits)
             </Text>
           </View>
         </View>
