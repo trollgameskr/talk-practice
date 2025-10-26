@@ -244,4 +244,23 @@ If you encounter any issues:
 
 ---
 
-**Note**: Firebase configuration is required for the full app functionality. The app can still work with local storage only if Firebase is not configured, but you won't have cross-device sync or cloud backup.
+## Running Without Firebase
+
+**Good news!** The app can run without Firebase configuration. If Firebase credentials are not provided:
+
+- The app will automatically detect this and run in "local-only" mode
+- Authentication screens will be skipped
+- All data will be stored locally in the browser's localStorage
+- You'll see a warning in the browser console: "Firebase is not configured. App will run with local storage only."
+
+This is useful for:
+- Quick testing and development
+- Users who don't want to set up Firebase
+- Scenarios where cloud storage is not needed
+
+**Limitations of local-only mode:**
+- No cross-device synchronization
+- No cloud backup of conversation history
+- Data is lost if browser cache is cleared
+
+**Note**: For full functionality including cross-device sync and cloud backup, Firebase configuration is recommended but not required.
