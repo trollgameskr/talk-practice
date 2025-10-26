@@ -3,7 +3,7 @@ name: Verify Self-Hosted Runner
 on:
   workflow_dispatch:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - '.github/workflows/verify-self-hosted.yml'
 
@@ -11,43 +11,44 @@ jobs:
   verify-runner:
     name: Verify Self-Hosted Runner
     runs-on: self-hosted
-    
+
     steps:
-    - name: Print runner information
-      run: |
-        echo "Runner name: $RUNNER_NAME"
-        echo "Runner OS: $RUNNER_OS"
-        echo "Runner architecture: $RUNNER_ARCH"
-        echo "Runner temp directory: $RUNNER_TEMP"
-        echo "Runner tool cache: $RUNNER_TOOL_CACHE"
-        echo "Workspace: $GITHUB_WORKSPACE"
-        
-    - name: Print system information
-      run: |
-        echo "=== System Information ==="
-        uname -a
-        echo ""
-        echo "=== Node version ==="
-        node --version || echo "Node not installed"
-        echo ""
-        echo "=== npm version ==="
-        npm --version || echo "npm not installed"
-        echo ""
-        echo "=== Current directory ==="
-        pwd
-        echo ""
-        echo "=== Available disk space ==="
-        df -h
-        
-    - name: Checkout code
-      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
-      
-    - name: Verify checkout
-      run: |
-        echo "Repository checked out successfully"
-        ls -la
-        
-    - name: Print success message
-      run: |
-        echo "✅ Self-hosted runner is working correctly!"
-        echo "✅ All basic checks passed"
+      - name: Print runner information
+        run: |
+          echo "Runner name: $RUNNER_NAME"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Runner architecture: $RUNNER_ARCH"
+          echo "Runner temp directory: $RUNNER_TEMP"
+          echo "Runner tool cache: $RUNNER_TOOL_CACHE"
+          echo "Workspace: $GITHUB_WORKSPACE"
+
+      - name: Print system information
+        run: |
+          echo "=== System Information ==="
+          uname -a
+          echo ""
+          echo "=== Node version ==="
+          node --version || echo "Node not installed"
+          echo ""
+          echo "=== npm version ==="
+          npm --version || echo "npm not installed"
+          echo ""
+          echo "=== Current directory ==="
+          pwd
+          echo ""
+          echo "=== Available disk space ==="
+          df -h
+
+      - name: Checkout code
+        # v3.6.0
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
+
+      - name: Verify checkout
+        run: |
+          echo "Repository checked out successfully"
+          ls -la
+
+      - name: Print success message
+        run: |
+          echo "✅ Self-hosted runner is working correctly!"
+          echo "✅ All basic checks passed"
