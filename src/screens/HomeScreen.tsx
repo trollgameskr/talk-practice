@@ -10,24 +10,46 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import StorageService from '../services/StorageService';
 import {UserProgress} from '../types';
 import {formatDuration} from '../utils/helpers';
 import CostDisplay from '../components/CostDisplay';
 
 const storageService = new StorageService();
+const API_KEY_STORAGE = '@gemini_api_key';
 
 const HomeScreen = ({navigation}: any) => {
   const [progress, setProgress] = useState<UserProgress | null>(null);
 
   useEffect(() => {
     loadProgress();
+    checkApiKey();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadProgress = async () => {
     const userProgress = await storageService.getUserProgress();
     setProgress(userProgress);
+  };
+
+  const checkApiKey = async () => {
+    const apiKey = await AsyncStorage.getItem(API_KEY_STORAGE);
+    if (!apiKey) {
+      Alert.alert(
+        'API Key Required',
+        'You need a Gemini API key to use GeminiTalk. You can get one for free from Google AI Studio.\n\nWould you like to go to Settings to configure your API key now?',
+        [
+          {text: 'Later', style: 'cancel'},
+          {
+            text: 'Go to Settings',
+            onPress: () => navigation.navigate('Settings'),
+          },
+        ],
+      );
+    }
   };
 
   return (
