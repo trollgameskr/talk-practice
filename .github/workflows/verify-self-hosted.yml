@@ -1,4 +1,4 @@
-name: Verify Self-Hosted Runner
+name: Verify GitHub Runner
 
 on:
   workflow_dispatch:
@@ -13,8 +13,8 @@ permissions:
 
 jobs:
   verify-runner:
-    name: Verify Self-Hosted Runner
-    runs-on: self-hosted
+    name: Verify GitHub Runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Print runner information
@@ -53,5 +53,5 @@ jobs:
 
       - name: Print success message
         run: |
-          echo "✅ Self-hosted runner is working correctly!"
+          echo "✅ GitHub-hosted runner is working correctly!"
           echo "✅ All basic checks passed"
