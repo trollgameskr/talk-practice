@@ -501,16 +501,18 @@ const ConversationScreen = ({route, navigation}: any) => {
       </ScrollView>
 
       <View style={styles.controls}>
-        <TouchableOpacity
+        <Pressable
           style={[styles.micButton, isListening && styles.micButtonActive]}
           onPressIn={handleStartListening}
           onPressOut={handleStopListening}
-          disabled={isLoading || isSpeaking}>
+          disabled={isLoading || isSpeaking}
+          // @ts-ignore - onContextMenu is a web-only prop
+          onContextMenu={(e: React.MouseEvent<HTMLElement>) => e.preventDefault()}>
           <Text style={styles.micIcon}>{isListening ? '⏸️' : '🎤'}</Text>
           <Text style={styles.micText}>
             {isListening ? 'Recording...' : 'Hold to Speak'}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
 
         {isSpeaking && (
           <View style={styles.speakingIndicator}>
