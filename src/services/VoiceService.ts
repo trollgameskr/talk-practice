@@ -137,8 +137,7 @@ export class VoiceService {
   private onSpeechEnd(e: any) {
     console.log('Speech ended:', e);
     // Don't automatically set isListening to false here
-    // The user should control when to stop listening via stopListening()
-    // This prevents the button state from being released while user is still holding it
+    // The user controls when to stop listening via the toggle button
   }
 
   private onSpeechResults(e: any) {
