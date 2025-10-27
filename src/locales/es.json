@@ -197,7 +197,11 @@
           }
         },
         "info": "💡 Las respuestas más cortas son más fáciles de seguir y responder, haciendo la práctica más atractiva. Las respuestas más largas proporcionan más contexto y detalle.",
-        "success": "¡Preferencia de longitud de oración guardada!"
+        "success": "¡Preferencia de longitud de oración guardada!",
+        "autoReadResponse": {
+          "label": "Lectura automática al seleccionar respuesta",
+          "description": "La IA leerá automáticamente en voz alta cuando toques una opción de respuesta"
+        }
       },
       "language": {
         "title": "🌐 Idioma",

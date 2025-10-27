@@ -52,6 +52,7 @@ const SettingsScreen = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [selectedTargetLanguage, setSelectedTargetLanguage] =
     useState<string>('en');
+  const [autoReadResponse, setAutoReadResponse] = useState(true);
 
   useEffect(() => {
     loadApiKey();
@@ -59,6 +60,7 @@ const SettingsScreen = () => {
     loadSentenceLength();
     loadLanguage();
     loadTargetLanguage();
+    loadAutoReadResponse();
   }, []);
 
   const loadLanguage = async () => {
@@ -105,6 +107,19 @@ const SettingsScreen = () => {
     }
   };
 
+  const loadAutoReadResponse = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.AUTO_READ_RESPONSE,
+      );
+      if (savedValue !== null) {
+        setAutoReadResponse(savedValue === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading auto-read response setting:', error);
+    }
+  };
+
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
       Alert.alert('Error', 'Please enter an API key');
@@ -136,6 +151,19 @@ const SettingsScreen = () => {
     } catch (error) {
       console.error('Error saving sentence length:', error);
       Alert.alert('Error', 'Failed to save sentence length preference');
+    }
+  };
+
+  const handleAutoReadResponseToggle = async (value: boolean) => {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.AUTO_READ_RESPONSE,
+        value.toString(),
+      );
+      setAutoReadResponse(value);
+    } catch (error) {
+      console.error('Error saving auto-read response setting:', error);
+      Alert.alert('Error', 'Failed to save auto-read response setting');
     }
   };
 
@@ -705,6 +733,38 @@ const SettingsScreen = () => {
                 </TouchableOpacity>
               ),
             )}
+          </View>
+
+          <View style={styles.optionGroup}>
+            <View style={styles.themeRow}>
+              <View style={styles.themeInfo}>
+                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                  {t('settings.sections.conversation.autoReadResponse.label')}
+                </Text>
+                <Text
+                  style={[
+                    styles.themeDescription,
+                    {color: theme.colors.textSecondary},
+                  ]}>
+                  {t(
+                    'settings.sections.conversation.autoReadResponse.description',
+                  )}
+                </Text>
+              </View>
+              <Switch
+                value={autoReadResponse}
+                onValueChange={handleAutoReadResponseToggle}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={
+                  autoReadResponse
+                    ? theme.colors.buttonPrimaryText
+                    : theme.colors.inputBackground
+                }
+              />
+            </View>
           </View>
 
           <View

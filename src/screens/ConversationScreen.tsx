@@ -48,6 +48,7 @@ const ConversationScreen = ({route, navigation}: any) => {
     examples: string[];
   } | null>(null);
   const [showDefinitionModal, setShowDefinitionModal] = useState(false);
+  const [autoReadResponse, setAutoReadResponse] = useState(true);
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -94,6 +95,14 @@ const ConversationScreen = ({route, navigation}: any) => {
         STORAGE_KEYS.SENTENCE_LENGTH,
       );
       const sentenceLength = (sentenceLengthPref as any) || 'medium';
+
+      // Load auto-read response preference from storage
+      const autoReadPref = await AsyncStorage.getItem(
+        STORAGE_KEYS.AUTO_READ_RESPONSE,
+      );
+      if (autoReadPref !== null) {
+        setAutoReadResponse(autoReadPref === 'true');
+      }
 
       // Load language preferences
       const targetLanguage = await getTargetLanguage();
@@ -226,7 +235,7 @@ const ConversationScreen = ({route, navigation}: any) => {
     // kept for potential future enhancements to silence detection.
   };
 
-  const handleUserMessage = async (text: string) => {
+  const handleUserMessage = async (text: string, shouldSpeak: boolean = true) => {
     if (!text.trim() || !geminiService.current) {
       return;
     }
@@ -258,8 +267,8 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Generate 2 sample answer options for user to practice with
       await generateSampleAnswers(response);
 
-      // Speak the response
-      if (voiceService.current) {
+      // Speak the response only if shouldSpeak is true
+      if (shouldSpeak && voiceService.current) {
         setIsSpeaking(true);
         await voiceService.current.speak(response);
         setIsSpeaking(false);
@@ -356,7 +365,7 @@ const ConversationScreen = ({route, navigation}: any) => {
 
   const handleUseSample = async (sample: string) => {
     setShowSamples(false);
-    await handleUserMessage(sample);
+    await handleUserMessage(sample, autoReadResponse);
   };
 
   const saveSession = async () => {

@@ -197,7 +197,11 @@
           }
         },
         "info": "💡 Shorter responses are easier to follow and respond to, making practice more engaging. Longer responses provide more context and detail.",
-        "success": "Sentence length preference saved!"
+        "success": "Sentence length preference saved!",
+        "autoReadResponse": {
+          "label": "Auto-read response when selected",
+          "description": "AI will automatically read aloud when you touch a response option"
+        }
       },
       "language": {
         "title": "🌐 Language",
