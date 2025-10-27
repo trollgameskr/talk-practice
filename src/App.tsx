@@ -103,7 +103,11 @@ const AppContent = () => {
   // Show loading indicator while checking auth state or initializing i18n
   if (isAuthenticated === null || !i18nInitialized) {
     return (
-      <View style={[styles.loadingContainer, {backgroundColor: theme.colors.background}]}>
+      <View
+        style={[
+          styles.loadingContainer,
+          {backgroundColor: theme.colors.background},
+        ]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
@@ -114,15 +118,22 @@ const AppContent = () => {
 
 const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
   const {t} = useTranslation();
+  const {theme} = useTheme();
 
   return (
     <>
-      <StatusBar barStyle={theme.colors.statusBarStyle} backgroundColor={theme.colors.statusBarBackground} />
+      <StatusBar
+        barStyle={theme.colors.statusBarStyle}
+        backgroundColor={theme.colors.statusBarBackground}
+      />
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName={isAuthenticated ? 'Home' : 'Login'}
           screenOptions={{
-            headerStyle: {...styles.header, backgroundColor: theme.colors.backgroundSecondary},
+            headerStyle: {
+              ...styles.header,
+              backgroundColor: theme.colors.backgroundSecondary,
+            },
             headerTintColor: theme.colors.text,
             headerTitleStyle: styles.headerTitle,
             headerRight: isAuthenticated ? HeaderRight : undefined,
