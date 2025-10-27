@@ -2,7 +2,7 @@
  * Topic Selection Screen
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {ConversationTopic} from '../types';
