@@ -7,7 +7,8 @@
     "topicSelection": "Thema Wählen",
     "conversation": "Üben",
     "progress": "Ihr Fortschritt",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "feedback": "Feedback"
   },
   "home": {
     "title": "Willkommen bei GeminiTalk",
@@ -250,6 +251,9 @@
         "lastModified": "Zuletzt Geändert",
         "description": "Beschreibung",
         "descriptionValue": "Echtzeit-Englisch-Konversationstrainer"
+      },
+      "feedback": {
+        "buttonLabel": "Feedback oder Vorschläge senden"
       }
     },
     "footer": "© 2024 GeminiTalk - Betrieben von Gemini Live API"
@@ -288,6 +292,53 @@
     "totalCost": "Gesamtkosten",
     "currentSession": "Aktuelle Sitzung",
     "disclaimer": "Geschätzte Kosten basierend auf Gemini API-Preisen"
+  },
+  "feedback": {
+    "title": "💬 Feedback Senden",
+    "description": "Wir würden gerne Ihre Ideen hören! Teilen Sie Ihre Funktionswünsche, Verbesserungsvorschläge oder jedes Feedback zur App mit.",
+    "tip": "Ihr Feedback hilft uns, GeminiTalk für alle besser zu machen!",
+    "fields": {
+      "name": {
+        "label": "Ihr Name",
+        "placeholder": "Geben Sie Ihren Namen ein"
+      },
+      "email": {
+        "label": "E-Mail-Adresse",
+        "placeholder": "ihre.email@beispiel.com",
+        "help": "Optional - wenn Sie möchten, dass wir Ihnen antworten"
+      },
+      "message": {
+        "label": "Ihre Nachricht",
+        "placeholder": "Erzählen Sie uns von Ihrem Funktionswunsch oder Vorschlag...",
+        "help": "Bitte beschreiben Sie Ihre Idee oder Vorschlag im Detail"
+      },
+      "optional": "optional"
+    },
+    "submitButton": "📧 Feedback Senden",
+    "sending": "Wird gesendet...",
+    "sendSuccess": "E-Mail-Client geöffnet! Bitte senden Sie die E-Mail, um Ihr Feedback einzureichen.",
+    "validation": {
+      "messageRequired": "Bitte geben Sie Ihre Nachricht ein"
+    },
+    "errors": {
+      "cannotOpenEmail": "E-Mail-Client konnte nicht geöffnet werden. Bitte versuchen Sie es erneut oder senden Sie direkt an trollgameskr@gmail.com",
+      "sendFailed": "Feedback konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+    },
+    "emailSubject": "GeminiTalk Feedback",
+    "emailBody": {
+      "name": "Name",
+      "email": "E-Mail",
+      "message": "Nachricht",
+      "anonymous": "Anonym",
+      "notProvided": "Nicht angegeben"
+    },
+    "examples": {
+      "title": "Welche Art von Feedback können Sie senden?",
+      "item1": "Ideen für neue Funktionen oder Verbesserungen",
+      "item2": "UI/UX-Verbesserungsvorschläge",
+      "item3": "Fehlerberichte oder aufgetretene Probleme",
+      "item4": "Allgemeine Kommentare oder Dankeschöns"
+    }
   },
   "common": {
     "ok": "OK",

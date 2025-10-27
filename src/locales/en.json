@@ -7,7 +7,8 @@
     "topicSelection": "Choose Topic",
     "conversation": "Practice",
     "progress": "Your Progress",
-    "settings": "Settings"
+    "settings": "Settings",
+    "feedback": "Feedback"
   },
   "home": {
     "title": "Welcome to GeminiTalk",
@@ -250,6 +251,9 @@
         "lastModified": "Last Modified",
         "description": "Description",
         "descriptionValue": "Real-time English Conversation Coach"
+      },
+      "feedback": {
+        "buttonLabel": "Send Feedback or Suggestions"
       }
     },
     "footer": "© 2024 GeminiTalk - Powered by Gemini Live API"
@@ -288,6 +292,53 @@
     "totalCost": "Total Cost",
     "currentSession": "Current Session",
     "disclaimer": "Estimated cost based on Gemini API pricing"
+  },
+  "feedback": {
+    "title": "💬 Send Feedback",
+    "description": "We'd love to hear your ideas! Share your feature requests, improvement suggestions, or any feedback about the app.",
+    "tip": "Your feedback helps us make GeminiTalk better for everyone!",
+    "fields": {
+      "name": {
+        "label": "Your Name",
+        "placeholder": "Enter your name"
+      },
+      "email": {
+        "label": "Email Address",
+        "placeholder": "your.email@example.com",
+        "help": "Optional - if you'd like us to respond to you"
+      },
+      "message": {
+        "label": "Your Message",
+        "placeholder": "Tell us about your feature request or suggestion...",
+        "help": "Please describe your idea or suggestion in detail"
+      },
+      "optional": "optional"
+    },
+    "submitButton": "📧 Send Feedback",
+    "sending": "Sending...",
+    "sendSuccess": "Email client opened! Please send the email to submit your feedback.",
+    "validation": {
+      "messageRequired": "Please enter your message"
+    },
+    "errors": {
+      "cannotOpenEmail": "Could not open email client. Please try again or send directly to trollgameskr@gmail.com",
+      "sendFailed": "Failed to send feedback. Please try again."
+    },
+    "emailSubject": "GeminiTalk Feedback",
+    "emailBody": {
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "anonymous": "Anonymous",
+      "notProvided": "Not provided"
+    },
+    "examples": {
+      "title": "What kind of feedback can you send?",
+      "item1": "New feature ideas or improvements",
+      "item2": "UI/UX enhancement suggestions",
+      "item3": "Bug reports or issues you've encountered",
+      "item4": "General comments or appreciation"
+    }
   },
   "common": {
     "ok": "OK",

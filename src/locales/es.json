@@ -7,7 +7,8 @@
     "topicSelection": "Elegir Tema",
     "conversation": "Práctica",
     "progress": "Tu Progreso",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "feedback": "Comentarios"
   },
   "home": {
     "title": "Bienvenido a GeminiTalk",
@@ -288,6 +289,53 @@
     "totalCost": "Costo Total",
     "currentSession": "Sesión Actual",
     "disclaimer": "Costo estimado basado en los precios de la API de Gemini"
+  },
+  "feedback": {
+    "title": "💬 Enviar Comentarios",
+    "description": "¡Nos encantaría escuchar tus ideas! Comparte tus solicitudes de funciones, sugerencias de mejora o cualquier comentario sobre la aplicación.",
+    "tip": "¡Tus comentarios nos ayudan a mejorar GeminiTalk para todos!",
+    "fields": {
+      "name": {
+        "label": "Tu Nombre",
+        "placeholder": "Ingresa tu nombre"
+      },
+      "email": {
+        "label": "Dirección de Correo Electrónico",
+        "placeholder": "tu.email@ejemplo.com",
+        "help": "Opcional - si deseas que te respondamos"
+      },
+      "message": {
+        "label": "Tu Mensaje",
+        "placeholder": "Cuéntanos sobre tu solicitud de función o sugerencia...",
+        "help": "Por favor describe tu idea o sugerencia en detalle"
+      },
+      "optional": "opcional"
+    },
+    "submitButton": "📧 Enviar Comentarios",
+    "sending": "Enviando...",
+    "sendSuccess": "¡Cliente de correo abierto! Por favor envía el correo para enviar tus comentarios.",
+    "validation": {
+      "messageRequired": "Por favor ingresa tu mensaje"
+    },
+    "errors": {
+      "cannotOpenEmail": "No se pudo abrir el cliente de correo. Inténtalo de nuevo o envía directamente a trollgameskr@gmail.com",
+      "sendFailed": "Error al enviar comentarios. Por favor inténtalo de nuevo."
+    },
+    "emailSubject": "Comentarios de GeminiTalk",
+    "emailBody": {
+      "name": "Nombre",
+      "email": "Correo",
+      "message": "Mensaje",
+      "anonymous": "Anónimo",
+      "notProvided": "No proporcionado"
+    },
+    "examples": {
+      "title": "¿Qué tipo de comentarios puedes enviar?",
+      "item1": "Ideas de nuevas funciones o mejoras",
+      "item2": "Sugerencias de mejora de UI/UX",
+      "item3": "Informes de errores o problemas que hayas encontrado",
+      "item4": "Comentarios generales o agradecimientos"
+    }
   },
   "common": {
     "ok": "OK",

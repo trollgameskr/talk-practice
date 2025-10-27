@@ -7,7 +7,8 @@
     "topicSelection": "Choisir un Sujet",
     "conversation": "Pratique",
     "progress": "Vos Progrès",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "feedback": "Commentaires"
   },
   "home": {
     "title": "Bienvenue sur GeminiTalk",
@@ -250,6 +251,9 @@
         "lastModified": "Dernière Modification",
         "description": "Description",
         "descriptionValue": "Coach de Conversation Anglaise en Temps Réel"
+      },
+      "feedback": {
+        "buttonLabel": "Envoyer des Commentaires ou Suggestions"
       }
     },
     "footer": "© 2024 GeminiTalk - Alimenté par Gemini Live API"
@@ -288,6 +292,53 @@
     "totalCost": "Coût Total",
     "currentSession": "Session Actuelle",
     "disclaimer": "Coût estimé basé sur les tarifs de l'API Gemini"
+  },
+  "feedback": {
+    "title": "💬 Envoyer des Commentaires",
+    "description": "Nous aimerions connaître vos idées ! Partagez vos demandes de fonctionnalités, suggestions d'amélioration ou tout commentaire sur l'application.",
+    "tip": "Vos commentaires nous aident à améliorer GeminiTalk pour tout le monde !",
+    "fields": {
+      "name": {
+        "label": "Votre Nom",
+        "placeholder": "Entrez votre nom"
+      },
+      "email": {
+        "label": "Adresse E-mail",
+        "placeholder": "votre.email@exemple.com",
+        "help": "Facultatif - si vous souhaitez que nous vous répondions"
+      },
+      "message": {
+        "label": "Votre Message",
+        "placeholder": "Parlez-nous de votre demande de fonctionnalité ou suggestion...",
+        "help": "Veuillez décrire votre idée ou suggestion en détail"
+      },
+      "optional": "facultatif"
+    },
+    "submitButton": "📧 Envoyer des Commentaires",
+    "sending": "Envoi en cours...",
+    "sendSuccess": "Client de messagerie ouvert ! Veuillez envoyer l'e-mail pour soumettre vos commentaires.",
+    "validation": {
+      "messageRequired": "Veuillez entrer votre message"
+    },
+    "errors": {
+      "cannotOpenEmail": "Impossible d'ouvrir le client de messagerie. Veuillez réessayer ou envoyer directement à trollgameskr@gmail.com",
+      "sendFailed": "Échec de l'envoi des commentaires. Veuillez réessayer."
+    },
+    "emailSubject": "Commentaires GeminiTalk",
+    "emailBody": {
+      "name": "Nom",
+      "email": "E-mail",
+      "message": "Message",
+      "anonymous": "Anonyme",
+      "notProvided": "Non fourni"
+    },
+    "examples": {
+      "title": "Quel type de commentaires pouvez-vous envoyer ?",
+      "item1": "Idées de nouvelles fonctionnalités ou améliorations",
+      "item2": "Suggestions d'amélioration UI/UX",
+      "item3": "Rapports de bugs ou problèmes rencontrés",
+      "item4": "Commentaires généraux ou remerciements"
+    }
   },
   "common": {
     "ok": "OK",

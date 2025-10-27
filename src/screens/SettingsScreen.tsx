@@ -40,7 +40,7 @@ const storageService = new StorageService();
 const firebaseService = new FirebaseService();
 const GEMINI_API_KEY_URL = 'https://makersuite.google.com/app/apikey';
 
-const SettingsScreen = () => {
+const SettingsScreen = ({navigation}: any) => {
   const {theme, isDark, toggleTheme} = useTheme();
   const {t, i18n} = useTranslation();
   const [apiKey, setApiKey] = useState('');
@@ -821,6 +821,22 @@ const SettingsScreen = () => {
               Real-time English Conversation Coach
             </Text>
           </View>
+
+          <TouchableOpacity
+            style={[
+              styles.primaryButton,
+              {backgroundColor: theme.colors.buttonPrimary},
+              {marginTop: 16},
+            ]}
+            onPress={() => navigation.navigate('Feedback')}>
+            <Text
+              style={[
+                styles.primaryButtonText,
+                {color: theme.colors.buttonPrimaryText},
+              ]}>
+              💬 {t('settings.sections.feedback.buttonLabel')}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>
