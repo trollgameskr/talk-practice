@@ -197,7 +197,11 @@
           }
         },
         "info": "💡 Les réponses plus courtes sont plus faciles à suivre et à répondre, rendant la pratique plus engageante. Les réponses plus longues fournissent plus de contexte et de détails.",
-        "success": "Préférence de longueur de phrase enregistrée !"
+        "success": "Préférence de longueur de phrase enregistrée !",
+        "autoReadResponse": {
+          "label": "Lecture automatique lors de la sélection",
+          "description": "L'IA lira automatiquement à voix haute lorsque vous touchez une option de réponse"
+        }
       },
       "language": {
         "title": "🌐 Langue",

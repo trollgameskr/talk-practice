@@ -197,7 +197,11 @@
           }
         },
         "info": "💡 Kürzere Antworten sind einfacher zu folgen und zu beantworten, was das Üben ansprechender macht. Längere Antworten bieten mehr Kontext und Details.",
-        "success": "Satzlängeneinstellung gespeichert!"
+        "success": "Satzlängeneinstellung gespeichert!",
+        "autoReadResponse": {
+          "label": "Automatisches Vorlesen bei Auswahl",
+          "description": "Die KI liest automatisch vor, wenn Sie eine Antwortoption berühren"
+        }
       },
       "language": {
         "title": "🌐 Sprache",
