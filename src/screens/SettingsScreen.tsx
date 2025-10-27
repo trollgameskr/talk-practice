@@ -1180,8 +1180,7 @@ const SettingsScreen = ({navigation}: any) => {
                 handleAiVoicePersonalityChange(value as VoicePersonality)
               }
               items={Object.keys(VOICE_PERSONALITY_OPTIONS).map(key => ({
-                label:
-                  VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
+                label: VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
                 value: key,
               }))}
               placeholder="Select AI Voice Personality"
@@ -1208,8 +1207,7 @@ const SettingsScreen = ({navigation}: any) => {
                 handleResponseVoicePersonalityChange(value as VoicePersonality)
               }
               items={Object.keys(VOICE_PERSONALITY_OPTIONS).map(key => ({
-                label:
-                  VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
+                label: VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
                 value: key,
               }))}
               placeholder="Select Your Voice Personality"

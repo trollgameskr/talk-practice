@@ -2,7 +2,7 @@
  * Feedback Screen - Send feature requests and suggestions to the operator
  */
 
-import React, {useState} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,11 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
-  TextInput,
   Alert,
   Linking,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useTheme} from '../contexts/ThemeContext';
-import {FEEDBACK_CONFIG} from '../config/feedback.config';
 
 const FeedbackScreen = () => {
   const {theme} = useTheme();
@@ -65,12 +63,9 @@ const FeedbackScreen = () => {
             {t('feedback.title')}
           </Text>
           <Text
-            style={[
-              styles.description,
-              {color: theme.colors.textSecondary},
-            ]}>
-            Share your feedback, feature requests, and bug reports on our
-            GitHub Issues page.
+            style={[styles.description, {color: theme.colors.textSecondary}]}>
+            Share your feedback, feature requests, and bug reports on our GitHub
+            Issues page.
           </Text>
 
           <View
@@ -116,31 +111,19 @@ const FeedbackScreen = () => {
           </Text>
           <View style={styles.exampleList}>
             <Text
-              style={[
-                styles.exampleItem,
-                {color: theme.colors.textSecondary},
-              ]}>
+              style={[styles.exampleItem, {color: theme.colors.textSecondary}]}>
               • {t('feedback.examples.item1')}
             </Text>
             <Text
-              style={[
-                styles.exampleItem,
-                {color: theme.colors.textSecondary},
-              ]}>
+              style={[styles.exampleItem, {color: theme.colors.textSecondary}]}>
               • {t('feedback.examples.item2')}
             </Text>
             <Text
-              style={[
-                styles.exampleItem,
-                {color: theme.colors.textSecondary},
-              ]}>
+              style={[styles.exampleItem, {color: theme.colors.textSecondary}]}>
               • {t('feedback.examples.item3')}
             </Text>
             <Text
-              style={[
-                styles.exampleItem,
-                {color: theme.colors.textSecondary},
-              ]}>
+              style={[styles.exampleItem, {color: theme.colors.textSecondary}]}>
               • {t('feedback.examples.item4')}
             </Text>
           </View>

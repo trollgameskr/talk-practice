@@ -40,7 +40,6 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionStartTime] = useState(new Date());
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [sampleAnswers, setSampleAnswers] = useState<string[]>([]);
   const [enrichedSampleAnswers, setEnrichedSampleAnswers] = useState<
     Array<{
       text: string;
@@ -452,7 +451,6 @@ const ConversationScreen = ({route, navigation}: any) => {
         aiMessage,
         2,
       );
-      setSampleAnswers(samples);
 
       // Enrich sample answers with translation and pronunciation (Feature 2)
       const enriched = await Promise.all(
