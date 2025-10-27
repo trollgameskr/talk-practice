@@ -31,6 +31,9 @@ import {
   saveLanguage,
   getAvailableLanguages,
   getCurrentLanguage,
+  saveTargetLanguage,
+  getTargetLanguage,
+  getAvailableTargetLanguages,
 } from '../config/i18n.config';
 
 const storageService = new StorageService();
@@ -47,17 +50,25 @@ const SettingsScreen = () => {
   const [sentenceLength, setSentenceLength] =
     useState<SentenceLength>('medium');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
+  const [selectedTargetLanguage, setSelectedTargetLanguage] =
+    useState<string>('en');
 
   useEffect(() => {
     loadApiKey();
     loadUserInfo();
     loadSentenceLength();
     loadLanguage();
+    loadTargetLanguage();
   }, []);
 
   const loadLanguage = async () => {
     const currentLang = await getCurrentLanguage();
     setSelectedLanguage(currentLang);
+  };
+
+  const loadTargetLanguage = async () => {
+    const targetLang = await getTargetLanguage();
+    setSelectedTargetLanguage(targetLang);
   };
 
   const loadUserInfo = async () => {
@@ -227,41 +238,95 @@ const SettingsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <ScrollView style={styles.scrollView}>
-        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>🎨 Appearance</Text>
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            🎨 Appearance
+          </Text>
           <View style={styles.themeRow}>
             <View style={styles.themeInfo}>
-              <Text style={[styles.themeLabel, {color: theme.colors.text}]}>Dark Mode</Text>
-              <Text style={[styles.themeDescription, {color: theme.colors.textSecondary}]}>
+              <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                Dark Mode
+              </Text>
+              <Text
+                style={[
+                  styles.themeDescription,
+                  {color: theme.colors.textSecondary},
+                ]}>
                 Switch between light and dark theme
               </Text>
             </View>
             <Switch
               value={isDark}
               onValueChange={toggleTheme}
-              trackColor={{false: theme.colors.border, true: theme.colors.primary}}
-              thumbColor={isDark ? theme.colors.buttonPrimaryText : theme.colors.inputBackground}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
+              thumbColor={
+                isDark
+                  ? theme.colors.buttonPrimaryText
+                  : theme.colors.inputBackground
+              }
             />
           </View>
         </View>
 
-        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>🌐 Language</Text>
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            {t('settings.sections.language.title')}
+          </Text>
+          <Text
+            style={[
+              styles.sectionDescription,
+              {color: theme.colors.textSecondary},
+            ]}>
+            {t('settings.sections.language.description')}
+          </Text>
+
           <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              {t('settings.sections.language.nativeLanguage')}
+            </Text>
             {getAvailableLanguages().map(lang => (
               <TouchableOpacity
                 key={lang.code}
                 style={[
                   styles.optionButton,
-                  {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border},
-                  selectedLanguage === lang.code && {...styles.optionButtonActive, borderColor: theme.colors.primary, backgroundColor: theme.colors.primaryLight},
+                  {
+                    backgroundColor: theme.colors.inputBackground,
+                    borderColor: theme.colors.border,
+                  },
+                  selectedLanguage === lang.code && {
+                    ...styles.optionButtonActive,
+                    borderColor: theme.colors.primary,
+                    backgroundColor: theme.colors.primaryLight,
+                  },
                 ]}
                 onPress={async () => {
                   await saveLanguage(lang.code);
                   await i18n.changeLanguage(lang.code);
                   setSelectedLanguage(lang.code);
+                  Alert.alert(
+                    t('common.success'),
+                    t('settings.sections.language.success'),
+                  );
                 }}>
                 <View style={styles.optionContent}>
                   <View style={styles.optionHeader}>
@@ -269,12 +334,78 @@ const SettingsScreen = () => {
                       style={[
                         styles.optionTitle,
                         {color: theme.colors.text},
-                        selectedLanguage === lang.code && {...styles.optionTitleActive, color: theme.colors.primary},
+                        selectedLanguage === lang.code && {
+                          ...styles.optionTitleActive,
+                          color: theme.colors.primary,
+                        },
                       ]}>
                       {lang.name}
                     </Text>
                     {selectedLanguage === lang.code && (
-                      <Text style={[styles.checkMark, {color: theme.colors.primary}]}>✓</Text>
+                      <Text
+                        style={[
+                          styles.checkMark,
+                          {color: theme.colors.primary},
+                        ]}>
+                        ✓
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              {t('settings.sections.language.targetLanguage')}
+            </Text>
+            {getAvailableTargetLanguages().map(lang => (
+              <TouchableOpacity
+                key={lang.code}
+                style={[
+                  styles.optionButton,
+                  {
+                    backgroundColor: theme.colors.inputBackground,
+                    borderColor: theme.colors.border,
+                  },
+                  selectedTargetLanguage === lang.code && {
+                    ...styles.optionButtonActive,
+                    borderColor: theme.colors.primary,
+                    backgroundColor: theme.colors.primaryLight,
+                  },
+                ]}
+                onPress={async () => {
+                  await saveTargetLanguage(lang.code);
+                  setSelectedTargetLanguage(lang.code);
+                  Alert.alert(
+                    t('common.success'),
+                    t('settings.sections.language.success'),
+                  );
+                }}>
+                <View style={styles.optionContent}>
+                  <View style={styles.optionHeader}>
+                    <Text
+                      style={[
+                        styles.optionTitle,
+                        {color: theme.colors.text},
+                        selectedTargetLanguage === lang.code && {
+                          ...styles.optionTitleActive,
+                          color: theme.colors.primary,
+                        },
+                      ]}>
+                      {t(
+                        `settings.sections.language.targetLanguages.${lang.code}`,
+                      )}
+                    </Text>
+                    {selectedTargetLanguage === lang.code && (
+                      <Text
+                        style={[
+                          styles.checkMark,
+                          {color: theme.colors.primary},
+                        ]}>
+                        ✓
+                      </Text>
                     )}
                   </View>
                 </View>
@@ -284,26 +415,67 @@ const SettingsScreen = () => {
         </View>
 
         {isGuestMode && (
-          <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
-            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>👤 Guest Mode</Text>
+          <View
+            style={[
+              styles.section,
+              {
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
+              },
+            ]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              👤 Guest Mode
+            </Text>
             <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Status</Text>
-              <Text style={[styles.infoValue, {color: theme.colors.text}]}>Using as Guest</Text>
+              <Text
+                style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+                Status
+              </Text>
+              <Text style={[styles.infoValue, {color: theme.colors.text}]}>
+                Using as Guest
+              </Text>
             </View>
-            <View style={[styles.guestInfoBox, {backgroundColor: isDark ? '#422006' : '#fef3c7', borderLeftColor: theme.colors.warning}]}>
-              <Text style={[styles.guestInfoText, {color: isDark ? '#fbbf24' : '#92400e'}]}>
+            <View
+              style={[
+                styles.guestInfoBox,
+                {
+                  backgroundColor: isDark ? '#422006' : '#fef3c7',
+                  borderLeftColor: theme.colors.warning,
+                },
+              ]}>
+              <Text
+                style={[
+                  styles.guestInfoText,
+                  {color: isDark ? '#fbbf24' : '#92400e'},
+                ]}>
                 ℹ️ You are using the app in guest mode. Your data is saved
                 locally on this device only.
               </Text>
-              <Text style={[styles.guestInfoText, {color: isDark ? '#fbbf24' : '#92400e'}]}>
+              <Text
+                style={[
+                  styles.guestInfoText,
+                  {color: isDark ? '#fbbf24' : '#92400e'},
+                ]}>
                 💡 Create an account to sync your data across devices and keep
                 it safe in the cloud.
               </Text>
             </View>
             <TouchableOpacity
-              style={[styles.secondaryButton, styles.dangerButton, {backgroundColor: isDark ? '#7f1d1d' : '#fef2f2', borderColor: isDark ? '#991b1b' : '#fecaca'}]}
+              style={[
+                styles.secondaryButton,
+                styles.dangerButton,
+                {
+                  backgroundColor: isDark ? '#7f1d1d' : '#fef2f2',
+                  borderColor: isDark ? '#991b1b' : '#fecaca',
+                },
+              ]}
               onPress={handleExitGuestMode}>
-              <Text style={[styles.secondaryButtonText, styles.dangerText, {color: isDark ? '#fca5a5' : '#dc2626'}]}>
+              <Text
+                style={[
+                  styles.secondaryButtonText,
+                  styles.dangerText,
+                  {color: isDark ? '#fca5a5' : '#dc2626'},
+                ]}>
                 🚪 Exit Guest Mode
               </Text>
             </TouchableOpacity>
@@ -311,32 +483,81 @@ const SettingsScreen = () => {
         )}
 
         {userEmail && (
-          <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
-            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>Account</Text>
+          <View
+            style={[
+              styles.section,
+              {
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
+              },
+            ]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              Account
+            </Text>
             <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Logged in as</Text>
-              <Text style={[styles.infoValue, {color: theme.colors.text}]}>  {userEmail}</Text>
+              <Text
+                style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+                Logged in as
+              </Text>
+              <Text style={[styles.infoValue, {color: theme.colors.text}]}>
+                {' '}
+                {userEmail}
+              </Text>
             </View>
             <TouchableOpacity
-              style={[styles.secondaryButton, styles.dangerButton, {backgroundColor: isDark ? '#7f1d1d' : '#fef2f2', borderColor: isDark ? '#991b1b' : '#fecaca'}]}
+              style={[
+                styles.secondaryButton,
+                styles.dangerButton,
+                {
+                  backgroundColor: isDark ? '#7f1d1d' : '#fef2f2',
+                  borderColor: isDark ? '#991b1b' : '#fecaca',
+                },
+              ]}
               onPress={handleLogout}>
-              <Text style={[styles.secondaryButtonText, styles.dangerText, {color: isDark ? '#fca5a5' : '#dc2626'}]}>
+              <Text
+                style={[
+                  styles.secondaryButtonText,
+                  styles.dangerText,
+                  {color: isDark ? '#fca5a5' : '#dc2626'},
+                ]}>
                 🚪 Logout
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>API Configuration</Text>
-          <Text style={[styles.sectionDescription, {color: theme.colors.textSecondary}]}>
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            API Configuration
+          </Text>
+          <Text
+            style={[
+              styles.sectionDescription,
+              {color: theme.colors.textSecondary},
+            ]}>
             Enter your Gemini API key to enable conversation features
           </Text>
 
           <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>Gemini API Key</Text>
+            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+              Gemini API Key
+            </Text>
             <TextInput
-              style={[styles.input, {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.inputBorder, color: theme.colors.text}]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.colors.inputBackground,
+                  borderColor: theme.colors.inputBorder,
+                  color: theme.colors.text,
+                },
+              ]}
               value={apiKey}
               onChangeText={setApiKey}
               placeholder="Enter your Gemini API key"
@@ -348,27 +569,57 @@ const SettingsScreen = () => {
             <TouchableOpacity
               style={styles.toggleButton}
               onPress={() => setIsApiKeyVisible(!isApiKeyVisible)}>
-              <Text style={[styles.toggleButtonText, {color: theme.colors.primary}]}>
+              <Text
+                style={[
+                  styles.toggleButtonText,
+                  {color: theme.colors.primary},
+                ]}>
                 {isApiKeyVisible ? '👁️ Hide' : '👁️‍🗨️ Show'}
               </Text>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={[styles.primaryButton, {backgroundColor: theme.colors.buttonPrimary}]}
+            style={[
+              styles.primaryButton,
+              {backgroundColor: theme.colors.buttonPrimary},
+            ]}
             onPress={handleSaveApiKey}>
-            <Text style={[styles.primaryButtonText, {color: theme.colors.buttonPrimaryText}]}>Save API Key</Text>
+            <Text
+              style={[
+                styles.primaryButtonText,
+                {color: theme.colors.buttonPrimaryText},
+              ]}>
+              Save API Key
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.secondaryButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
+            style={[
+              styles.secondaryButton,
+              {
+                backgroundColor: theme.colors.buttonSecondary,
+                borderColor: theme.colors.border,
+              },
+            ]}
             onPress={handleGetApiKey}>
-            <Text style={[styles.secondaryButtonText, {color: theme.colors.buttonSecondaryText}]}>
+            <Text
+              style={[
+                styles.secondaryButtonText,
+                {color: theme.colors.buttonSecondaryText},
+              ]}>
               🔑 Get API Key from Google AI Studio
             </Text>
           </TouchableOpacity>
 
-          <View style={[styles.infoBox, {backgroundColor: theme.colors.primaryLight, borderLeftColor: theme.colors.primary}]}>
+          <View
+            style={[
+              styles.infoBox,
+              {
+                backgroundColor: theme.colors.primaryLight,
+                borderLeftColor: theme.colors.primary,
+              },
+            ]}>
             <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
               ℹ️ Don't have an API key? Click the button above to get one from
               Google AI Studio (free with usage limits)
@@ -376,22 +627,44 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>🗣️ Conversation Settings</Text>
-          <Text style={[styles.sectionDescription, {color: theme.colors.textSecondary}]}>
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            🗣️ Conversation Settings
+          </Text>
+          <Text
+            style={[
+              styles.sectionDescription,
+              {color: theme.colors.textSecondary},
+            ]}>
             Adjust the length of AI responses and suggested user responses
           </Text>
 
           <View style={styles.optionGroup}>
-            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>Response Length</Text>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              Response Length
+            </Text>
             {(Object.keys(SENTENCE_LENGTH_CONFIG) as SentenceLength[]).map(
               length => (
                 <TouchableOpacity
                   key={length}
                   style={[
                     styles.optionButton,
-                    {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border},
-                    sentenceLength === length && {...styles.optionButtonActive, borderColor: theme.colors.primary, backgroundColor: theme.colors.primaryLight},
+                    {
+                      backgroundColor: theme.colors.inputBackground,
+                      borderColor: theme.colors.border,
+                    },
+                    sentenceLength === length && {
+                      ...styles.optionButtonActive,
+                      borderColor: theme.colors.primary,
+                      backgroundColor: theme.colors.primaryLight,
+                    },
                   ]}
                   onPress={() => handleSentenceLengthChange(length)}>
                   <View style={styles.optionContent}>
@@ -400,20 +673,31 @@ const SettingsScreen = () => {
                         style={[
                           styles.optionTitle,
                           {color: theme.colors.text},
-                          sentenceLength === length && {...styles.optionTitleActive, color: theme.colors.primary},
+                          sentenceLength === length && {
+                            ...styles.optionTitleActive,
+                            color: theme.colors.primary,
+                          },
                         ]}>
                         {SENTENCE_LENGTH_CONFIG[length].label}
                       </Text>
                       {sentenceLength === length && (
-                        <Text style={[styles.checkMark, {color: theme.colors.primary}]}>✓</Text>
+                        <Text
+                          style={[
+                            styles.checkMark,
+                            {color: theme.colors.primary},
+                          ]}>
+                          ✓
+                        </Text>
                       )}
                     </View>
                     <Text
                       style={[
                         styles.optionDescription,
                         {color: theme.colors.textSecondary},
-                        sentenceLength === length &&
-                          {...styles.optionDescriptionActive, color: theme.colors.primaryDark},
+                        sentenceLength === length && {
+                          ...styles.optionDescriptionActive,
+                          color: theme.colors.primaryDark,
+                        },
                       ]}>
                       {SENTENCE_LENGTH_CONFIG[length].description}
                     </Text>
@@ -423,7 +707,14 @@ const SettingsScreen = () => {
             )}
           </View>
 
-          <View style={[styles.infoBox, {backgroundColor: theme.colors.primaryLight, borderLeftColor: theme.colors.primary}]}>
+          <View
+            style={[
+              styles.infoBox,
+              {
+                backgroundColor: theme.colors.primaryLight,
+                borderLeftColor: theme.colors.primary,
+              },
+            ]}>
             <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
               💡 Shorter responses are easier to follow and respond to, making
               practice more engaging. Longer responses provide more context and
@@ -432,42 +723,100 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>Data Management</Text>
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            Data Management
+          </Text>
 
           <TouchableOpacity
-            style={[styles.secondaryButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
+            style={[
+              styles.secondaryButton,
+              {
+                backgroundColor: theme.colors.buttonSecondary,
+                borderColor: theme.colors.border,
+              },
+            ]}
             onPress={handleExportData}>
-            <Text style={[styles.secondaryButtonText, {color: theme.colors.buttonSecondaryText}]}>📤 Export Data</Text>
+            <Text
+              style={[
+                styles.secondaryButtonText,
+                {color: theme.colors.buttonSecondaryText},
+              ]}>
+              📤 Export Data
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.secondaryButton, styles.dangerButton, {backgroundColor: isDark ? '#7f1d1d' : '#fef2f2', borderColor: isDark ? '#991b1b' : '#fecaca'}]}
+            style={[
+              styles.secondaryButton,
+              styles.dangerButton,
+              {
+                backgroundColor: isDark ? '#7f1d1d' : '#fef2f2',
+                borderColor: isDark ? '#991b1b' : '#fecaca',
+              },
+            ]}
             onPress={handleClearData}>
-            <Text style={[styles.secondaryButtonText, styles.dangerText, {color: isDark ? '#fca5a5' : '#dc2626'}]}>
+            <Text
+              style={[
+                styles.secondaryButtonText,
+                styles.dangerText,
+                {color: isDark ? '#fca5a5' : '#dc2626'},
+              ]}>
               🗑️ Clear All Data
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>About</Text>
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            About
+          </Text>
           <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>App Name</Text>
-            <Text style={[styles.infoValue, {color: theme.colors.text}]}>GeminiTalk</Text>
+            <Text
+              style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+              App Name
+            </Text>
+            <Text style={[styles.infoValue, {color: theme.colors.text}]}>
+              GeminiTalk
+            </Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Version</Text>
-            <Text style={[styles.infoValue, {color: theme.colors.text}]}>1.0.0</Text>
+            <Text
+              style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+              Version
+            </Text>
+            <Text style={[styles.infoValue, {color: theme.colors.text}]}>
+              1.0.0
+            </Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Last Modified</Text>
+            <Text
+              style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+              Last Modified
+            </Text>
             <Text style={[styles.infoValue, {color: theme.colors.text}]}>
               {formatDate(BUILD_INFO.timestamp)}
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Description</Text>
+            <Text
+              style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+              Description
+            </Text>
             <Text style={[styles.infoValue, {color: theme.colors.text}]}>
               Real-time English Conversation Coach
             </Text>
@@ -570,10 +919,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  dangerButton: {
-  },
-  dangerText: {
-  },
+  dangerButton: {},
+  dangerText: {},
   infoBox: {
     padding: 12,
     borderRadius: 8,
@@ -632,8 +979,7 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
   },
-  optionButtonActive: {
-  },
+  optionButtonActive: {},
   optionContent: {
     flex: 1,
   },
@@ -647,13 +993,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  optionTitleActive: {
-  },
+  optionTitleActive: {},
   optionDescription: {
     fontSize: 13,
   },
-  optionDescriptionActive: {
-  },
+  optionDescriptionActive: {},
   checkMark: {
     fontSize: 18,
     fontWeight: 'bold',

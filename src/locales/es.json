@@ -1,0 +1,308 @@
+{
+  "app": {
+    "name": "GeminiTalk"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "topicSelection": "Elegir Tema",
+    "conversation": "Práctica",
+    "progress": "Tu Progreso",
+    "settings": "Configuración"
+  },
+  "home": {
+    "title": "Bienvenido a GeminiTalk",
+    "subtitle": "Tu entrenador de conversación en inglés con IA",
+    "stats": {
+      "totalSessions": "Sesiones Totales",
+      "practiceTime": "Tiempo de Práctica",
+      "overallScore": "Puntuación General"
+    },
+    "buttons": {
+      "startPractice": "🎯 Comenzar Práctica",
+      "viewProgress": "📊 Ver Progreso",
+      "settings": "⚙️ Configuración"
+    },
+    "howItWorks": {
+      "title": "Cómo funciona:",
+      "step1": "1. Elige un tema de conversación",
+      "step2": "2. Practica hablando en inglés",
+      "step3": "3. Obtén retroalimentación instantánea",
+      "step4": "4. Rastrea tu progreso con el tiempo"
+    },
+    "achievements": {
+      "title": "Logros Recientes 🏆"
+    },
+    "apiKeyRequired": {
+      "title": "Se Requiere Clave API",
+      "message": "Necesitas una clave API de Gemini para usar GeminiTalk. Puedes obtener una gratis desde Google AI Studio.\n\n¿Quieres ir a Configuración para configurar tu clave API ahora?",
+      "later": "Más Tarde",
+      "goToSettings": "Ir a Configuración"
+    }
+  },
+  "topicSelection": {
+    "title": "Elige Tu Tema",
+    "subtitle": "Selecciona un tema de conversación para practicar",
+    "topics": {
+      "daily": {
+        "name": "Vida Diaria",
+        "description": "Practica conversaciones cotidianas sobre la vida diaria"
+      },
+      "travel": {
+        "name": "Viajes",
+        "description": "Aprende frases y escenarios relacionados con viajes"
+      },
+      "business": {
+        "name": "Negocios",
+        "description": "Inglés profesional de negocios y etiqueta"
+      },
+      "casual": {
+        "name": "Charla Casual",
+        "description": "Conversaciones informales sobre entretenimiento y pasatiempos"
+      },
+      "professional": {
+        "name": "Profesional",
+        "description": "Comunicación y colaboración en el lugar de trabajo"
+      }
+    },
+    "tip": {
+      "icon": "💡",
+      "text": "Consejo: ¡Comienza con temas con los que te sientas cómodo, luego intenta gradualmente los más desafiantes!"
+    }
+  },
+  "conversation": {
+    "apiKeyRequired": {
+      "title": "Se Requiere Clave API",
+      "message": "Necesitas una clave API de Gemini para comenzar a practicar. Puedes obtener una gratis desde Google AI Studio.\n\nVe a Configuración para configurar tu clave API.",
+      "cancel": "Cancelar",
+      "goToSettings": "Ir a Configuración"
+    },
+    "buttons": {
+      "startListening": "🎤 Comenzar a Hablar",
+      "stopListening": "⏹️ Detener",
+      "endConversation": "Finalizar Práctica",
+      "sampleAnswers": "Respuestas de Ejemplo",
+      "hideSamples": "Ocultar Ejemplos"
+    },
+    "status": {
+      "listening": "🎤 Escuchando...",
+      "speaking": "🔊 Hablando...",
+      "thinking": "🤔 Pensando...",
+      "ready": "Listo para practicar"
+    },
+    "endSession": {
+      "title": "Finalizar Sesión de Práctica",
+      "message": "¿Estás seguro de que quieres finalizar esta sesión de práctica?",
+      "cancel": "Continuar",
+      "confirm": "Finalizar Sesión"
+    },
+    "sessionSummary": {
+      "title": "¡Sesión Completa!",
+      "duration": "Duración",
+      "score": "Puntuación",
+      "feedback": "Retroalimentación",
+      "vocabulary": "Vocabulario Nuevo",
+      "ok": "OK"
+    },
+    "errors": {
+      "initializationFailed": "Error al inicializar los servicios. Por favor, verifica tu configuración.",
+      "noApiKey": "No se encontró clave API. Por favor, configúrala en Configuración.",
+      "voicePermission": "Se requiere permiso de micrófono para usar esta función.",
+      "listeningError": "Error al escuchar",
+      "speakingError": "Error al hablar"
+    }
+  },
+  "progress": {
+    "title": "Tu Progreso",
+    "subtitle": "Rastrea tu viaje de aprendizaje",
+    "stats": {
+      "totalSessions": "Sesiones Totales",
+      "totalDuration": "Tiempo Total",
+      "averageScore": "Puntuación Promedio"
+    },
+    "recentSessions": {
+      "title": "Sesiones Recientes",
+      "noSessions": "Aún no hay sesiones de práctica. ¡Comienza tu primera conversación!",
+      "score": "Puntuación",
+      "duration": "Duración"
+    },
+    "achievements": {
+      "title": "Logros",
+      "noAchievements": "¡Completa sesiones de práctica para desbloquear logros!"
+    }
+  },
+  "settings": {
+    "sections": {
+      "guestMode": {
+        "title": "👤 Modo Invitado",
+        "status": "Estado",
+        "statusValue": "Usando como Invitado",
+        "info1": "ℹ️ Estás usando la aplicación en modo invitado. Tus datos se guardan localmente solo en este dispositivo.",
+        "info2": "💡 Crea una cuenta para sincronizar tus datos entre dispositivos y mantenerlos seguros en la nube.",
+        "exitButton": "🚪 Salir del Modo Invitado",
+        "exitConfirm": {
+          "title": "Salir del Modo Invitado",
+          "message": "¿Quieres crear una cuenta para guardar tus datos en la nube?",
+          "cancel": "Cancelar",
+          "confirm": "Salir del Modo Invitado",
+          "success": "Modo Invitado Cerrado",
+          "successMessage": "Necesitarás reiniciar la aplicación para iniciar sesión o crear una cuenta.",
+          "error": "Error al salir del modo invitado"
+        }
+      },
+      "account": {
+        "title": "Cuenta",
+        "loggedInAs": "Sesión iniciada como",
+        "logoutButton": "🚪 Cerrar Sesión",
+        "logoutConfirm": {
+          "title": "Cerrar Sesión",
+          "message": "¿Estás seguro de que quieres cerrar sesión?",
+          "cancel": "Cancelar",
+          "confirm": "Cerrar Sesión",
+          "success": "Sesión cerrada exitosamente",
+          "error": "Error al cerrar sesión"
+        }
+      },
+      "api": {
+        "title": "Configuración de API",
+        "description": "Ingresa tu clave API de Gemini para habilitar las funciones de conversación",
+        "apiKeyLabel": "Clave API de Gemini",
+        "apiKeyPlaceholder": "Ingresa tu clave API de Gemini",
+        "showButton": "👁️‍🗨️ Mostrar",
+        "hideButton": "👁️ Ocultar",
+        "saveButton": "Guardar Clave API",
+        "getKeyButton": "🔑 Obtener Clave API de Google AI Studio",
+        "info": "ℹ️ ¿No tienes una clave API? Haz clic en el botón de arriba para obtener una de Google AI Studio (gratis con límites de uso)",
+        "errors": {
+          "empty": "Por favor ingresa una clave API",
+          "invalid": "El formato de la clave API parece ser inválido. Por favor verifica e intenta de nuevo."
+        },
+        "success": "¡Clave API guardada exitosamente!"
+      },
+      "conversation": {
+        "title": "🗣️ Configuración de Conversación",
+        "description": "Ajusta la longitud de las respuestas de IA y las respuestas sugeridas del usuario",
+        "responseLength": "Longitud de Respuesta",
+        "lengths": {
+          "short": {
+            "label": "Corta",
+            "description": "Respuestas rápidas y concisas (1-2 oraciones)"
+          },
+          "medium": {
+            "label": "Media",
+            "description": "Respuestas equilibradas (2-3 oraciones)"
+          },
+          "long": {
+            "label": "Larga",
+            "description": "Respuestas detalladas y completas (3-4 oraciones)"
+          }
+        },
+        "info": "💡 Las respuestas más cortas son más fáciles de seguir y responder, haciendo la práctica más atractiva. Las respuestas más largas proporcionan más contexto y detalle.",
+        "success": "¡Preferencia de longitud de oración guardada!"
+      },
+      "language": {
+        "title": "🌐 Idioma",
+        "description": "Elige tu idioma preferido para la interfaz de la aplicación",
+        "currentLanguage": "Idioma de la Aplicación",
+        "nativeLanguage": "Idioma Nativo (Idioma de la Interfaz)",
+        "targetLanguage": "Idioma de Aprendizaje",
+        "languages": {
+          "ko": "한국어",
+          "en": "English",
+          "ja": "日本語",
+          "zh": "中文",
+          "es": "Español",
+          "fr": "Français",
+          "de": "Deutsch"
+        },
+        "targetLanguages": {
+          "en": "Inglés",
+          "ko": "Coreano",
+          "ja": "Japonés",
+          "zh": "Chino",
+          "es": "Español",
+          "fr": "Francés",
+          "de": "Alemán"
+        },
+        "success": "¡Idioma cambiado exitosamente!"
+      },
+      "data": {
+        "title": "Gestión de Datos",
+        "exportButton": "📤 Exportar Datos",
+        "clearButton": "🗑️ Borrar Todos los Datos",
+        "clearConfirm": {
+          "title": "Borrar Todos los Datos",
+          "message": "Esto eliminará todo tu historial de conversaciones y progreso. Esta acción no se puede deshacer.",
+          "cancel": "Cancelar",
+          "confirm": "Borrar Datos",
+          "success": "Todos los datos han sido borrados",
+          "error": "Error al borrar datos"
+        },
+        "exportSuccess": {
+          "title": "Exportar Datos",
+          "message": "¡Datos exportados exitosamente!\n\nEn una aplicación de producción, esto guardaría en un archivo o compartiría por correo electrónico."
+        },
+        "exportError": "Error al exportar datos"
+      },
+      "about": {
+        "title": "Acerca de",
+        "appName": "Nombre de la Aplicación",
+        "version": "Versión",
+        "lastModified": "Última Modificación",
+        "description": "Descripción",
+        "descriptionValue": "Entrenador de Conversación en Inglés en Tiempo Real"
+      }
+    },
+    "footer": "© 2024 GeminiTalk - Impulsado por Gemini Live API"
+  },
+  "login": {
+    "title": "Bienvenido a GeminiTalk",
+    "subtitle": "Tu entrenador de conversación en inglés con IA",
+    "emailLabel": "Correo Electrónico",
+    "emailPlaceholder": "Ingresa tu correo electrónico",
+    "passwordLabel": "Contraseña",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "loginButton": "Iniciar Sesión",
+    "signupButton": "Registrarse",
+    "guestButton": "Continuar como Invitado",
+    "forgotPassword": "¿Olvidaste tu Contraseña?",
+    "switchToSignup": "¿No tienes cuenta? Regístrate",
+    "switchToLogin": "¿Ya tienes cuenta? Inicia Sesión",
+    "errors": {
+      "invalidEmail": "Por favor ingresa una dirección de correo electrónico válida",
+      "shortPassword": "La contraseña debe tener al menos 6 caracteres",
+      "loginFailed": "Inicio de sesión fallido. Por favor verifica tus credenciales.",
+      "signupFailed": "Registro fallido. Por favor intenta de nuevo.",
+      "resetFailed": "Error al enviar correo de restablecimiento. Por favor intenta de nuevo."
+    },
+    "resetPassword": {
+      "title": "Restablecer Contraseña",
+      "message": "Ingresa tu dirección de correo electrónico y te enviaremos instrucciones para restablecer tu contraseña.",
+      "cancel": "Cancelar",
+      "send": "Enviar Correo de Restablecimiento",
+      "success": "Correo de Restablecimiento de Contraseña Enviado",
+      "successMessage": "Revisa tu correo electrónico para obtener instrucciones para restablecer tu contraseña."
+    }
+  },
+  "cost": {
+    "title": "Costo de Uso de API",
+    "totalCost": "Costo Total",
+    "currentSession": "Sesión Actual",
+    "disclaimer": "Costo estimado basado en los precios de la API de Gemini"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  }
+}

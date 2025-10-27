@@ -1,0 +1,308 @@
+{
+  "app": {
+    "name": "GeminiTalk"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "topicSelection": "トピック選択",
+    "conversation": "練習",
+    "progress": "進捗状況",
+    "settings": "設定"
+  },
+  "home": {
+    "title": "GeminiTalkへようこそ",
+    "subtitle": "AI搭載の英会話コーチ",
+    "stats": {
+      "totalSessions": "総セッション数",
+      "practiceTime": "練習時間",
+      "overallScore": "総合スコア"
+    },
+    "buttons": {
+      "startPractice": "🎯 練習を始める",
+      "viewProgress": "📊 進捗を見る",
+      "settings": "⚙️ 設定"
+    },
+    "howItWorks": {
+      "title": "使い方：",
+      "step1": "1. 会話のトピックを選ぶ",
+      "step2": "2. 英語で話す練習をする",
+      "step3": "3. 即座にフィードバックを得る",
+      "step4": "4. 時間の経過とともに進捗を追跡する"
+    },
+    "achievements": {
+      "title": "最近の成果 🏆"
+    },
+    "apiKeyRequired": {
+      "title": "APIキーが必要です",
+      "message": "GeminiTalkを使用するにはGemini APIキーが必要です。Google AI Studioから無料で取得できます。\n\n今すぐ設定に移動してAPIキーを設定しますか？",
+      "later": "後で",
+      "goToSettings": "設定へ移動"
+    }
+  },
+  "topicSelection": {
+    "title": "トピックを選択",
+    "subtitle": "練習する会話のトピックを選択してください",
+    "topics": {
+      "daily": {
+        "name": "日常生活",
+        "description": "日常生活についての会話を練習"
+      },
+      "travel": {
+        "name": "旅行",
+        "description": "旅行関連のフレーズとシナリオを学ぶ"
+      },
+      "business": {
+        "name": "ビジネス",
+        "description": "プロフェッショナルなビジネス英語とエチケット"
+      },
+      "casual": {
+        "name": "カジュアルチャット",
+        "description": "エンターテイメントや趣味についての非公式な会話"
+      },
+      "professional": {
+        "name": "プロフェッショナル",
+        "description": "職場でのコミュニケーションと協力"
+      }
+    },
+    "tip": {
+      "icon": "💡",
+      "text": "ヒント：まずは得意なトピックから始めて、徐々に難しいものに挑戦しましょう！"
+    }
+  },
+  "conversation": {
+    "apiKeyRequired": {
+      "title": "APIキーが必要です",
+      "message": "練習を始めるにはGemini APIキーが必要です。Google AI Studioから無料で取得できます。\n\n設定に移動してAPIキーを設定してください。",
+      "cancel": "キャンセル",
+      "goToSettings": "設定へ移動"
+    },
+    "buttons": {
+      "startListening": "🎤 話し始める",
+      "stopListening": "⏹️ 停止",
+      "endConversation": "練習を終了",
+      "sampleAnswers": "サンプル回答",
+      "hideSamples": "サンプルを非表示"
+    },
+    "status": {
+      "listening": "🎤 聞いています...",
+      "speaking": "🔊 話しています...",
+      "thinking": "🤔 考えています...",
+      "ready": "練習の準備ができました"
+    },
+    "endSession": {
+      "title": "練習セッションを終了",
+      "message": "この練習セッションを終了してもよろしいですか？",
+      "cancel": "続ける",
+      "confirm": "セッションを終了"
+    },
+    "sessionSummary": {
+      "title": "セッション完了！",
+      "duration": "所要時間",
+      "score": "スコア",
+      "feedback": "フィードバック",
+      "vocabulary": "新しい語彙",
+      "ok": "OK"
+    },
+    "errors": {
+      "initializationFailed": "サービスの初期化に失敗しました。設定を確認してください。",
+      "noApiKey": "APIキーが見つかりません。設定で構成してください。",
+      "voicePermission": "この機能を使用するにはマイクの許可が必要です。",
+      "listeningError": "リスニングエラー",
+      "speakingError": "スピーキングエラー"
+    }
+  },
+  "progress": {
+    "title": "進捗状況",
+    "subtitle": "学習の旅を追跡",
+    "stats": {
+      "totalSessions": "総セッション数",
+      "totalDuration": "総時間",
+      "averageScore": "平均スコア"
+    },
+    "recentSessions": {
+      "title": "最近のセッション",
+      "noSessions": "まだ練習セッションがありません。最初の会話を始めましょう！",
+      "score": "スコア",
+      "duration": "所要時間"
+    },
+    "achievements": {
+      "title": "成果",
+      "noAchievements": "練習セッションを完了して成果をアンロックしましょう！"
+    }
+  },
+  "settings": {
+    "sections": {
+      "guestMode": {
+        "title": "👤 ゲストモード",
+        "status": "ステータス",
+        "statusValue": "ゲストとして使用中",
+        "info1": "ℹ️ ゲストモードでアプリを使用しています。データはこのデバイスにのみローカルで保存されます。",
+        "info2": "💡 アカウントを作成して、デバイス間でデータを同期し、クラウドに安全に保管しましょう。",
+        "exitButton": "🚪 ゲストモードを終了",
+        "exitConfirm": {
+          "title": "ゲストモードを終了",
+          "message": "クラウドにデータを保存するためにアカウントを作成しますか？",
+          "cancel": "キャンセル",
+          "confirm": "ゲストモードを終了",
+          "success": "ゲストモードを終了しました",
+          "successMessage": "サインインまたはアカウントを作成するには、アプリを再起動する必要があります。",
+          "error": "ゲストモードの終了に失敗しました"
+        }
+      },
+      "account": {
+        "title": "アカウント",
+        "loggedInAs": "ログイン中",
+        "logoutButton": "🚪 ログアウト",
+        "logoutConfirm": {
+          "title": "ログアウト",
+          "message": "ログアウトしてもよろしいですか？",
+          "cancel": "キャンセル",
+          "confirm": "ログアウト",
+          "success": "ログアウトしました",
+          "error": "ログアウトに失敗しました"
+        }
+      },
+      "api": {
+        "title": "API設定",
+        "description": "会話機能を有効にするには、Gemini APIキーを入力してください",
+        "apiKeyLabel": "Gemini APIキー",
+        "apiKeyPlaceholder": "Gemini APIキーを入力",
+        "showButton": "👁️‍🗨️ 表示",
+        "hideButton": "👁️ 非表示",
+        "saveButton": "APIキーを保存",
+        "getKeyButton": "🔑 Google AI StudioからAPIキーを取得",
+        "info": "ℹ️ APIキーをお持ちでない場合は、上のボタンをクリックしてGoogle AI Studioから取得してください（無料、使用制限あり）",
+        "errors": {
+          "empty": "APIキーを入力してください",
+          "invalid": "APIキーの形式が無効のようです。確認してもう一度お試しください。"
+        },
+        "success": "APIキーが正常に保存されました！"
+      },
+      "conversation": {
+        "title": "🗣️ 会話設定",
+        "description": "AI応答と提案されるユーザー応答の長さを調整します",
+        "responseLength": "応答の長さ",
+        "lengths": {
+          "short": {
+            "label": "短い",
+            "description": "簡潔な応答（1-2文）"
+          },
+          "medium": {
+            "label": "中程度",
+            "description": "バランスの取れた応答（2-3文）"
+          },
+          "long": {
+            "label": "長い",
+            "description": "詳細で包括的な応答（3-4文）"
+          }
+        },
+        "info": "💡 短い応答は理解しやすく、より魅力的な練習になります。長い応答はより多くのコンテキストと詳細を提供します。",
+        "success": "文の長さの設定が保存されました！"
+      },
+      "language": {
+        "title": "🌐 言語",
+        "description": "アプリのインターフェース言語を選択してください",
+        "currentLanguage": "アプリの言語",
+        "nativeLanguage": "母国語（UI言語）",
+        "targetLanguage": "学習言語",
+        "languages": {
+          "ko": "한국어",
+          "en": "English",
+          "ja": "日本語",
+          "zh": "中文",
+          "es": "Español",
+          "fr": "Français",
+          "de": "Deutsch"
+        },
+        "targetLanguages": {
+          "en": "英語",
+          "ko": "韓国語",
+          "ja": "日本語",
+          "zh": "中国語",
+          "es": "スペイン語",
+          "fr": "フランス語",
+          "de": "ドイツ語"
+        },
+        "success": "言語が正常に変更されました！"
+      },
+      "data": {
+        "title": "データ管理",
+        "exportButton": "📤 データをエクスポート",
+        "clearButton": "🗑️ すべてのデータをクリア",
+        "clearConfirm": {
+          "title": "すべてのデータをクリア",
+          "message": "すべての会話履歴と進捗が削除されます。この操作は元に戻せません。",
+          "cancel": "キャンセル",
+          "confirm": "データをクリア",
+          "success": "すべてのデータがクリアされました",
+          "error": "データのクリアに失敗しました"
+        },
+        "exportSuccess": {
+          "title": "データをエクスポート",
+          "message": "データが正常にエクスポートされました！\n\n本番アプリでは、ファイルに保存するか、メールで共有します。"
+        },
+        "exportError": "データのエクスポートに失敗しました"
+      },
+      "about": {
+        "title": "情報",
+        "appName": "アプリ名",
+        "version": "バージョン",
+        "lastModified": "最終更新日",
+        "description": "説明",
+        "descriptionValue": "リアルタイム英会話コーチ"
+      }
+    },
+    "footer": "© 2024 GeminiTalk - Gemini Live API搭載"
+  },
+  "login": {
+    "title": "GeminiTalkへようこそ",
+    "subtitle": "AI搭載の英会話コーチ",
+    "emailLabel": "メール",
+    "emailPlaceholder": "メールアドレスを入力",
+    "passwordLabel": "パスワード",
+    "passwordPlaceholder": "パスワードを入力",
+    "loginButton": "ログイン",
+    "signupButton": "サインアップ",
+    "guestButton": "ゲストとして続ける",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "switchToSignup": "アカウントをお持ちでない方はサインアップ",
+    "switchToLogin": "すでにアカウントをお持ちの方はログイン",
+    "errors": {
+      "invalidEmail": "有効なメールアドレスを入力してください",
+      "shortPassword": "パスワードは6文字以上である必要があります",
+      "loginFailed": "ログインに失敗しました。認証情報を確認してください。",
+      "signupFailed": "サインアップに失敗しました。もう一度お試しください。",
+      "resetFailed": "リセットメールの送信に失敗しました。もう一度お試しください。"
+    },
+    "resetPassword": {
+      "title": "パスワードをリセット",
+      "message": "メールアドレスを入力すると、パスワードをリセットする手順をお送りします。",
+      "cancel": "キャンセル",
+      "send": "リセットメールを送信",
+      "success": "パスワードリセットメール送信済み",
+      "successMessage": "パスワードをリセットする手順についてのメールを確認してください。"
+    }
+  },
+  "cost": {
+    "title": "API使用コスト",
+    "totalCost": "総コスト",
+    "currentSession": "現在のセッション",
+    "disclaimer": "Gemini API価格に基づく推定コスト"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "yes": "はい",
+    "no": "いいえ",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "back": "戻る",
+    "next": "次へ",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功"
+  }
+}
