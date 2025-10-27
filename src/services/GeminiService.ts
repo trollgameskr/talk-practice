@@ -25,6 +25,7 @@ export class GeminiService {
     totalTokens: 0,
     estimatedCost: 0,
   };
+  private onTokenUsageUpdate?: (tokenUsage: TokenUsage) => void;
 
   constructor(apiKey: string, sentenceLength?: SentenceLength) {
     if (sentenceLength) {
@@ -48,6 +49,13 @@ export class GeminiService {
       // Rethrow so callers know initialization failed
       throw err;
     }
+  }
+
+  /**
+   * Set callback to be called when token usage is updated
+   */
+  setTokenUsageCallback(callback: (tokenUsage: TokenUsage) => void) {
+    this.onTokenUsageUpdate = callback;
   }
 
   /**
@@ -155,6 +163,16 @@ export class GeminiService {
     const inputCost = (inputTokens / 1000) * GEMINI_PRICING.inputPer1K;
     const outputCost = (outputTokens / 1000) * GEMINI_PRICING.outputPer1K;
     this.sessionTokenUsage.estimatedCost += inputCost + outputCost;
+
+    // Notify callback with the incremental token usage for this API call
+    if (this.onTokenUsageUpdate) {
+      this.onTokenUsageUpdate({
+        inputTokens,
+        outputTokens,
+        totalTokens,
+        estimatedCost: inputCost + outputCost,
+      });
+    }
   }
 
   /**

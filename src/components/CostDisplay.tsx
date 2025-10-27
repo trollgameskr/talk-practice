@@ -15,15 +15,15 @@ interface CostDisplayProps {
 }
 
 const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
-  const {theme, isDark} = useTheme();
+  const {isDark} = useTheme();
   const [totalCost, setTotalCost] = useState<number>(0);
   const [totalTokens, setTotalTokens] = useState<number>(0);
 
   useEffect(() => {
     loadCostData();
 
-    // Refresh every 5 seconds
-    const interval = setInterval(loadCostData, 5000);
+    // Refresh every 2 seconds for more real-time updates
+    const interval = setInterval(loadCostData, 2000);
 
     return () => clearInterval(interval);
   }, []);
