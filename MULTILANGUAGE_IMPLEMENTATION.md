@@ -162,12 +162,20 @@ All tests verify:
 - AsyncStorage integration
 - Default language fallbacks
 
+## Recent Updates
+
+### AI First Message Language Fix (2025)
+The AI's first message in each conversation is now properly generated in the target language, not English. For example:
+- **Before**: "What do you like to do with your friends? Respond in Japanese." (English)
+- **After**: "友達と何をするのが好きですか？" (Japanese)
+
+The system now uses the Gemini API to translate the starter prompts into the target language, ensuring a fully immersive learning experience from the first message.
+
 ## Future Enhancements
 
 Potential improvements for future versions:
 1. Add more languages based on user demand
-2. Use target language in conversation prompts to customize practice content
-3. Allow region-specific variants (e.g., Simplified Chinese 'zh-Hans' vs Traditional Chinese 'zh-Hant', or 'en-US' vs 'en-GB')
-4. Add language-specific cultural content and conversation topics
-5. Implement language learning progress tracking per target language
-6. Add voice accent options for target language practice
+2. Allow region-specific variants (e.g., Simplified Chinese 'zh-Hans' vs Traditional Chinese 'zh-Hant', or 'en-US' vs 'en-GB')
+3. Add language-specific cultural content and conversation topics
+4. Implement language learning progress tracking per target language
+5. Add voice accent options for target language practice

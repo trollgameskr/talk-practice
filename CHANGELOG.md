@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- AI's first message now correctly uses the target language instead of English
+  - When learning Japanese, the first message will be in Japanese (e.g., "友達と何をするのが好きですか？")
+  - Previously, it was in English with instructions to "Respond in Japanese"
+  - Applies to all supported target languages: English, Korean, Japanese, Chinese, Spanish, French, German
+
+### Changed
+- `startConversation()` method in GeminiService now uses AI to generate the first message in the target language
+- Added fallback mechanism to English prompts if AI translation fails
+
+### Note
+- Multi-language support for UI and target languages was implemented in a previous update but not documented in CHANGELOG
+  - See MULTILANGUAGE_IMPLEMENTATION.md for details
+  - Supports 7 languages: English, Korean, Japanese, Chinese, Spanish, French, German
+
+### Planned Features
+- Offline mode with cached responses
+- Custom conversation scenarios
+- Speech rate adjustment
+- Background mode support
+- Social features (share progress)
+- Advanced analytics dashboard
+- Export to PDF/CSV
+- Widget support (iOS/Android)
+
+### Known Issues
+- Voice recognition requires internet connection
+- API key must be configured manually
+- Limited offline functionality
+
 ## [1.0.0] - 2024-10-19
 
 ### Added
@@ -75,7 +107,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned Features
 - Offline mode with cached responses
-- Multi-language support
 - Custom conversation scenarios
 - Speech rate adjustment
 - Background mode support

@@ -39,6 +39,53 @@ describe('GeminiService', () => {
         expect(result).toBeDefined();
       }
     });
+
+    it('should generate starter message in target language', async () => {
+      // Test with Japanese as target language
+      const japaneseService = new GeminiService(
+        'test-api-key',
+        'medium',
+        'ja',
+        'en',
+      );
+
+      const result = await japaneseService.startConversation(
+        ConversationTopic.CASUAL,
+      );
+
+      expect(result).toBeDefined();
+      expect(typeof result).toBe('string');
+      expect(result.length).toBeGreaterThan(0);
+
+      japaneseService.endConversation();
+    });
+
+    it('should generate starter message for different target languages', async () => {
+      const languages = [
+        {code: 'ja', name: 'Japanese'},
+        {code: 'ko', name: 'Korean'},
+        {code: 'es', name: 'Spanish'},
+      ];
+
+      for (const lang of languages) {
+        const langService = new GeminiService(
+          'test-api-key',
+          'medium',
+          lang.code,
+          'en',
+        );
+
+        const result = await langService.startConversation(
+          ConversationTopic.DAILY,
+        );
+
+        expect(result).toBeDefined();
+        expect(typeof result).toBe('string');
+        expect(result.length).toBeGreaterThan(0);
+
+        langService.endConversation();
+      }
+    });
   });
 
   describe('sendMessage', () => {
@@ -217,7 +264,7 @@ describe('GeminiService', () => {
     it('should accept and store callback function', () => {
       const mockCallback = jest.fn();
       service.setTokenUsageCallback(mockCallback);
-      
+
       // Test passes if no error is thrown
       expect(true).toBe(true);
     });
@@ -231,15 +278,15 @@ describe('GeminiService', () => {
     it('should retrieve token usage after API calls', async () => {
       await service.startConversation(ConversationTopic.DAILY);
       await service.sendMessage('Hello');
-      
+
       const tokenUsage = service.getSessionTokenUsage();
-      
+
       // Token usage should be defined with correct structure
       expect(tokenUsage).toHaveProperty('inputTokens');
       expect(tokenUsage).toHaveProperty('outputTokens');
       expect(tokenUsage).toHaveProperty('totalTokens');
       expect(tokenUsage).toHaveProperty('estimatedCost');
-      
+
       // Values should be numbers (may be 0 in test environment)
       expect(typeof tokenUsage.inputTokens).toBe('number');
       expect(typeof tokenUsage.outputTokens).toBe('number');
