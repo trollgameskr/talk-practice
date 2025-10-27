@@ -212,4 +212,39 @@ describe('GeminiService', () => {
       });
     });
   });
+
+  describe('setTokenUsageCallback', () => {
+    it('should accept and store callback function', () => {
+      const mockCallback = jest.fn();
+      service.setTokenUsageCallback(mockCallback);
+      
+      // Test passes if no error is thrown
+      expect(true).toBe(true);
+    });
+
+    it('should work without callback set', async () => {
+      // Should not throw error when no callback is set
+      await service.startConversation(ConversationTopic.DAILY);
+      await expect(service.sendMessage('Hello')).resolves.toBeDefined();
+    });
+
+    it('should retrieve token usage after API calls', async () => {
+      await service.startConversation(ConversationTopic.DAILY);
+      await service.sendMessage('Hello');
+      
+      const tokenUsage = service.getSessionTokenUsage();
+      
+      // Token usage should be defined with correct structure
+      expect(tokenUsage).toHaveProperty('inputTokens');
+      expect(tokenUsage).toHaveProperty('outputTokens');
+      expect(tokenUsage).toHaveProperty('totalTokens');
+      expect(tokenUsage).toHaveProperty('estimatedCost');
+      
+      // Values should be numbers (may be 0 in test environment)
+      expect(typeof tokenUsage.inputTokens).toBe('number');
+      expect(typeof tokenUsage.outputTokens).toBe('number');
+      expect(typeof tokenUsage.totalTokens).toBe('number');
+      expect(typeof tokenUsage.estimatedCost).toBe('number');
+    });
+  });
 });

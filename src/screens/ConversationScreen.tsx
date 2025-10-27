@@ -97,6 +97,15 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Initialize Gemini service with API key and sentence length
       geminiService.current = new GeminiService(apiKey, sentenceLength);
 
+      // Set up real-time token usage tracking
+      geminiService.current.setTokenUsageCallback(async tokenUsage => {
+        try {
+          await storageService.updateTokenUsage(tokenUsage);
+        } catch (error) {
+          console.error('Error saving token usage:', error);
+        }
+      });
+
       // Initialize Voice service
       voiceService.current = new VoiceService();
 

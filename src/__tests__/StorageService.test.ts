@@ -216,4 +216,75 @@ describe('StorageService', () => {
       expect(parsed.exportDate).toBeDefined();
     });
   });
+
+  describe('updateTokenUsage', () => {
+    it('should update token usage immediately', async () => {
+      const tokenUsage = {
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+        estimatedCost: 0.001,
+      };
+
+      await service.updateTokenUsage(tokenUsage);
+      const progress = await service.getUserProgress();
+
+      expect(progress.totalTokens).toBe(150);
+      expect(progress.totalCost).toBe(0.001);
+    });
+
+    it('should accumulate token usage across multiple updates', async () => {
+      const tokenUsage1 = {
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+        estimatedCost: 0.001,
+      };
+
+      const tokenUsage2 = {
+        inputTokens: 200,
+        outputTokens: 100,
+        totalTokens: 300,
+        estimatedCost: 0.002,
+      };
+
+      await service.updateTokenUsage(tokenUsage1);
+      await service.updateTokenUsage(tokenUsage2);
+      
+      const progress = await service.getUserProgress();
+
+      expect(progress.totalTokens).toBe(450);
+      expect(progress.totalCost).toBeCloseTo(0.003, 4);
+    });
+
+    it('should not double-count tokens when session is saved', async () => {
+      // First, update token usage in real-time
+      const tokenUsage = {
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+        estimatedCost: 0.001,
+      };
+
+      await service.updateTokenUsage(tokenUsage);
+
+      // Then save a session (which should not add tokens again)
+      const session: ConversationSession = {
+        id: 'test-session',
+        topic: ConversationTopic.DAILY,
+        startTime: new Date(),
+        endTime: new Date(),
+        messages: [],
+        duration: 300,
+        tokenUsage: tokenUsage,
+      };
+
+      await service.saveSession(session);
+      const progress = await service.getUserProgress();
+
+      // Tokens should only be counted once (from real-time update)
+      expect(progress.totalTokens).toBe(150);
+      expect(progress.totalCost).toBeCloseTo(0.001, 4);
+    });
+  });
 });

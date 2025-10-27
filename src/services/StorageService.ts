@@ -136,6 +136,31 @@ export class StorageService {
   }
 
   /**
+   * Update token usage immediately (real-time tracking)
+   */
+  async updateTokenUsage(tokenUsage: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    estimatedCost: number;
+  }): Promise<void> {
+    try {
+      const progress = await this.getUserProgress();
+      
+      // Add the incremental token usage to the totals
+      progress.totalCost += tokenUsage.estimatedCost;
+      progress.totalTokens += tokenUsage.totalTokens;
+      
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.USER_PROGRESS,
+        JSON.stringify(progress),
+      );
+    } catch (error) {
+      console.error('Error updating token usage:', error);
+    }
+  }
+
+  /**
    * Update user progress based on completed session
    */
   async updateUserProgress(session: ConversationSession): Promise<void> {
@@ -148,11 +173,8 @@ export class StorageService {
       progress.averageSessionDuration =
         progress.totalDuration / progress.totalSessions;
 
-      // Update cost tracking
-      if (session.tokenUsage) {
-        progress.totalCost += session.tokenUsage.estimatedCost;
-        progress.totalTokens += session.tokenUsage.totalTokens;
-      }
+      // Note: Token usage is now tracked in real-time via updateTokenUsage(),
+      // so we don't need to update it here to avoid double-counting
 
       // Update topic progress
       const topicProg = progress.topicProgress[session.topic];
