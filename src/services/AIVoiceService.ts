@@ -279,7 +279,7 @@ export class AIVoiceService {
 
     // Get language code without region (e.g., 'en' from 'en-US')
     const baseLang = this.voiceAccent.split('-')[0];
-    
+
     // Priority order for AI/Neural voices with matching accent:
     // 1. Google voices matching accent
     // 2. Microsoft voices with "Neural" matching accent
@@ -288,8 +288,14 @@ export class AIVoiceService {
     const voicePriorities = [
       (v: any) => v.name.includes('Google') && v.lang === this.voiceAccent,
       (v: any) => v.name.includes('Google') && v.lang.startsWith(baseLang),
-      (v: any) => v.name.includes('Microsoft') && v.name.includes('Neural') && v.lang === this.voiceAccent,
-      (v: any) => v.name.includes('Microsoft') && v.name.includes('Neural') && v.lang.startsWith(baseLang),
+      (v: any) =>
+        v.name.includes('Microsoft') &&
+        v.name.includes('Neural') &&
+        v.lang === this.voiceAccent,
+      (v: any) =>
+        v.name.includes('Microsoft') &&
+        v.name.includes('Neural') &&
+        v.lang.startsWith(baseLang),
       (v: any) => v.name.includes('Premium') && v.lang === this.voiceAccent,
       (v: any) => v.name.includes('Enhanced') && v.lang === this.voiceAccent,
       (v: any) => v.lang === this.voiceAccent && v.localService,

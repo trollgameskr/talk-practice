@@ -415,7 +415,9 @@ const SettingsScreen = ({navigation}: any) => {
             overflow: 'scroll',
           },
         ]}
-        contentContainerStyle={Platform.OS === 'web' ? styles.scrollContentWeb : undefined}
+        contentContainerStyle={
+          Platform.OS === 'web' ? styles.scrollContentWeb : undefined
+        }
         showsVerticalScrollIndicator={true}>
         <View
           style={[

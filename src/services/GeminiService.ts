@@ -551,7 +551,9 @@ Provide only the pronunciation guide, no explanations.`;
    */
   async getGrammarHighlights(
     text: string,
-  ): Promise<Array<{text: string; type: string; explanation: string; examples: string[]}>> {
+  ): Promise<
+    Array<{text: string; type: string; explanation: string; examples: string[]}>
+  > {
     const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
     const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
 

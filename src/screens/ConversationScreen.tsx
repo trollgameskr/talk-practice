@@ -144,10 +144,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       );
       const aiVoiceAccent = aiVoiceAccentPref || 'en-US';
 
-      const responseVoiceAccentPref = await AsyncStorage.getItem(
-        STORAGE_KEYS.RESPONSE_VOICE_ACCENT,
-      );
-      const responseVoiceAccent = responseVoiceAccentPref || 'en-US';
+      // Response voice accent will be loaded when needed (handleUseSample)
 
       // Load language preferences
       const targetLanguage = await getTargetLanguage();
@@ -286,9 +283,7 @@ const ConversationScreen = ({route, navigation}: any) => {
   /**
    * Enrich assistant message with translation, pronunciation, and grammar highlights
    */
-  const enrichAssistantMessage = async (
-    message: Message,
-  ): Promise<Message> => {
+  const enrichAssistantMessage = async (message: Message): Promise<Message> => {
     if (!geminiService.current) {
       return message;
     }
@@ -334,7 +329,10 @@ const ConversationScreen = ({route, navigation}: any) => {
     return enrichedMessage;
   };
 
-  const handleUserMessage = async (text: string, shouldSpeak: boolean = true) => {
+  const handleUserMessage = async (
+    text: string,
+    shouldSpeak: boolean = true,
+  ) => {
     if (!text.trim() || !geminiService.current) {
       return;
     }
@@ -467,7 +465,7 @@ const ConversationScreen = ({route, navigation}: any) => {
 
   const handleUseSample = async (sample: string) => {
     setShowSamples(false);
-    
+
     // If auto-read is enabled, temporarily switch to response voice accent
     if (autoReadResponse && voiceService.current) {
       try {
@@ -476,9 +474,9 @@ const ConversationScreen = ({route, navigation}: any) => {
         );
         const responseVoiceAccent = responseVoiceAccentPref || 'en-US';
         voiceService.current.setVoiceAccent(responseVoiceAccent);
-        
+
         await handleUserMessage(sample, autoReadResponse);
-        
+
         // Restore AI voice accent
         const aiVoiceAccentPref = await AsyncStorage.getItem(
           STORAGE_KEYS.AI_VOICE_ACCENT,
@@ -541,7 +539,7 @@ const ConversationScreen = ({route, navigation}: any) => {
   const renderClickableWords = (message: Message) => {
     const text = message.content;
     const grammarHighlights = message.grammarHighlights || [];
-    
+
     // Split text into words while preserving spaces and punctuation
     const parts: {text: string; isWord: boolean; charIndex: number}[] = [];
     let currentWord = '';
@@ -581,11 +579,11 @@ const ConversationScreen = ({route, navigation}: any) => {
     const getHighlightForPosition = (
       position: number,
       length: number,
-    ): typeof grammarHighlights[0] | null => {
+    ): (typeof grammarHighlights)[0] | null => {
       if (!showGrammarHighlights) {
         return null;
       }
-      
+
       for (const highlight of grammarHighlights) {
         if (
           position >= highlight.startIndex &&
