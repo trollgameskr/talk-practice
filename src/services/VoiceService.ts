@@ -5,6 +5,7 @@
 
 import Voice from '@react-native-community/voice';
 import AIVoiceService from './AIVoiceService';
+import {VoicePersonality} from '../config/gemini.config';
 
 export class VoiceService {
   private isListening: boolean = false;
@@ -17,9 +18,17 @@ export class VoiceService {
   // Debounce delay for speech result processing (in milliseconds)
   private static readonly RESULT_DEBOUNCE_DELAY = 100;
 
-  constructor(apiKey?: string, voiceAccent?: string) {
+  constructor(
+    apiKey?: string,
+    voiceAccent?: string,
+    voicePersonality?: VoicePersonality,
+  ) {
     this.initializeVoice();
-    this.aiVoiceService = new AIVoiceService(apiKey, voiceAccent);
+    this.aiVoiceService = new AIVoiceService(
+      apiKey,
+      voiceAccent,
+      voicePersonality,
+    );
   }
 
   /**
@@ -125,6 +134,13 @@ export class VoiceService {
    */
   setVoiceAccent(accent: string) {
     this.aiVoiceService.setVoiceAccent(accent);
+  }
+
+  /**
+   * Set voice personality for AI voice service
+   */
+  setVoicePersonality(personality: VoicePersonality) {
+    this.aiVoiceService.setVoicePersonality(personality);
   }
 
   /**
