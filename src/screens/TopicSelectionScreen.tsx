@@ -2,7 +2,7 @@
  * Topic Selection Screen
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,12 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ConversationTopic} from '../types';
 import {getTopicDisplayName, getTopicIcon} from '../utils/helpers';
+import {STORAGE_KEYS} from '../config/gemini.config';
 
 const topics = [
   {
@@ -38,7 +41,43 @@ const topics = [
 ];
 
 const TopicSelectionScreen = ({navigation}: any) => {
-  const handleTopicSelect = (topic: ConversationTopic) => {
+  useEffect(() => {
+    checkApiKey();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const showApiKeyAlert = (onCancel?: () => void) => {
+    Alert.alert(
+      'API Key Required',
+      'You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nPlease go to Settings to configure your API key.',
+      [
+        {
+          text: 'Cancel',
+          onPress: onCancel,
+          style: 'cancel',
+        },
+        {
+          text: 'Go to Settings',
+          onPress: () => navigation.navigate('Settings'),
+        },
+      ],
+    );
+  };
+
+  const checkApiKey = async () => {
+    const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
+    if (!apiKey) {
+      showApiKeyAlert(() => navigation.goBack());
+    }
+  };
+
+  const handleTopicSelect = async (topic: ConversationTopic) => {
+    // Check API key again before navigation
+    const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
+    if (!apiKey) {
+      showApiKeyAlert();
+      return;
+    }
     navigation.navigate('Conversation', {topic});
   };
 
