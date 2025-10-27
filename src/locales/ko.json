@@ -202,6 +202,26 @@
         "autoReadResponse": {
           "label": "응답 선택 시 AI 음성 읽기",
           "description": "응답 옵션을 터치하면 AI가 자동으로 음성으로 읽어줍니다"
+        },
+        "showTranslation": {
+          "label": "번역 표시",
+          "description": "AI 메시지 아래에 모국어 번역을 표시합니다"
+        },
+        "showPronunciation": {
+          "label": "발음 가이드 표시",
+          "description": "AI 메시지 아래에 모국어로 발음 가이드를 표시합니다"
+        },
+        "showGrammarHighlights": {
+          "label": "문법과 이디엄 강조",
+          "description": "AI 메시지에서 유용한 문법 패턴과 이디엄을 강조 표시합니다"
+        },
+        "aiVoiceAccent": {
+          "label": "AI 음성 억양",
+          "description": "AI 음성 응답의 억양을 선택하세요"
+        },
+        "responseVoiceAccent": {
+          "label": "응답 옵션 음성 억양",
+          "description": "응답 옵션을 읽을 때의 억양을 선택하세요"
         }
       },
       "language": {

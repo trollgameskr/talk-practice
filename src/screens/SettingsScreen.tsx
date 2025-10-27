@@ -26,6 +26,8 @@ import {
   SentenceLength,
   SENTENCE_LENGTH_CONFIG,
   STORAGE_KEYS,
+  VOICE_ACCENT_OPTIONS,
+  VoiceAccent,
 } from '../config/gemini.config';
 import {useTheme} from '../contexts/ThemeContext';
 import {
@@ -54,6 +56,12 @@ const SettingsScreen = ({navigation}: any) => {
   const [selectedTargetLanguage, setSelectedTargetLanguage] =
     useState<string>('en');
   const [autoReadResponse, setAutoReadResponse] = useState(true);
+  const [showTranslation, setShowTranslation] = useState(false);
+  const [showPronunciation, setShowPronunciation] = useState(false);
+  const [showGrammarHighlights, setShowGrammarHighlights] = useState(false);
+  const [aiVoiceAccent, setAiVoiceAccent] = useState<VoiceAccent>('en-US');
+  const [responseVoiceAccent, setResponseVoiceAccent] =
+    useState<VoiceAccent>('en-US');
 
   useEffect(() => {
     loadApiKey();
@@ -62,6 +70,11 @@ const SettingsScreen = ({navigation}: any) => {
     loadLanguage();
     loadTargetLanguage();
     loadAutoReadResponse();
+    loadShowTranslation();
+    loadShowPronunciation();
+    loadShowGrammarHighlights();
+    loadAiVoiceAccent();
+    loadResponseVoiceAccent();
   }, []);
 
   const loadLanguage = async () => {
@@ -121,6 +134,71 @@ const SettingsScreen = ({navigation}: any) => {
     }
   };
 
+  const loadShowTranslation = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.SHOW_TRANSLATION,
+      );
+      if (savedValue !== null) {
+        setShowTranslation(savedValue === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading show translation setting:', error);
+    }
+  };
+
+  const loadShowPronunciation = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.SHOW_PRONUNCIATION,
+      );
+      if (savedValue !== null) {
+        setShowPronunciation(savedValue === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading show pronunciation setting:', error);
+    }
+  };
+
+  const loadShowGrammarHighlights = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.SHOW_GRAMMAR_HIGHLIGHTS,
+      );
+      if (savedValue !== null) {
+        setShowGrammarHighlights(savedValue === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading show grammar highlights setting:', error);
+    }
+  };
+
+  const loadAiVoiceAccent = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.AI_VOICE_ACCENT,
+      );
+      if (savedValue) {
+        setAiVoiceAccent(savedValue as VoiceAccent);
+      }
+    } catch (error) {
+      console.error('Error loading AI voice accent:', error);
+    }
+  };
+
+  const loadResponseVoiceAccent = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.RESPONSE_VOICE_ACCENT,
+      );
+      if (savedValue) {
+        setResponseVoiceAccent(savedValue as VoiceAccent);
+      }
+    } catch (error) {
+      console.error('Error loading response voice accent:', error);
+    }
+  };
+
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
       Alert.alert('Error', 'Please enter an API key');
@@ -165,6 +243,65 @@ const SettingsScreen = ({navigation}: any) => {
     } catch (error) {
       console.error('Error saving auto-read response setting:', error);
       Alert.alert('Error', 'Failed to save auto-read response setting');
+    }
+  };
+
+  const handleShowTranslationToggle = async (value: boolean) => {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.SHOW_TRANSLATION,
+        value.toString(),
+      );
+      setShowTranslation(value);
+    } catch (error) {
+      console.error('Error saving show translation setting:', error);
+      Alert.alert('Error', 'Failed to save translation setting');
+    }
+  };
+
+  const handleShowPronunciationToggle = async (value: boolean) => {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.SHOW_PRONUNCIATION,
+        value.toString(),
+      );
+      setShowPronunciation(value);
+    } catch (error) {
+      console.error('Error saving show pronunciation setting:', error);
+      Alert.alert('Error', 'Failed to save pronunciation setting');
+    }
+  };
+
+  const handleShowGrammarHighlightsToggle = async (value: boolean) => {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.SHOW_GRAMMAR_HIGHLIGHTS,
+        value.toString(),
+      );
+      setShowGrammarHighlights(value);
+    } catch (error) {
+      console.error('Error saving show grammar highlights setting:', error);
+      Alert.alert('Error', 'Failed to save grammar highlights setting');
+    }
+  };
+
+  const handleAiVoiceAccentChange = async (accent: VoiceAccent) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.AI_VOICE_ACCENT, accent);
+      setAiVoiceAccent(accent);
+    } catch (error) {
+      console.error('Error saving AI voice accent:', error);
+      Alert.alert('Error', 'Failed to save AI voice accent');
+    }
+  };
+
+  const handleResponseVoiceAccentChange = async (accent: VoiceAccent) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.RESPONSE_VOICE_ACCENT, accent);
+      setResponseVoiceAccent(accent);
+    } catch (error) {
+      console.error('Error saving response voice accent:', error);
+      Alert.alert('Error', 'Failed to save response voice accent');
     }
   };
 
@@ -776,6 +913,216 @@ const SettingsScreen = ({navigation}: any) => {
                 }
               />
             </View>
+          </View>
+
+          <View style={styles.optionGroup}>
+            <View style={styles.themeRow}>
+              <View style={styles.themeInfo}>
+                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                  {t('settings.sections.conversation.showTranslation.label')}
+                </Text>
+                <Text
+                  style={[
+                    styles.themeDescription,
+                    {color: theme.colors.textSecondary},
+                  ]}>
+                  {t(
+                    'settings.sections.conversation.showTranslation.description',
+                  )}
+                </Text>
+              </View>
+              <Switch
+                value={showTranslation}
+                onValueChange={handleShowTranslationToggle}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={
+                  showTranslation
+                    ? theme.colors.buttonPrimaryText
+                    : theme.colors.inputBackground
+                }
+              />
+            </View>
+          </View>
+
+          <View style={styles.optionGroup}>
+            <View style={styles.themeRow}>
+              <View style={styles.themeInfo}>
+                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                  {t('settings.sections.conversation.showPronunciation.label')}
+                </Text>
+                <Text
+                  style={[
+                    styles.themeDescription,
+                    {color: theme.colors.textSecondary},
+                  ]}>
+                  {t(
+                    'settings.sections.conversation.showPronunciation.description',
+                  )}
+                </Text>
+              </View>
+              <Switch
+                value={showPronunciation}
+                onValueChange={handleShowPronunciationToggle}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={
+                  showPronunciation
+                    ? theme.colors.buttonPrimaryText
+                    : theme.colors.inputBackground
+                }
+              />
+            </View>
+          </View>
+
+          <View style={styles.optionGroup}>
+            <View style={styles.themeRow}>
+              <View style={styles.themeInfo}>
+                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                  {t(
+                    'settings.sections.conversation.showGrammarHighlights.label',
+                  )}
+                </Text>
+                <Text
+                  style={[
+                    styles.themeDescription,
+                    {color: theme.colors.textSecondary},
+                  ]}>
+                  {t(
+                    'settings.sections.conversation.showGrammarHighlights.description',
+                  )}
+                </Text>
+              </View>
+              <Switch
+                value={showGrammarHighlights}
+                onValueChange={handleShowGrammarHighlightsToggle}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={
+                  showGrammarHighlights
+                    ? theme.colors.buttonPrimaryText
+                    : theme.colors.inputBackground
+                }
+              />
+            </View>
+          </View>
+
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              {t('settings.sections.conversation.aiVoiceAccent.label')}
+            </Text>
+            <Text
+              style={[
+                styles.optionDescription,
+                {color: theme.colors.textSecondary},
+              ]}>
+              {t('settings.sections.conversation.aiVoiceAccent.description')}
+            </Text>
+            {(Object.keys(VOICE_ACCENT_OPTIONS) as VoiceAccent[]).map(
+              accent => (
+                <TouchableOpacity
+                  key={accent}
+                  style={[
+                    styles.optionButton,
+                    {
+                      backgroundColor: theme.colors.inputBackground,
+                      borderColor: theme.colors.border,
+                    },
+                    aiVoiceAccent === accent && {
+                      borderColor: theme.colors.primary,
+                      backgroundColor: theme.colors.primaryLight,
+                    },
+                  ]}
+                  onPress={() => handleAiVoiceAccentChange(accent)}>
+                  <View style={styles.optionContent}>
+                    <View style={styles.optionHeader}>
+                      <Text
+                        style={[
+                          styles.optionTitle,
+                          {color: theme.colors.text},
+                          aiVoiceAccent === accent && {
+                            color: theme.colors.primary,
+                          },
+                        ]}>
+                        {VOICE_ACCENT_OPTIONS[accent].label}
+                      </Text>
+                      {aiVoiceAccent === accent && (
+                        <Text
+                          style={[
+                            styles.checkMark,
+                            {color: theme.colors.primary},
+                          ]}>
+                          ✓
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ),
+            )}
+          </View>
+
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              {t('settings.sections.conversation.responseVoiceAccent.label')}
+            </Text>
+            <Text
+              style={[
+                styles.optionDescription,
+                {color: theme.colors.textSecondary},
+              ]}>
+              {t(
+                'settings.sections.conversation.responseVoiceAccent.description',
+              )}
+            </Text>
+            {(Object.keys(VOICE_ACCENT_OPTIONS) as VoiceAccent[]).map(
+              accent => (
+                <TouchableOpacity
+                  key={accent}
+                  style={[
+                    styles.optionButton,
+                    {
+                      backgroundColor: theme.colors.inputBackground,
+                      borderColor: theme.colors.border,
+                    },
+                    responseVoiceAccent === accent && {
+                      borderColor: theme.colors.primary,
+                      backgroundColor: theme.colors.primaryLight,
+                    },
+                  ]}
+                  onPress={() => handleResponseVoiceAccentChange(accent)}>
+                  <View style={styles.optionContent}>
+                    <View style={styles.optionHeader}>
+                      <Text
+                        style={[
+                          styles.optionTitle,
+                          {color: theme.colors.text},
+                          responseVoiceAccent === accent && {
+                            color: theme.colors.primary,
+                          },
+                        ]}>
+                        {VOICE_ACCENT_OPTIONS[accent].label}
+                      </Text>
+                      {responseVoiceAccent === accent && (
+                        <Text
+                          style={[
+                            styles.checkMark,
+                            {color: theme.colors.primary},
+                          ]}>
+                          ✓
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ),
+            )}
           </View>
 
           <View
