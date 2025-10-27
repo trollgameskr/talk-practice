@@ -912,7 +912,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContentWeb: {
-    // @ts-ignore - Web-specific style
     paddingBottom: 20,
   },
   section: {
