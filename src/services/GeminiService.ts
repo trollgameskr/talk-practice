@@ -11,7 +11,7 @@ import {
   SENTENCE_LENGTH_CONFIG,
 } from '../config/gemini.config';
 import {ConversationTopic, Message, Feedback, TokenUsage} from '../types';
-import {conversationPrompts} from '../data/conversationPrompts';
+import {getConversationPrompts} from '../data/conversationPrompts';
 
 export class GeminiService {
   private genAI!: GoogleGenerativeAI;
@@ -19,6 +19,8 @@ export class GeminiService {
   private chat: any;
   private currentTopic: ConversationTopic | null = null;
   private sentenceLength: SentenceLength = 'medium';
+  private targetLanguage: string = 'en';
+  private nativeLanguage: string = 'en';
   private sessionTokenUsage: TokenUsage = {
     inputTokens: 0,
     outputTokens: 0,
@@ -27,9 +29,20 @@ export class GeminiService {
   };
   private onTokenUsageUpdate?: (tokenUsage: TokenUsage) => void;
 
-  constructor(apiKey: string, sentenceLength?: SentenceLength) {
+  constructor(
+    apiKey: string,
+    sentenceLength?: SentenceLength,
+    targetLanguage?: string,
+    nativeLanguage?: string,
+  ) {
     if (sentenceLength) {
       this.sentenceLength = sentenceLength;
+    }
+    if (targetLanguage) {
+      this.targetLanguage = targetLanguage;
+    }
+    if (nativeLanguage) {
+      this.nativeLanguage = nativeLanguage;
     }
     // The GoogleGenerativeAI constructor expects a plain string API key
     // Wrap in try/catch to surface errors.
@@ -63,6 +76,10 @@ export class GeminiService {
    */
   async startConversation(topic: ConversationTopic): Promise<string> {
     this.currentTopic = topic;
+    const conversationPrompts = getConversationPrompts(
+      this.targetLanguage,
+      this.nativeLanguage,
+    );
     const prompt = conversationPrompts[topic];
     const lengthGuideline =
       SENTENCE_LENGTH_CONFIG[this.sentenceLength].guideline;
@@ -328,18 +345,29 @@ Provide an encouraging summary in 2-3 sentences.`;
     lastMessage: string,
     count: number = 2,
   ): Promise<string[]> {
+    const languageNames: Record<string, string> = {
+      en: 'English',
+      ko: 'Korean',
+      ja: 'Japanese',
+      zh: 'Chinese',
+      es: 'Spanish',
+      fr: 'French',
+      de: 'German',
+    };
+    const targetLangName = languageNames[this.targetLanguage] || 'English';
+
     const lengthGuideline =
       SENTENCE_LENGTH_CONFIG[this.sentenceLength].guideline;
     const samplePrompt = `Based on the question or statement: "${lastMessage}"
 
-Generate ${count} different sample responses that a learner could use to practice English. Make them:
-1. Natural and conversational
-2. At an intermediate English level
+Generate ${count} different sample responses that a learner could use to practice ${targetLangName}. Make them:
+1. Natural and conversational in ${targetLangName}
+2. At an intermediate ${targetLangName} level
 3. Appropriate for the context
 4. Slightly different in tone or approach
 5. ${lengthGuideline}
 
-Format: Return only the sample responses, one per line, without numbering or extra text.`;
+Format: Return only the sample responses in ${targetLangName}, one per line, without numbering or extra text.`;
 
     if (!this.chat) {
       throw new Error('Conversation not started');
@@ -393,12 +421,26 @@ Format: Return only the sample responses, one per line, without numbering or ext
   async getWordDefinition(
     word: string,
   ): Promise<{definition: string; examples: string[]}> {
-    const definitionPrompt = `영어 단어 또는 구문 "${word}"에 대한 명확하고 간결한 한글 설명과 영어 예문 2개를 제공해주세요.
+    // Language name mapping
+    const languageNames: Record<string, string> = {
+      en: 'English',
+      ko: 'Korean',
+      ja: 'Japanese',
+      zh: 'Chinese',
+      es: 'Spanish',
+      fr: 'French',
+      de: 'German',
+    };
 
-응답을 다음과 같은 JSON 형식으로 작성해주세요:
+    const targetLangName = languageNames[this.targetLanguage] || 'English';
+    const nativeLangName = languageNames[this.nativeLanguage] || 'English';
+
+    const definitionPrompt = `Provide a clear and concise explanation of the ${targetLangName} word or phrase "${word}" in ${nativeLangName}, along with 2 example sentences in ${targetLangName}.
+
+Please format your response as JSON:
 {
-  "definition": "한글로 작성된 간단한 설명",
-  "examples": ["example sentence 1", "example sentence 2"]
+  "definition": "A simple explanation in ${nativeLangName}",
+  "examples": ["example sentence 1 in ${targetLangName}", "example sentence 2 in ${targetLangName}"]
 }`;
 
     try {
@@ -414,20 +456,20 @@ Format: Return only the sample responses, one per line, without numbering or ext
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
         return {
-          definition: parsed.definition || '정의를 불러올 수 없습니다',
+          definition: parsed.definition || 'Definition not available',
           examples: parsed.examples || [],
         };
       }
 
       // Fallback if JSON parsing fails
       return {
-        definition: '정의를 불러올 수 없습니다',
+        definition: 'Definition not available',
         examples: [],
       };
     } catch (error) {
       console.error('Error getting word definition:', error);
       return {
-        definition: '정의를 불러올 수 없습니다',
+        definition: 'Definition not available',
         examples: [],
       };
     }
