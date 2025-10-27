@@ -4,16 +4,24 @@
  * This service generates natural-sounding AI voices instead of using basic TTS
  */
 
+import {VoicePersonality} from '../config/gemini.config';
+
 export class AIVoiceService {
   private isInitialized: boolean = false;
   private isSpeaking: boolean = false;
   private currentAudio: any = null; // HTMLAudioElement in browser
   private apiKey: string = '';
   private voiceAccent: string = 'en-US'; // Default accent
+  private voicePersonality: VoicePersonality = 'cheerful_female'; // Default personality
 
-  constructor(apiKey?: string, voiceAccent?: string) {
+  constructor(
+    apiKey?: string,
+    voiceAccent?: string,
+    voicePersonality?: VoicePersonality,
+  ) {
     this.apiKey = apiKey || '';
     this.voiceAccent = voiceAccent || 'en-US';
+    this.voicePersonality = voicePersonality || 'cheerful_female';
     this.initialize();
   }
 
@@ -28,6 +36,13 @@ export class AIVoiceService {
       console.error('Error initializing AI Voice Service:', error);
       this.isInitialized = false;
     }
+  }
+
+  /**
+   * Determine if personality is male or female
+   */
+  private isMaleVoice(): boolean {
+    return this.voicePersonality.includes('male');
   }
 
   /**
@@ -73,16 +88,72 @@ export class AIVoiceService {
     try {
       const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
 
-      // Map voice accent to Google TTS voice
-      const voiceNameMap: {[key: string]: string} = {
-        'en-US': 'en-US-Neural2-F',
-        'en-GB': 'en-GB-Neural2-F',
-        'en-AU': 'en-AU-Neural2-A',
-        'en-IN': 'en-IN-Neural2-A',
-        'en-CA': 'en-US-Neural2-F', // Use US voice for Canada
+      // Determine gender from personality
+      const isMale = this.isMaleVoice();
+      const gender = isMale ? 'MALE' : 'FEMALE';
+
+      // Map voice accent and personality to Google TTS voice
+      const voiceNameMap: {
+        [key: string]: {male: string; female: string};
+      } = {
+        'en-US': {
+          male: 'en-US-Neural2-D',
+          female: 'en-US-Neural2-F',
+        },
+        'en-GB': {
+          male: 'en-GB-Neural2-D',
+          female: 'en-GB-Neural2-F',
+        },
+        'en-AU': {
+          male: 'en-AU-Neural2-D',
+          female: 'en-AU-Neural2-A',
+        },
+        'en-IN': {
+          male: 'en-IN-Neural2-D',
+          female: 'en-IN-Neural2-A',
+        },
+        'en-CA': {
+          male: 'en-US-Neural2-D',
+          female: 'en-US-Neural2-F',
+        }, // Use US voice for Canada
       };
 
-      const voiceName = voiceNameMap[this.voiceAccent] || 'en-US-Neural2-F';
+      const voiceSet =
+        voiceNameMap[this.voiceAccent] || voiceNameMap['en-US'];
+      const voiceName = isMale ? voiceSet.male : voiceSet.female;
+
+      // Adjust pitch and speaking rate based on personality
+      let pitch = 0.0;
+      let speakingRate = 0.95;
+
+      if (this.voicePersonality.includes('cheerful')) {
+        pitch = 1.0;
+        speakingRate = 1.0;
+      } else if (this.voicePersonality.includes('calm')) {
+        pitch = -1.0;
+        speakingRate = 0.9;
+      } else if (
+        this.voicePersonality.includes('energetic') ||
+        this.voicePersonality.includes('lively')
+      ) {
+        pitch = 2.0;
+        speakingRate = 1.05;
+      } else if (this.voicePersonality.includes('serious')) {
+        pitch = -1.0;
+        speakingRate = 0.85;
+      } else if (this.voicePersonality.includes('humorous')) {
+        pitch = 1.5;
+        speakingRate = 1.0;
+      } else if (this.voicePersonality.includes('cautious')) {
+        pitch = -0.5;
+        speakingRate = 0.9;
+      } else if (
+        this.voicePersonality.includes('friendly') ||
+        this.voicePersonality.includes('warm')
+      ) {
+        pitch = 0.5;
+        speakingRate = 0.95;
+      }
 
       const requestBody = {
         input: {
@@ -91,12 +162,12 @@ export class AIVoiceService {
         voice: {
           languageCode: this.voiceAccent,
           name: voiceName,
-          ssmlGender: 'FEMALE',
+          ssmlGender: gender,
         },
         audioConfig: {
           audioEncoding: 'MP3',
-          speakingRate: 0.95,
-          pitch: 0.0,
+          speakingRate: speakingRate,
+          pitch: pitch,
           volumeGainDb: 0.0,
         },
       };
@@ -182,7 +253,7 @@ export class AIVoiceService {
           win.SpeechSynthesisUtterance;
         const utterance = new SpeechSynthesisUtteranceConstructor(text);
 
-        // Select the best AI voice available with the configured accent
+        // Select the best AI voice available with the configured accent and personality
         const bestVoice = this.selectBestVoice(voices);
         if (bestVoice) {
           utterance.voice = bestVoice;
@@ -191,10 +262,43 @@ export class AIVoiceService {
           console.log('Using default system voice');
         }
 
-        // Configure for natural speech with accent
+        // Adjust rate and pitch based on personality
+        let rate = 0.95;
+        let pitch = 1.0;
+
+        if (this.voicePersonality.includes('cheerful')) {
+          pitch = 1.1;
+          rate = 1.0;
+        } else if (this.voicePersonality.includes('calm')) {
+          pitch = 0.9;
+          rate = 0.9;
+        } else if (
+          this.voicePersonality.includes('energetic') ||
+          this.voicePersonality.includes('lively')
+        ) {
+          pitch = 1.2;
+          rate = 1.05;
+        } else if (this.voicePersonality.includes('serious')) {
+          pitch = 0.9;
+          rate = 0.85;
+        } else if (this.voicePersonality.includes('humorous')) {
+          pitch = 1.15;
+          rate = 1.0;
+        } else if (this.voicePersonality.includes('cautious')) {
+          pitch = 0.95;
+          rate = 0.9;
+        } else if (
+          this.voicePersonality.includes('friendly') ||
+          this.voicePersonality.includes('warm')
+        ) {
+          pitch = 1.05;
+          rate = 0.95;
+        }
+
+        // Configure for natural speech with accent and personality
         utterance.lang = this.voiceAccent;
-        utterance.rate = 0.95; // Slightly slower for clarity
-        utterance.pitch = 1.0; // Natural pitch
+        utterance.rate = rate;
+        utterance.pitch = pitch;
         utterance.volume = 1.0; // Full volume
 
         utterance.onstart = () => {
@@ -280,6 +384,27 @@ export class AIVoiceService {
     // Get language code without region (e.g., 'en' from 'en-US')
     const baseLang = this.voiceAccent.split('-')[0];
 
+    // Determine preferred gender from personality
+    const isMale = this.isMaleVoice();
+
+    // Filter voices by gender preference
+    const genderMatchingVoices = voices.filter((v: any) => {
+      const voiceName = v.name.toLowerCase();
+      const isMaleVoice =
+        voiceName.includes('male') && !voiceName.includes('female');
+      const isFemaleVoice = voiceName.includes('female');
+
+      if (isMale) {
+        return isMaleVoice || (!isMaleVoice && !isFemaleVoice);
+      } else {
+        return isFemaleVoice || (!isMaleVoice && !isFemaleVoice);
+      }
+    });
+
+    // If we have gender-matching voices, prefer those; otherwise use all
+    const voicesToSearch =
+      genderMatchingVoices.length > 0 ? genderMatchingVoices : voices;
+
     // Priority order for AI/Neural voices with matching accent:
     // 1. Google voices matching accent
     // 2. Microsoft voices with "Neural" matching accent
@@ -304,13 +429,13 @@ export class AIVoiceService {
     ];
 
     for (const priorityCheck of voicePriorities) {
-      const voice = voices.find(priorityCheck);
+      const voice = voicesToSearch.find(priorityCheck);
       if (voice) {
         return voice;
       }
     }
 
-    return voices[0];
+    return voicesToSearch[0] || voices[0];
   }
 
   /**
@@ -356,6 +481,13 @@ export class AIVoiceService {
    */
   setVoiceAccent(accent: string) {
     this.voiceAccent = accent;
+  }
+
+  /**
+   * Set voice personality
+   */
+  setVoicePersonality(personality: VoicePersonality) {
+    this.voicePersonality = personality;
   }
 
   /**

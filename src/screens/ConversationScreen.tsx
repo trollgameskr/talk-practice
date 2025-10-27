@@ -26,7 +26,7 @@ import GeminiService from '../services/GeminiService';
 import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
 import {generateId, formatDuration} from '../utils/helpers';
-import {STORAGE_KEYS} from '../config/gemini.config';
+import {STORAGE_KEYS, VoicePersonality} from '../config/gemini.config';
 import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
 
 const storageService = new StorageService();
@@ -85,6 +85,16 @@ const ConversationScreen = ({route, navigation}: any) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Helper function to safely parse VoicePersonality from storage
+   */
+  const parseVoicePersonality = (
+    value: string | null,
+    defaultValue: VoicePersonality = 'cheerful_female',
+  ): VoicePersonality => {
+    return (value as VoicePersonality) || defaultValue;
+  };
 
   const initializeServices = async () => {
     try {
@@ -154,7 +164,13 @@ const ConversationScreen = ({route, navigation}: any) => {
       );
       const aiVoiceAccent = aiVoiceAccentPref || 'en-US';
 
-      // Response voice accent will be loaded when needed (handleUseSample)
+      // Load voice personality preferences
+      const aiVoicePersonalityPref = await AsyncStorage.getItem(
+        STORAGE_KEYS.AI_VOICE_PERSONALITY,
+      );
+      const aiVoicePersonality = parseVoicePersonality(aiVoicePersonalityPref);
+
+      // Response voice accent and personality will be loaded when needed (handleUseSample)
 
       // Load language preferences
       const targetLanguage = await getTargetLanguage();
@@ -177,8 +193,12 @@ const ConversationScreen = ({route, navigation}: any) => {
         }
       });
 
-      // Initialize Voice service with accent
-      voiceService.current = new VoiceService(undefined, aiVoiceAccent);
+      // Initialize Voice service with accent and personality
+      voiceService.current = new VoiceService(
+        undefined,
+        aiVoiceAccent,
+        aiVoicePersonality,
+      );
 
       // Start conversation
       const starterMessage = await geminiService.current.startConversation(
@@ -203,7 +223,11 @@ const ConversationScreen = ({route, navigation}: any) => {
       setMessages([assistantMessage]);
 
       // Generate 2 sample answer options for the user
-      await generateSampleAnswers(starterMessage);
+      // Pass loaded values directly to avoid relying on state (Bug 2 fix)
+      await generateSampleAnswers(starterMessage, {
+        translation: loadedShowTranslation,
+        pronunciation: loadedShowPronunciation,
+      });
 
       // Speak the starter message
       if (voiceService.current) {
@@ -441,7 +465,13 @@ const ConversationScreen = ({route, navigation}: any) => {
     );
   };
 
-  const generateSampleAnswers = async (aiMessage: string) => {
+  const generateSampleAnswers = async (
+    aiMessage: string,
+    options?: {
+      translation?: boolean;
+      pronunciation?: boolean;
+    },
+  ) => {
     if (!geminiService.current) {
       return;
     }
@@ -451,6 +481,16 @@ const ConversationScreen = ({route, navigation}: any) => {
         aiMessage,
         2,
       );
+
+      // Use provided options or fall back to state values
+      const enableTranslation =
+        options?.translation !== undefined
+          ? options.translation
+          : showTranslation;
+      const enablePronunciation =
+        options?.pronunciation !== undefined
+          ? options.pronunciation
+          : showPronunciation;
 
       // Enrich sample answers with translation and pronunciation (Feature 2)
       const enriched = await Promise.all(
@@ -462,12 +502,12 @@ const ConversationScreen = ({route, navigation}: any) => {
           } = {text: sample};
 
           try {
-            if (showTranslation) {
+            if (enableTranslation) {
               result.translation = await geminiService.current!.getTranslation(
                 sample,
               );
             }
-            if (showPronunciation) {
+            if (enablePronunciation) {
               result.pronunciation =
                 await geminiService.current!.getPronunciation(sample);
             }
@@ -530,25 +570,43 @@ const ConversationScreen = ({route, navigation}: any) => {
   const handleUseSample = async (sample: string) => {
     setShowSamples(false);
 
-    // If auto-read is enabled, temporarily switch to response voice accent
+    // If auto-read is enabled, temporarily switch to response voice accent and personality
     if (autoReadResponse && voiceService.current) {
       try {
         const responseVoiceAccentPref = await AsyncStorage.getItem(
           STORAGE_KEYS.RESPONSE_VOICE_ACCENT,
         );
         const responseVoiceAccent = responseVoiceAccentPref || 'en-US';
+
+        const responseVoicePersonalityPref = await AsyncStorage.getItem(
+          STORAGE_KEYS.RESPONSE_VOICE_PERSONALITY,
+        );
+        const responseVoicePersonality = parseVoicePersonality(
+          responseVoicePersonalityPref,
+        );
+
         voiceService.current.setVoiceAccent(responseVoiceAccent);
+        voiceService.current.setVoicePersonality(responseVoicePersonality);
 
         await handleUserMessage(sample, autoReadResponse);
 
-        // Restore AI voice accent
+        // Restore AI voice accent and personality
         const aiVoiceAccentPref = await AsyncStorage.getItem(
           STORAGE_KEYS.AI_VOICE_ACCENT,
         );
         const aiVoiceAccent = aiVoiceAccentPref || 'en-US';
+
+        const aiVoicePersonalityPref = await AsyncStorage.getItem(
+          STORAGE_KEYS.AI_VOICE_PERSONALITY,
+        );
+        const aiVoicePersonality = parseVoicePersonality(
+          aiVoicePersonalityPref,
+        );
+
         voiceService.current.setVoiceAccent(aiVoiceAccent);
+        voiceService.current.setVoicePersonality(aiVoicePersonality);
       } catch (error) {
-        console.error('Error switching voice accent:', error);
+        console.error('Error switching voice accent/personality:', error);
         await handleUserMessage(sample, autoReadResponse);
       }
     } else {

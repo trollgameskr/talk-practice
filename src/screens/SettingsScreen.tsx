@@ -1029,48 +1029,19 @@ const SettingsScreen = ({navigation}: any) => {
             </Text>
             {/* Feature 4: Show accent options only when target language is English */}
             {selectedTargetLanguage === 'en' ? (
-              (Object.keys(VOICE_ACCENT_OPTIONS) as VoiceAccent[]).map(
-                accent => (
-                  <TouchableOpacity
-                    key={accent}
-                    style={[
-                      styles.optionButton,
-                      {
-                        backgroundColor: theme.colors.inputBackground,
-                        borderColor: theme.colors.border,
-                      },
-                      aiVoiceAccent === accent && {
-                        borderColor: theme.colors.primary,
-                        backgroundColor: theme.colors.primaryLight,
-                      },
-                    ]}
-                    onPress={() => handleAiVoiceAccentChange(accent)}>
-                    <View style={styles.optionContent}>
-                      <View style={styles.optionHeader}>
-                        <Text
-                          style={[
-                            styles.optionTitle,
-                            {color: theme.colors.text},
-                            aiVoiceAccent === accent && {
-                              color: theme.colors.primary,
-                            },
-                          ]}>
-                          {VOICE_ACCENT_OPTIONS[accent].label}
-                        </Text>
-                        {aiVoiceAccent === accent && (
-                          <Text
-                            style={[
-                              styles.checkMark,
-                              {color: theme.colors.primary},
-                            ]}>
-                            ✓
-                          </Text>
-                        )}
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                ),
-              )
+              <CustomPicker
+                selectedValue={aiVoiceAccent}
+                onValueChange={(value: string) =>
+                  handleAiVoiceAccentChange(value as VoiceAccent)
+                }
+                items={Object.keys(VOICE_ACCENT_OPTIONS).map(key => ({
+                  label: VOICE_ACCENT_OPTIONS[key as VoiceAccent].label,
+                  value: key,
+                }))}
+                placeholder="Select AI Voice Accent"
+                theme={theme}
+                style={styles.pickerContainer}
+              />
             ) : (
               <View
                 style={[
@@ -1103,48 +1074,19 @@ const SettingsScreen = ({navigation}: any) => {
             </Text>
             {/* Feature 4: Show accent options only when target language is English */}
             {selectedTargetLanguage === 'en' ? (
-              (Object.keys(VOICE_ACCENT_OPTIONS) as VoiceAccent[]).map(
-                accent => (
-                  <TouchableOpacity
-                    key={accent}
-                    style={[
-                      styles.optionButton,
-                      {
-                        backgroundColor: theme.colors.inputBackground,
-                        borderColor: theme.colors.border,
-                      },
-                      responseVoiceAccent === accent && {
-                        borderColor: theme.colors.primary,
-                        backgroundColor: theme.colors.primaryLight,
-                      },
-                    ]}
-                    onPress={() => handleResponseVoiceAccentChange(accent)}>
-                    <View style={styles.optionContent}>
-                      <View style={styles.optionHeader}>
-                        <Text
-                          style={[
-                            styles.optionTitle,
-                            {color: theme.colors.text},
-                            responseVoiceAccent === accent && {
-                              color: theme.colors.primary,
-                            },
-                          ]}>
-                          {VOICE_ACCENT_OPTIONS[accent].label}
-                        </Text>
-                        {responseVoiceAccent === accent && (
-                          <Text
-                            style={[
-                              styles.checkMark,
-                              {color: theme.colors.primary},
-                            ]}>
-                            ✓
-                          </Text>
-                        )}
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                ),
-              )
+              <CustomPicker
+                selectedValue={responseVoiceAccent}
+                onValueChange={(value: string) =>
+                  handleResponseVoiceAccentChange(value as VoiceAccent)
+                }
+                items={Object.keys(VOICE_ACCENT_OPTIONS).map(key => ({
+                  label: VOICE_ACCENT_OPTIONS[key as VoiceAccent].label,
+                  value: key,
+                }))}
+                placeholder="Select Response Voice Accent"
+                theme={theme}
+                style={styles.pickerContainer}
+              />
             ) : (
               <View
                 style={[
