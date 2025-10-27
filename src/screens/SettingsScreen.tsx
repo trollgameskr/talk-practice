@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Switch,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StorageService from '../services/StorageService';
@@ -24,12 +25,14 @@ import {
   SENTENCE_LENGTH_CONFIG,
   STORAGE_KEYS,
 } from '../config/gemini.config';
+import {useTheme} from '../contexts/ThemeContext';
 
 const storageService = new StorageService();
 const firebaseService = new FirebaseService();
 const GEMINI_API_KEY_URL = 'https://makersuite.google.com/app/apikey';
 
 const SettingsScreen = () => {
+  const {theme, isDark, toggleTheme} = useTheme();
   const [apiKey, setApiKey] = useState('');
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -210,29 +213,47 @@ const SettingsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <ScrollView style={styles.scrollView}>
-        {isGuestMode && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>👤 Guest Mode</Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Status</Text>
-              <Text style={styles.infoValue}>Using as Guest</Text>
+        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>🎨 Appearance</Text>
+          <View style={styles.themeRow}>
+            <View style={styles.themeInfo}>
+              <Text style={[styles.themeLabel, {color: theme.colors.text}]}>Dark Mode</Text>
+              <Text style={[styles.themeDescription, {color: theme.colors.textSecondary}]}>
+                Switch between light and dark theme
+              </Text>
             </View>
-            <View style={styles.guestInfoBox}>
-              <Text style={styles.guestInfoText}>
+            <Switch
+              value={isDark}
+              onValueChange={toggleTheme}
+              trackColor={{false: theme.colors.border, true: theme.colors.primary}}
+              thumbColor={isDark ? theme.colors.buttonPrimaryText : theme.colors.inputBackground}
+            />
+          </View>
+        </View>
+
+        {isGuestMode && (
+          <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>👤 Guest Mode</Text>
+            <View style={styles.infoRow}>
+              <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Status</Text>
+              <Text style={[styles.infoValue, {color: theme.colors.text}]}>Using as Guest</Text>
+            </View>
+            <View style={[styles.guestInfoBox, {backgroundColor: isDark ? '#422006' : '#fef3c7', borderLeftColor: theme.colors.warning}]}>
+              <Text style={[styles.guestInfoText, {color: isDark ? '#fbbf24' : '#92400e'}]}>
                 ℹ️ You are using the app in guest mode. Your data is saved
                 locally on this device only.
               </Text>
-              <Text style={styles.guestInfoText}>
+              <Text style={[styles.guestInfoText, {color: isDark ? '#fbbf24' : '#92400e'}]}>
                 💡 Create an account to sync your data across devices and keep
                 it safe in the cloud.
               </Text>
             </View>
             <TouchableOpacity
-              style={[styles.secondaryButton, styles.dangerButton]}
+              style={[styles.secondaryButton, styles.dangerButton, {backgroundColor: isDark ? '#7f1d1d' : '#fef2f2', borderColor: isDark ? '#991b1b' : '#fecaca'}]}
               onPress={handleExitGuestMode}>
-              <Text style={[styles.secondaryButtonText, styles.dangerText]}>
+              <Text style={[styles.secondaryButtonText, styles.dangerText, {color: isDark ? '#fca5a5' : '#dc2626'}]}>
                 🚪 Exit Guest Mode
               </Text>
             </TouchableOpacity>
@@ -240,36 +261,36 @@ const SettingsScreen = () => {
         )}
 
         {userEmail && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Account</Text>
+          <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>Account</Text>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Logged in as</Text>
-              <Text style={styles.infoValue}>{userEmail}</Text>
+              <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Logged in as</Text>
+              <Text style={[styles.infoValue, {color: theme.colors.text}]}>  {userEmail}</Text>
             </View>
             <TouchableOpacity
-              style={[styles.secondaryButton, styles.dangerButton]}
+              style={[styles.secondaryButton, styles.dangerButton, {backgroundColor: isDark ? '#7f1d1d' : '#fef2f2', borderColor: isDark ? '#991b1b' : '#fecaca'}]}
               onPress={handleLogout}>
-              <Text style={[styles.secondaryButtonText, styles.dangerText]}>
+              <Text style={[styles.secondaryButtonText, styles.dangerText, {color: isDark ? '#fca5a5' : '#dc2626'}]}>
                 🚪 Logout
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>API Configuration</Text>
-          <Text style={styles.sectionDescription}>
+        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>API Configuration</Text>
+          <Text style={[styles.sectionDescription, {color: theme.colors.textSecondary}]}>
             Enter your Gemini API key to enable conversation features
           </Text>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Gemini API Key</Text>
+            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>Gemini API Key</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.inputBorder, color: theme.colors.text}]}
               value={apiKey}
               onChangeText={setApiKey}
               placeholder="Enter your Gemini API key"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.colors.textTertiary}
               secureTextEntry={!isApiKeyVisible}
               autoCapitalize="none"
               autoCorrect={false}
@@ -277,49 +298,50 @@ const SettingsScreen = () => {
             <TouchableOpacity
               style={styles.toggleButton}
               onPress={() => setIsApiKeyVisible(!isApiKeyVisible)}>
-              <Text style={styles.toggleButtonText}>
+              <Text style={[styles.toggleButtonText, {color: theme.colors.primary}]}>
                 {isApiKeyVisible ? '👁️ Hide' : '👁️‍🗨️ Show'}
               </Text>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={styles.primaryButton}
+            style={[styles.primaryButton, {backgroundColor: theme.colors.buttonPrimary}]}
             onPress={handleSaveApiKey}>
-            <Text style={styles.primaryButtonText}>Save API Key</Text>
+            <Text style={[styles.primaryButtonText, {color: theme.colors.buttonPrimaryText}]}>Save API Key</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.secondaryButton}
+            style={[styles.secondaryButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
             onPress={handleGetApiKey}>
-            <Text style={styles.secondaryButtonText}>
+            <Text style={[styles.secondaryButtonText, {color: theme.colors.buttonSecondaryText}]}>
               🔑 Get API Key from Google AI Studio
             </Text>
           </TouchableOpacity>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
+          <View style={[styles.infoBox, {backgroundColor: theme.colors.primaryLight, borderLeftColor: theme.colors.primary}]}>
+            <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
               ℹ️ Don't have an API key? Click the button above to get one from
               Google AI Studio (free with usage limits)
             </Text>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🗣️ Conversation Settings</Text>
-          <Text style={styles.sectionDescription}>
+        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>🗣️ Conversation Settings</Text>
+          <Text style={[styles.sectionDescription, {color: theme.colors.textSecondary}]}>
             Adjust the length of AI responses and suggested user responses
           </Text>
 
           <View style={styles.optionGroup}>
-            <Text style={styles.optionLabel}>Response Length</Text>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>Response Length</Text>
             {(Object.keys(SENTENCE_LENGTH_CONFIG) as SentenceLength[]).map(
               length => (
                 <TouchableOpacity
                   key={length}
                   style={[
                     styles.optionButton,
-                    sentenceLength === length && styles.optionButtonActive,
+                    {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border},
+                    sentenceLength === length && {...styles.optionButtonActive, borderColor: theme.colors.primary, backgroundColor: theme.colors.primaryLight},
                   ]}
                   onPress={() => handleSentenceLengthChange(length)}>
                   <View style={styles.optionContent}>
@@ -327,19 +349,21 @@ const SettingsScreen = () => {
                       <Text
                         style={[
                           styles.optionTitle,
-                          sentenceLength === length && styles.optionTitleActive,
+                          {color: theme.colors.text},
+                          sentenceLength === length && {...styles.optionTitleActive, color: theme.colors.primary},
                         ]}>
                         {SENTENCE_LENGTH_CONFIG[length].label}
                       </Text>
                       {sentenceLength === length && (
-                        <Text style={styles.checkMark}>✓</Text>
+                        <Text style={[styles.checkMark, {color: theme.colors.primary}]}>✓</Text>
                       )}
                     </View>
                     <Text
                       style={[
                         styles.optionDescription,
+                        {color: theme.colors.textSecondary},
                         sentenceLength === length &&
-                          styles.optionDescriptionActive,
+                          {...styles.optionDescriptionActive, color: theme.colors.primaryDark},
                       ]}>
                       {SENTENCE_LENGTH_CONFIG[length].description}
                     </Text>
@@ -349,8 +373,8 @@ const SettingsScreen = () => {
             )}
           </View>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
+          <View style={[styles.infoBox, {backgroundColor: theme.colors.primaryLight, borderLeftColor: theme.colors.primary}]}>
+            <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
               💡 Shorter responses are easier to follow and respond to, making
               practice more engaging. Longer responses provide more context and
               detail.
@@ -358,50 +382,50 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Management</Text>
+        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>Data Management</Text>
 
           <TouchableOpacity
-            style={styles.secondaryButton}
+            style={[styles.secondaryButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
             onPress={handleExportData}>
-            <Text style={styles.secondaryButtonText}>📤 Export Data</Text>
+            <Text style={[styles.secondaryButtonText, {color: theme.colors.buttonSecondaryText}]}>📤 Export Data</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.secondaryButton, styles.dangerButton]}
+            style={[styles.secondaryButton, styles.dangerButton, {backgroundColor: isDark ? '#7f1d1d' : '#fef2f2', borderColor: isDark ? '#991b1b' : '#fecaca'}]}
             onPress={handleClearData}>
-            <Text style={[styles.secondaryButtonText, styles.dangerText]}>
+            <Text style={[styles.secondaryButtonText, styles.dangerText, {color: isDark ? '#fca5a5' : '#dc2626'}]}>
               🗑️ Clear All Data
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
+        <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>About</Text>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>App Name</Text>
-            <Text style={styles.infoValue}>GeminiTalk</Text>
+            <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>App Name</Text>
+            <Text style={[styles.infoValue, {color: theme.colors.text}]}>GeminiTalk</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Version</Text>
-            <Text style={styles.infoValue}>1.0.0</Text>
+            <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Version</Text>
+            <Text style={[styles.infoValue, {color: theme.colors.text}]}>1.0.0</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Last Modified</Text>
-            <Text style={styles.infoValue}>
+            <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Last Modified</Text>
+            <Text style={[styles.infoValue, {color: theme.colors.text}]}>
               {formatDate(BUILD_INFO.timestamp)}
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Description</Text>
-            <Text style={styles.infoValue}>
+            <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Description</Text>
+            <Text style={[styles.infoValue, {color: theme.colors.text}]}>
               Real-time English Conversation Coach
             </Text>
           </View>
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
+          <Text style={[styles.footerText, {color: theme.colors.textTertiary}]}>
             © 2024 GeminiTalk - Powered by Gemini Live API
           </Text>
         </View>
@@ -413,13 +437,11 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
   },
   scrollView: {
     flex: 1,
   },
   section: {
-    backgroundColor: '#ffffff',
     margin: 16,
     padding: 16,
     borderRadius: 12,
@@ -432,13 +454,29 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 8,
   },
   sectionDescription: {
     fontSize: 14,
-    color: '#6b7280',
     marginBottom: 16,
+  },
+  themeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  themeInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  themeLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  themeDescription: {
+    fontSize: 14,
   },
   inputContainer: {
     marginBottom: 16,
@@ -446,17 +484,13 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#f9fafb',
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
-    color: '#1f2937',
   },
   toggleButton: {
     marginTop: 8,
@@ -464,51 +498,39 @@ const styles = StyleSheet.create({
   },
   toggleButtonText: {
     fontSize: 14,
-    color: '#3b82f6',
   },
   primaryButton: {
-    backgroundColor: '#3b82f6',
     padding: 14,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 12,
   },
   primaryButtonText: {
-    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
   secondaryButton: {
-    backgroundColor: '#f9fafb',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     padding: 14,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 12,
   },
   secondaryButtonText: {
-    color: '#1f2937',
     fontSize: 16,
     fontWeight: '500',
   },
   dangerButton: {
-    borderColor: '#fecaca',
-    backgroundColor: '#fef2f2',
   },
   dangerText: {
-    color: '#dc2626',
   },
   infoBox: {
-    backgroundColor: '#eff6ff',
     padding: 12,
     borderRadius: 8,
     borderLeftWidth: 3,
-    borderLeftColor: '#3b82f6',
   },
   infoText: {
     fontSize: 13,
-    color: '#1e40af',
     lineHeight: 18,
   },
   infoRow: {
@@ -520,11 +542,9 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: '#6b7280',
   },
   infoValue: {
     fontSize: 14,
-    color: '#1f2937',
     fontWeight: '500',
     flex: 1,
     textAlign: 'right',
@@ -535,20 +555,16 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: '#9ca3af',
     textAlign: 'center',
   },
   guestInfoBox: {
-    backgroundColor: '#fef3c7',
     padding: 12,
     borderRadius: 8,
     borderLeftWidth: 3,
-    borderLeftColor: '#f59e0b',
     marginBottom: 12,
   },
   guestInfoText: {
     fontSize: 13,
-    color: '#92400e',
     lineHeight: 18,
     marginBottom: 8,
   },
@@ -558,20 +574,15 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
     marginBottom: 12,
   },
   optionButton: {
-    backgroundColor: '#f9fafb',
     borderWidth: 2,
-    borderColor: '#e5e7eb',
     borderRadius: 8,
     padding: 14,
     marginBottom: 10,
   },
   optionButtonActive: {
-    borderColor: '#3b82f6',
-    backgroundColor: '#eff6ff',
   },
   optionContent: {
     flex: 1,
@@ -585,21 +596,16 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
   },
   optionTitleActive: {
-    color: '#3b82f6',
   },
   optionDescription: {
     fontSize: 13,
-    color: '#6b7280',
   },
   optionDescriptionActive: {
-    color: '#1e40af',
   },
   checkMark: {
     fontSize: 18,
-    color: '#3b82f6',
     fontWeight: 'bold',
   },
 });

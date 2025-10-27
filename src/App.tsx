@@ -22,13 +22,17 @@ import FirebaseService from './services/FirebaseService';
 // Components
 import CostDisplay from './components/CostDisplay';
 
+// Context
+import {ThemeProvider, useTheme} from './contexts/ThemeContext';
+
 const firebaseService = new FirebaseService();
 
 const Stack = createStackNavigator();
 
 const HeaderRight = () => <CostDisplay compact />;
 
-const App = () => {
+const AppContent = () => {
+  const {theme} = useTheme();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isGuestMode, setIsGuestMode] = useState<boolean>(false);
   const [isFirebaseConfigured] = useState<boolean>(
@@ -86,21 +90,21 @@ const App = () => {
   // Show loading indicator while checking auth state
   if (isAuthenticated === null) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+      <View style={[styles.loadingContainer, {backgroundColor: theme.colors.background}]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar barStyle={theme.colors.statusBarStyle} backgroundColor={theme.colors.statusBarBackground} />
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName={isAuthenticated ? 'Home' : 'Login'}
           screenOptions={{
-            headerStyle: styles.header,
-            headerTintColor: '#1f2937',
+            headerStyle: {...styles.header, backgroundColor: theme.colors.backgroundSecondary},
+            headerTintColor: theme.colors.text,
             headerTitleStyle: styles.headerTitle,
             headerRight: isAuthenticated ? HeaderRight : undefined,
           }}>
@@ -150,10 +154,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
   },
   header: {
-    backgroundColor: '#ffffff',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -165,5 +167,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
+
+const App = () => {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+};
 
 export default App;
