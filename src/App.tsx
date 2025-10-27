@@ -7,6 +7,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {StatusBar, StyleSheet, ActivityIndicator, View} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useTranslation} from 'react-i18next';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -22,6 +23,9 @@ import FirebaseService from './services/FirebaseService';
 // Components
 import CostDisplay from './components/CostDisplay';
 
+// i18n
+import {initI18n} from './config/i18n.config';
+
 const firebaseService = new FirebaseService();
 
 const Stack = createStackNavigator();
@@ -34,6 +38,16 @@ const App = () => {
   const [isFirebaseConfigured] = useState<boolean>(
     firebaseService.isFirebaseConfigured(),
   );
+  const [i18nInitialized, setI18nInitialized] = useState(false);
+
+  // Initialize i18n
+  useEffect(() => {
+    const init = async () => {
+      await initI18n();
+      setI18nInitialized(true);
+    };
+    init();
+  }, []);
 
   useEffect(() => {
     const checkAuthState = async () => {
@@ -83,14 +97,20 @@ const App = () => {
     return () => clearInterval(interval);
   }, [isGuestMode]);
 
-  // Show loading indicator while checking auth state
-  if (isAuthenticated === null) {
+  // Show loading indicator while checking auth state or initializing i18n
+  if (isAuthenticated === null || !i18nInitialized) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#3b82f6" />
       </View>
     );
   }
+
+  return <AppContent isAuthenticated={isAuthenticated} />;
+};
+
+const AppContent = ({isAuthenticated}: {isAuthenticated: boolean}) => {
+  const {t} = useTranslation();
 
   return (
     <>
@@ -104,7 +124,7 @@ const App = () => {
             headerTitleStyle: styles.headerTitle,
             headerRight: isAuthenticated ? HeaderRight : undefined,
           }}>
-          {!isAuthenticated && isFirebaseConfigured ? (
+          {!isAuthenticated && firebaseService.isFirebaseConfigured() ? (
             <Stack.Screen
               name="Login"
               component={LoginScreen}
@@ -115,27 +135,27 @@ const App = () => {
               <Stack.Screen
                 name="Home"
                 component={HomeScreen}
-                options={{title: 'GeminiTalk'}}
+                options={{title: t('app.name')}}
               />
               <Stack.Screen
                 name="TopicSelection"
                 component={TopicSelectionScreen}
-                options={{title: 'Choose Topic'}}
+                options={{title: t('navigation.topicSelection')}}
               />
               <Stack.Screen
                 name="Conversation"
                 component={ConversationScreen}
-                options={{title: 'Practice'}}
+                options={{title: t('navigation.conversation')}}
               />
               <Stack.Screen
                 name="Progress"
                 component={ProgressScreen}
-                options={{title: 'Your Progress'}}
+                options={{title: t('navigation.progress')}}
               />
               <Stack.Screen
                 name="Settings"
                 component={SettingsScreen}
-                options={{title: 'Settings'}}
+                options={{title: t('navigation.settings')}}
               />
             </>
           )}
