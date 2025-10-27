@@ -202,6 +202,26 @@
         "autoReadResponse": {
           "label": "Auto-read response when selected",
           "description": "AI will automatically read aloud when you touch a response option"
+        },
+        "showTranslation": {
+          "label": "Show translation",
+          "description": "Display translation in your native language below AI messages"
+        },
+        "showPronunciation": {
+          "label": "Show pronunciation guide",
+          "description": "Display pronunciation guide in your native language below AI messages"
+        },
+        "showGrammarHighlights": {
+          "label": "Highlight grammar and idioms",
+          "description": "Highlight useful grammar patterns and idioms in AI messages"
+        },
+        "aiVoiceAccent": {
+          "label": "AI voice accent",
+          "description": "Choose the accent for AI voice responses"
+        },
+        "responseVoiceAccent": {
+          "label": "Response option voice accent",
+          "description": "Choose the accent when reading response options"
         }
       },
       "language": {

@@ -17,9 +17,9 @@ export class VoiceService {
   // Debounce delay for speech result processing (in milliseconds)
   private static readonly RESULT_DEBOUNCE_DELAY = 100;
 
-  constructor(apiKey?: string) {
+  constructor(apiKey?: string, voiceAccent?: string) {
     this.initializeVoice();
-    this.aiVoiceService = new AIVoiceService(apiKey);
+    this.aiVoiceService = new AIVoiceService(apiKey, voiceAccent);
   }
 
   /**
@@ -118,6 +118,13 @@ export class VoiceService {
    */
   setApiKey(apiKey: string) {
     this.aiVoiceService.setApiKey(apiKey);
+  }
+
+  /**
+   * Set voice accent for AI voice service
+   */
+  setVoiceAccent(accent: string) {
+    this.aiVoiceService.setVoiceAccent(accent);
   }
 
   /**

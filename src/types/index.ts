@@ -16,6 +16,9 @@ export interface Message {
   content: string;
   timestamp: Date;
   audioUrl?: string;
+  translation?: string; // Translation to native language
+  pronunciation?: string; // Phonetic pronunciation guide
+  grammarHighlights?: GrammarHighlight[]; // Grammar patterns and idioms to highlight
 }
 
 export interface Feedback {
@@ -111,4 +114,13 @@ export interface VocabularyWord {
   addedDate: Date;
   fromSession?: string; // session ID where this word was encountered
   reviewed: boolean;
+}
+
+export interface GrammarHighlight {
+  text: string; // The text to highlight
+  type: 'grammar' | 'idiom' | 'phrase';
+  explanation: string; // Explanation in native language
+  examples?: string[]; // Usage examples
+  startIndex: number; // Start position in the message
+  endIndex: number; // End position in the message
 }

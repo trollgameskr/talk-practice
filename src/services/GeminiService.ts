@@ -495,6 +495,113 @@ Please format your response as JSON:
   }
 
   /**
+   * Get translation of text to native language
+   */
+  async getTranslation(text: string): Promise<string> {
+    const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
+    const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
+
+    const translationPrompt = `Translate the following ${targetLangName} text to ${nativeLangName}. Provide only the translation, no explanations:
+
+"${text}"`;
+
+    try {
+      if (!this.model) {
+        throw new Error('Model not initialized');
+      }
+
+      const result = await this.model.generateContent(translationPrompt);
+      const response = result.response.text();
+      return response.trim();
+    } catch (error) {
+      console.error('Error getting translation:', error);
+      return '';
+    }
+  }
+
+  /**
+   * Get phonetic pronunciation guide in native language script
+   */
+  async getPronunciation(text: string): Promise<string> {
+    const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
+    const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
+
+    const pronunciationPrompt = `Provide a pronunciation guide for the following ${targetLangName} text using ${nativeLangName} phonetic representation that helps ${nativeLangName} speakers pronounce it correctly. Make it simple and easy to read:
+
+"${text}"
+
+Provide only the pronunciation guide, no explanations.`;
+
+    try {
+      if (!this.model) {
+        throw new Error('Model not initialized');
+      }
+
+      const result = await this.model.generateContent(pronunciationPrompt);
+      const response = result.response.text();
+      return response.trim();
+    } catch (error) {
+      console.error('Error getting pronunciation:', error);
+      return '';
+    }
+  }
+
+  /**
+   * Identify grammar patterns and idioms in text
+   */
+  async getGrammarHighlights(
+    text: string,
+  ): Promise<
+    Array<{text: string; type: string; explanation: string; examples: string[]}>
+  > {
+    const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
+    const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
+
+    const grammarPrompt = `Analyze the following ${targetLangName} text and identify useful grammar patterns, idioms, or phrases that a learner should know. Explain them in ${nativeLangName}:
+
+"${text}"
+
+Return a JSON array of highlights. Each item should have:
+- text: the exact phrase from the original text
+- type: "grammar", "idiom", or "phrase"
+- explanation: brief explanation in ${nativeLangName}
+- examples: array of 1-2 usage examples in ${targetLangName}
+
+Only identify 2-4 most important items. Return an empty array [] if there are no notable patterns.
+
+Example format:
+[
+  {
+    "text": "would like to",
+    "type": "grammar",
+    "explanation": "~하고 싶다 (정중한 표현)",
+    "examples": ["I would like to order coffee.", "She would like to visit Paris."]
+  }
+]`;
+
+    try {
+      if (!this.model) {
+        throw new Error('Model not initialized');
+      }
+
+      const result = await this.model.generateContent(grammarPrompt);
+      const response = result.response.text();
+
+      // Try to parse JSON response
+      const jsonMatch = response.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return parsed;
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error getting grammar highlights:', error);
+      return [];
+    }
+  }
+
+  /**
    * End the current conversation
    */
   endConversation() {

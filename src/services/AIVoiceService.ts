@@ -9,9 +9,11 @@ export class AIVoiceService {
   private isSpeaking: boolean = false;
   private currentAudio: any = null; // HTMLAudioElement in browser
   private apiKey: string = '';
+  private voiceAccent: string = 'en-US'; // Default accent
 
-  constructor(apiKey?: string) {
+  constructor(apiKey?: string, voiceAccent?: string) {
     this.apiKey = apiKey || '';
+    this.voiceAccent = voiceAccent || 'en-US';
     this.initialize();
   }
 
@@ -71,13 +73,24 @@ export class AIVoiceService {
     try {
       const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
 
+      // Map voice accent to Google TTS voice
+      const voiceNameMap: {[key: string]: string} = {
+        'en-US': 'en-US-Neural2-F',
+        'en-GB': 'en-GB-Neural2-F',
+        'en-AU': 'en-AU-Neural2-A',
+        'en-IN': 'en-IN-Neural2-A',
+        'en-CA': 'en-US-Neural2-F', // Use US voice for Canada
+      };
+
+      const voiceName = voiceNameMap[this.voiceAccent] || 'en-US-Neural2-F';
+
       const requestBody = {
         input: {
           text: text,
         },
         voice: {
-          languageCode: 'en-US',
-          name: 'en-US-Neural2-F', // Neural2 voices are AI-generated
+          languageCode: this.voiceAccent,
+          name: voiceName,
           ssmlGender: 'FEMALE',
         },
         audioConfig: {
@@ -169,7 +182,7 @@ export class AIVoiceService {
           win.SpeechSynthesisUtterance;
         const utterance = new SpeechSynthesisUtteranceConstructor(text);
 
-        // Select the best AI voice available
+        // Select the best AI voice available with the configured accent
         const bestVoice = this.selectBestVoice(voices);
         if (bestVoice) {
           utterance.voice = bestVoice;
@@ -178,8 +191,8 @@ export class AIVoiceService {
           console.log('Using default system voice');
         }
 
-        // Configure for natural speech
-        utterance.lang = 'en-US';
+        // Configure for natural speech with accent
+        utterance.lang = this.voiceAccent;
         utterance.rate = 0.95; // Slightly slower for clarity
         utterance.pitch = 1.0; // Natural pitch
         utterance.volume = 1.0; // Full volume
@@ -264,20 +277,30 @@ export class AIVoiceService {
       return null;
     }
 
-    // Priority order for AI/Neural voices:
-    // 1. Google voices (highest quality)
-    // 2. Microsoft voices with "Neural" in name
-    // 3. Apple Premium voices
-    // 4. Any quality US English voice
+    // Get language code without region (e.g., 'en' from 'en-US')
+    const baseLang = this.voiceAccent.split('-')[0];
+
+    // Priority order for AI/Neural voices with matching accent:
+    // 1. Google voices matching accent
+    // 2. Microsoft voices with "Neural" matching accent
+    // 3. Apple Premium voices matching accent
+    // 4. Any quality voice matching accent
     const voicePriorities = [
-      (v: any) => v.name.includes('Google') && v.name.includes('US'),
-      (v: any) => v.name.includes('Google') && v.lang === 'en-US',
-      (v: any) => v.name.includes('Microsoft') && v.name.includes('Neural'),
-      (v: any) => v.name.includes('Premium') && v.lang === 'en-US',
-      (v: any) => v.name.includes('Enhanced') && v.lang === 'en-US',
-      (v: any) => v.lang === 'en-US' && v.localService,
-      (v: any) => v.lang === 'en-US',
-      (v: any) => v.lang.startsWith('en'),
+      (v: any) => v.name.includes('Google') && v.lang === this.voiceAccent,
+      (v: any) => v.name.includes('Google') && v.lang.startsWith(baseLang),
+      (v: any) =>
+        v.name.includes('Microsoft') &&
+        v.name.includes('Neural') &&
+        v.lang === this.voiceAccent,
+      (v: any) =>
+        v.name.includes('Microsoft') &&
+        v.name.includes('Neural') &&
+        v.lang.startsWith(baseLang),
+      (v: any) => v.name.includes('Premium') && v.lang === this.voiceAccent,
+      (v: any) => v.name.includes('Enhanced') && v.lang === this.voiceAccent,
+      (v: any) => v.lang === this.voiceAccent && v.localService,
+      (v: any) => v.lang === this.voiceAccent,
+      (v: any) => v.lang.startsWith(baseLang),
     ];
 
     for (const priorityCheck of voicePriorities) {
@@ -326,6 +349,13 @@ export class AIVoiceService {
    */
   setApiKey(apiKey: string) {
     this.apiKey = apiKey;
+  }
+
+  /**
+   * Set voice accent
+   */
+  setVoiceAccent(accent: string) {
+    this.voiceAccent = accent;
   }
 
   /**

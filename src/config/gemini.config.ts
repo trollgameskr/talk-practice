@@ -72,6 +72,32 @@ export const SENTENCE_LENGTH_CONFIG = {
   },
 };
 
+// Voice accent options
+export type VoiceAccent = 'en-US' | 'en-GB' | 'en-AU' | 'en-IN' | 'en-CA';
+
+export const VOICE_ACCENT_OPTIONS = {
+  'en-US': {
+    label: 'American English',
+    code: 'en-US',
+  },
+  'en-GB': {
+    label: 'British English',
+    code: 'en-GB',
+  },
+  'en-AU': {
+    label: 'Australian English',
+    code: 'en-AU',
+  },
+  'en-IN': {
+    label: 'Indian English',
+    code: 'en-IN',
+  },
+  'en-CA': {
+    label: 'Canadian English',
+    code: 'en-CA',
+  },
+};
+
 // Gemini 1.5 Pro pricing (as of 2024)
 // See: https://ai.google.dev/pricing
 export const GEMINI_PRICING = {
@@ -84,4 +110,9 @@ export const STORAGE_KEYS = {
   API_KEY: '@gemini_api_key',
   SENTENCE_LENGTH: '@sentence_length',
   AUTO_READ_RESPONSE: '@auto_read_response',
+  SHOW_TRANSLATION: '@show_translation',
+  SHOW_PRONUNCIATION: '@show_pronunciation',
+  SHOW_GRAMMAR_HIGHLIGHTS: '@show_grammar_highlights',
+  AI_VOICE_ACCENT: '@ai_voice_accent',
+  RESPONSE_VOICE_ACCENT: '@response_voice_accent',
 } as const;
