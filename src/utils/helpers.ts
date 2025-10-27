@@ -158,3 +158,16 @@ export function isValidApiKey(apiKey: string): boolean {
   }
   return false;
 }
+
+/**
+ * Language name mapping for all supported languages
+ */
+export const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English',
+  ko: 'Korean',
+  ja: 'Japanese',
+  zh: 'Chinese',
+  es: 'Spanish',
+  fr: 'French',
+  de: 'German',
+};

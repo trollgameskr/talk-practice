@@ -27,6 +27,7 @@ import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
 import {generateId, formatDuration} from '../utils/helpers';
 import {STORAGE_KEYS} from '../config/gemini.config';
+import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
 
 const storageService = new StorageService();
 
@@ -94,8 +95,17 @@ const ConversationScreen = ({route, navigation}: any) => {
       );
       const sentenceLength = (sentenceLengthPref as any) || 'medium';
 
-      // Initialize Gemini service with API key and sentence length
-      geminiService.current = new GeminiService(apiKey, sentenceLength);
+      // Load language preferences
+      const targetLanguage = await getTargetLanguage();
+      const nativeLanguage = getCurrentLanguage();
+
+      // Initialize Gemini service with API key, sentence length, and languages
+      geminiService.current = new GeminiService(
+        apiKey,
+        sentenceLength,
+        targetLanguage,
+        nativeLanguage,
+      );
 
       // Set up real-time token usage tracking
       geminiService.current.setTokenUsageCallback(async tokenUsage => {
