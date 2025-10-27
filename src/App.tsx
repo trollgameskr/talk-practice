@@ -16,6 +16,7 @@ import ConversationScreen from './screens/ConversationScreen';
 import ProgressScreen from './screens/ProgressScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import LoginScreen, {GUEST_MODE_KEY} from './screens/LoginScreen';
+import FeedbackScreen from './screens/FeedbackScreen';
 
 // Services
 import FirebaseService from './services/FirebaseService';
@@ -170,6 +171,11 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
                 name="Settings"
                 component={SettingsScreen}
                 options={{title: t('navigation.settings')}}
+              />
+              <Stack.Screen
+                name="Feedback"
+                component={FeedbackScreen}
+                options={{title: t('navigation.feedback')}}
               />
             </>
           )}

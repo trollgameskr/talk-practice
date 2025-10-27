@@ -7,7 +7,8 @@
     "topicSelection": "トピック選択",
     "conversation": "練習",
     "progress": "進捗状況",
-    "settings": "設定"
+    "settings": "設定",
+    "feedback": "フィードバック"
   },
   "home": {
     "title": "GeminiTalkへようこそ",
@@ -254,6 +255,9 @@
         "lastModified": "最終更新日",
         "description": "説明",
         "descriptionValue": "リアルタイム英会話コーチ"
+      },
+      "feedback": {
+        "buttonLabel": "フィードバックまたは提案を送信"
       }
     },
     "footer": "© 2024 GeminiTalk - Gemini Live API搭載"
@@ -292,6 +296,53 @@
     "totalCost": "総コスト",
     "currentSession": "現在のセッション",
     "disclaimer": "Gemini API価格に基づく推定コスト"
+  },
+  "feedback": {
+    "title": "💬 フィードバックを送信",
+    "description": "あなたのアイデアをお聞かせください！機能リクエスト、改善提案、またはアプリに関するフィードバックをお寄せください。",
+    "tip": "あなたのフィードバックは、GeminiTalkをより良くするのに役立ちます！",
+    "fields": {
+      "name": {
+        "label": "お名前",
+        "placeholder": "名前を入力してください"
+      },
+      "email": {
+        "label": "メールアドレス",
+        "placeholder": "your.email@example.com",
+        "help": "オプション - 返信を希望する場合は入力してください"
+      },
+      "message": {
+        "label": "メッセージ",
+        "placeholder": "機能リクエストや提案について教えてください...",
+        "help": "アイデアや提案を詳しく説明してください"
+      },
+      "optional": "オプション"
+    },
+    "submitButton": "📧 フィードバックを送信",
+    "sending": "送信中...",
+    "sendSuccess": "メールクライアントが開きました！メールを送信してフィードバックを提出してください。",
+    "validation": {
+      "messageRequired": "メッセージを入力してください"
+    },
+    "errors": {
+      "cannotOpenEmail": "メールクライアントを開けませんでした。もう一度お試しいただくか、trollgameskr@gmail.comに直接送信してください",
+      "sendFailed": "フィードバックの送信に失敗しました。もう一度お試しください。"
+    },
+    "emailSubject": "GeminiTalk フィードバック",
+    "emailBody": {
+      "name": "名前",
+      "email": "メール",
+      "message": "メッセージ",
+      "anonymous": "匿名",
+      "notProvided": "未提供"
+    },
+    "examples": {
+      "title": "どんなフィードバックを送れますか？",
+      "item1": "新機能のアイデアや改善案",
+      "item2": "UI/UX向上の提案",
+      "item3": "遭遇したバグや問題の報告",
+      "item4": "一般的なコメントや感謝の言葉"
+    }
   },
   "common": {
     "ok": "OK",
