@@ -13,6 +13,7 @@ import {
   TextInput,
   Alert,
   Switch,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
@@ -268,7 +269,17 @@ const SettingsScreen = () => {
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={true}>
+      <ScrollView
+        style={[
+          styles.scrollView,
+          // Web-specific styles for scrollbar visibility
+          Platform.OS === 'web' && {
+            // @ts-ignore - Web-specific style
+            overflow: 'scroll',
+          },
+        ]}
+        contentContainerStyle={Platform.OS === 'web' ? styles.scrollContentWeb : undefined}
+        showsVerticalScrollIndicator={true}>
         <View
           style={[
             styles.section,
@@ -899,6 +910,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContentWeb: {
+    // @ts-ignore - Web-specific style
+    paddingBottom: 20,
   },
   section: {
     margin: 16,
