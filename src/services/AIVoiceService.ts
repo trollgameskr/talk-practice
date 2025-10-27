@@ -118,8 +118,7 @@ export class AIVoiceService {
         }, // Use US voice for Canada
       };
 
-      const voiceSet =
-        voiceNameMap[this.voiceAccent] || voiceNameMap['en-US'];
+      const voiceSet = voiceNameMap[this.voiceAccent] || voiceNameMap['en-US'];
       const voiceName = isMale ? voiceSet.male : voiceSet.female;
 
       // Adjust pitch and speaking rate based on personality
@@ -223,7 +222,13 @@ export class AIVoiceService {
           reject(error);
         };
 
-        this.currentAudio.play().catch(reject);
+        // Wait for audio to be ready before playing to prevent cutting off the beginning
+        this.currentAudio.oncanplaythrough = () => {
+          this.currentAudio.play().catch(reject);
+        };
+
+        // Trigger loading
+        this.currentAudio.load();
       } catch (error) {
         this.isSpeaking = false;
         reject(error);
