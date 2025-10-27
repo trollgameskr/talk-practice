@@ -109,10 +109,10 @@ const AppContent = () => {
     );
   }
 
-  return <AppContent isAuthenticated={isAuthenticated} />;
+  return <AppContentInner isAuthenticated={isAuthenticated} />;
 };
 
-const AppContent = ({isAuthenticated}: {isAuthenticated: boolean}) => {
+const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
   const {t} = useTranslation();
 
   return (
