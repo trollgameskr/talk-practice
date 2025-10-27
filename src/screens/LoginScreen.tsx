@@ -17,12 +17,14 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FirebaseService from '../services/FirebaseService';
+import {useTheme} from '../contexts/ThemeContext';
 
 export const GUEST_MODE_KEY = '@guest_mode';
 
 const firebaseService = new FirebaseService();
 
 const LoginScreen = ({navigation: _navigation}: any) => {
+  const {theme} = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
@@ -89,21 +91,21 @@ const LoginScreen = ({navigation: _navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}>
         <View style={styles.content}>
-          <Text style={styles.title}>GeminiTalk</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, {color: theme.colors.text}]}>GeminiTalk</Text>
+          <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
             {isLogin ? 'Sign in to continue' : 'Create your account'}
           </Text>
 
           <View style={styles.formContainer}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.inputBorder, color: theme.colors.text}]}
               placeholder="Email"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.colors.textTertiary}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -113,9 +115,9 @@ const LoginScreen = ({navigation: _navigation}: any) => {
             />
 
             <TextInput
-              style={styles.input}
+              style={[styles.input, {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.inputBorder, color: theme.colors.text}]}
               placeholder="Password"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={theme.colors.textTertiary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -125,13 +127,13 @@ const LoginScreen = ({navigation: _navigation}: any) => {
             />
 
             <TouchableOpacity
-              style={[styles.button, isLoading && styles.buttonDisabled]}
+              style={[styles.button, {backgroundColor: theme.colors.buttonPrimary}, isLoading && styles.buttonDisabled]}
               onPress={handleAuth}
               disabled={isLoading}>
               {isLoading ? (
-                <ActivityIndicator color="#ffffff" />
+                <ActivityIndicator color={theme.colors.buttonPrimaryText} />
               ) : (
-                <Text style={styles.buttonText}>
+                <Text style={[styles.buttonText, {color: theme.colors.buttonPrimaryText}]}>
                   {isLogin ? 'Sign In' : 'Sign Up'}
                 </Text>
               )}
@@ -141,7 +143,7 @@ const LoginScreen = ({navigation: _navigation}: any) => {
               style={styles.toggleButton}
               onPress={toggleMode}
               disabled={isLoading}>
-              <Text style={styles.toggleButtonText}>
+              <Text style={[styles.toggleButtonText, {color: theme.colors.primary}]}>
                 {isLogin
                   ? "Don't have an account? Sign Up"
                   : 'Already have an account? Sign In'}
@@ -149,44 +151,44 @@ const LoginScreen = ({navigation: _navigation}: any) => {
             </TouchableOpacity>
 
             <View style={styles.guestDivider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OR</Text>
-              <View style={styles.dividerLine} />
+              <View style={[styles.dividerLine, {backgroundColor: theme.colors.border}]} />
+              <Text style={[styles.dividerText, {color: theme.colors.textSecondary}]}>OR</Text>
+              <View style={[styles.dividerLine, {backgroundColor: theme.colors.border}]} />
             </View>
 
             <TouchableOpacity
-              style={styles.guestButton}
+              style={[styles.guestButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
               onPress={handleGuestMode}
               disabled={isLoading}>
-              <Text style={styles.guestButtonText}>👤 Continue as Guest</Text>
+              <Text style={[styles.guestButtonText, {color: theme.colors.buttonSecondaryText}]}>👤 Continue as Guest</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.infoContainer}>
-            <Text style={styles.infoTitle}>✨ Guest Mode</Text>
-            <Text style={styles.infoText}>
+          <View style={[styles.infoContainer, {backgroundColor: theme.colors.primaryLight, borderLeftColor: theme.colors.primary}]}>
+            <Text style={[styles.infoTitle, {color: theme.colors.text}]}>✨ Guest Mode</Text>
+            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               • Try the app without creating an account
             </Text>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               • Data saved locally on this device only
             </Text>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               • Create an account later to sync across devices
             </Text>
           </View>
 
-          <View style={styles.infoContainer}>
-            <Text style={styles.infoTitle}>🔑 Account Benefits</Text>
-            <Text style={styles.infoText}>
+          <View style={[styles.infoContainer, {backgroundColor: theme.colors.primaryLight, borderLeftColor: theme.colors.primary}]}>
+            <Text style={[styles.infoTitle, {color: theme.colors.text}]}>🔑 Account Benefits</Text>
+            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               🔒 Your data is securely stored in Firebase
             </Text>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               📊 Track your conversation history and progress
             </Text>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               💰 Monitor your token usage and costs
             </Text>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               🔄 Sync data across multiple devices
             </Text>
           </View>
@@ -199,7 +201,6 @@ const LoginScreen = ({navigation: _navigation}: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
   },
   keyboardView: {
     flex: 1,
@@ -212,13 +213,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#1f2937',
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
     textAlign: 'center',
     marginBottom: 40,
   },
@@ -233,17 +232,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   input: {
-    backgroundColor: '#f9fafb',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    color: '#1f2937',
     marginBottom: 16,
   },
   button: {
-    backgroundColor: '#3b82f6',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -253,7 +248,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: '#ffffff',
     fontSize: 18,
     fontWeight: '600',
   },
@@ -262,25 +256,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toggleButtonText: {
-    color: '#3b82f6',
     fontSize: 14,
     fontWeight: '500',
   },
   infoContainer: {
     marginTop: 16,
     padding: 16,
-    backgroundColor: '#eff6ff',
     borderRadius: 12,
+    borderLeftWidth: 4,
   },
   infoTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
-    color: '#4b5563',
     marginBottom: 8,
     lineHeight: 20,
   },
@@ -292,24 +283,19 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#e5e7eb',
   },
   dividerText: {
     marginHorizontal: 12,
     fontSize: 14,
-    color: '#9ca3af',
     fontWeight: '500',
   },
   guestButton: {
-    backgroundColor: '#f9fafb',
     borderWidth: 2,
-    borderColor: '#3b82f6',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
   },
   guestButtonText: {
-    color: '#3b82f6',
     fontSize: 18,
     fontWeight: '600',
   },

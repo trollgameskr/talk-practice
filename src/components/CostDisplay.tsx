@@ -6,6 +6,7 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import StorageService from '../services/StorageService';
+import {useTheme} from '../contexts/ThemeContext';
 
 const storageService = new StorageService();
 
@@ -14,6 +15,7 @@ interface CostDisplayProps {
 }
 
 const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
+  const {theme, isDark} = useTheme();
   const [totalCost, setTotalCost] = useState<number>(0);
   const [totalTokens, setTotalTokens] = useState<number>(0);
 
@@ -51,8 +53,16 @@ const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
 
   if (compact) {
     return (
-      <View style={styles.compactContainer}>
-        <Text style={styles.compactText}>
+      <View
+        style={[
+          styles.compactContainer,
+          {
+            backgroundColor: isDark ? '#065f46' : '#f0fdf4',
+            borderColor: isDark ? '#10b981' : '#86efac',
+          },
+        ]}>
+        <Text
+          style={[styles.compactText, {color: isDark ? '#d1fae5' : '#166534'}]}>
           💰 {formatCost(totalCost)} ({formatTokens(totalTokens)} tokens)
         </Text>
       </View>
@@ -60,14 +70,29 @@ const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark ? '#065f46' : '#f0fdf4',
+          borderColor: isDark ? '#10b981' : '#86efac',
+        },
+      ]}>
       <View style={styles.row}>
-        <Text style={styles.label}>💰 Total Cost:</Text>
-        <Text style={styles.value}>{formatCost(totalCost)}</Text>
+        <Text style={[styles.label, {color: isDark ? '#d1fae5' : '#166534'}]}>
+          💰 Total Cost:
+        </Text>
+        <Text style={[styles.value, {color: isDark ? '#a7f3d0' : '#15803d'}]}>
+          {formatCost(totalCost)}
+        </Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.label}>🔢 Tokens Used:</Text>
-        <Text style={styles.value}>{formatTokens(totalTokens)}</Text>
+        <Text style={[styles.label, {color: isDark ? '#d1fae5' : '#166534'}]}>
+          🔢 Tokens Used:
+        </Text>
+        <Text style={[styles.value, {color: isDark ? '#a7f3d0' : '#15803d'}]}>
+          {formatTokens(totalTokens)}
+        </Text>
       </View>
     </View>
   );
@@ -75,19 +100,15 @@ const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f0fdf4',
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#86efac',
   },
   compactContainer: {
-    backgroundColor: '#f0fdf4',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#86efac',
   },
   row: {
     flexDirection: 'row',
@@ -97,17 +118,14 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    color: '#166534',
     fontWeight: '500',
   },
   value: {
     fontSize: 12,
-    color: '#15803d',
     fontWeight: '600',
   },
   compactText: {
     fontSize: 11,
-    color: '#166534',
     fontWeight: '600',
   },
 });

@@ -19,10 +19,12 @@ import {UserProgress} from '../types';
 import {formatDuration} from '../utils/helpers';
 import CostDisplay from '../components/CostDisplay';
 import {STORAGE_KEYS} from '../config/gemini.config';
+import {useTheme} from '../contexts/ThemeContext';
 
 const storageService = new StorageService();
 
 const HomeScreen = ({navigation}: any) => {
+  const {theme} = useTheme();
   const {t} = useTranslation();
   const [progress, setProgress] = useState<UserProgress | null>(null);
 
@@ -55,35 +57,80 @@ const HomeScreen = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {backgroundColor: theme.colors.background},
+      ]}>
       <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('home.title')}</Text>
-          <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
+        <View
+          style={[
+            styles.header,
+            {
+              backgroundColor: theme.colors.backgroundSecondary,
+              borderBottomColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.title, {color: theme.colors.text}]}>
+            {t('home.title')}
+          </Text>
+          <Text
+            style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
+            {t('home.subtitle')}
+          </Text>
         </View>
 
         {progress && (
           <>
             <View style={styles.statsContainer}>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>{progress.totalSessions}</Text>
-                <Text style={styles.statLabel}>
+              <View
+                style={[
+                  styles.statCard,
+                  {backgroundColor: theme.colors.card},
+                ]}>
+                <Text
+                  style={[styles.statValue, {color: theme.colors.primary}]}>
+                  {progress.totalSessions}
+                </Text>
+                <Text
+                  style={[
+                    styles.statLabel,
+                    {color: theme.colors.textSecondary},
+                  ]}>
                   {t('home.stats.totalSessions')}
                 </Text>
               </View>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>
+              <View
+                style={[
+                  styles.statCard,
+                  {backgroundColor: theme.colors.card},
+                ]}>
+                <Text
+                  style={[styles.statValue, {color: theme.colors.primary}]}>
                   {formatDuration(progress.totalDuration)}
                 </Text>
-                <Text style={styles.statLabel}>
+                <Text
+                  style={[
+                    styles.statLabel,
+                    {color: theme.colors.textSecondary},
+                  ]}>
                   {t('home.stats.practiceTime')}
                 </Text>
               </View>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>
+              <View
+                style={[
+                  styles.statCard,
+                  {backgroundColor: theme.colors.card},
+                ]}>
+                <Text
+                  style={[styles.statValue, {color: theme.colors.primary}]}>
                   {progress.overallScore.toFixed(0)}
                 </Text>
-                <Text style={styles.statLabel}>
+                <Text
+                  style={[
+                    styles.statLabel,
+                    {color: theme.colors.textSecondary},
+                  ]}>
                   {t('home.stats.overallScore')}
                 </Text>
               </View>
@@ -97,33 +144,73 @@ const HomeScreen = ({navigation}: any) => {
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
+            style={[
+              styles.button,
+              styles.primaryButton,
+              {backgroundColor: theme.colors.buttonPrimary},
+            ]}
             onPress={() => navigation.navigate('TopicSelection')}>
-            <Text style={styles.buttonText}>
+            <Text
+              style={[
+                styles.buttonText,
+                {color: theme.colors.buttonPrimaryText},
+              ]}>
               {t('home.buttons.startPractice')}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+            style={[
+              styles.button,
+              styles.secondaryButton,
+              {
+                backgroundColor: theme.colors.buttonSecondary,
+                borderColor: theme.colors.border,
+              },
+            ]}
             onPress={() => navigation.navigate('Progress')}>
-            <Text style={styles.secondaryButtonText}>
+            <Text
+              style={[
+                styles.secondaryButtonText,
+                {color: theme.colors.buttonSecondaryText},
+              ]}>
               {t('home.buttons.viewProgress')}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+            style={[
+              styles.button,
+              styles.secondaryButton,
+              {
+                backgroundColor: theme.colors.buttonSecondary,
+                borderColor: theme.colors.border,
+              },
+            ]}
             onPress={() => navigation.navigate('Settings')}>
-            <Text style={styles.secondaryButtonText}>
+            <Text
+              style={[
+                styles.secondaryButtonText,
+                {color: theme.colors.buttonSecondaryText},
+              ]}>
               {t('home.buttons.settings')}
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoTitle}>{t('home.howItWorks.title')}</Text>
-          <Text style={styles.infoText}>
+        <View
+          style={[
+            styles.infoContainer,
+            {
+              backgroundColor: theme.colors.primaryLight,
+              borderLeftColor: theme.colors.primary,
+            },
+          ]}>
+          <Text style={[styles.infoTitle, {color: theme.colors.text}]}>
+            {t('home.howItWorks.title')}
+          </Text>
+          <Text
+            style={[styles.infoText, {color: theme.colors.textSecondary}]}>
             {t('home.howItWorks.step1')}
             {'\n'}
             {t('home.howItWorks.step2')}
@@ -135,21 +222,41 @@ const HomeScreen = ({navigation}: any) => {
         </View>
 
         {progress && progress.achievements.length > 0 && (
-          <View style={styles.achievementsContainer}>
-            <Text style={styles.achievementsTitle}>
+          <View
+            style={[
+              styles.achievementsContainer,
+              {backgroundColor: theme.colors.card},
+            ]}>
+            <Text
+              style={[styles.achievementsTitle, {color: theme.colors.text}]}>
               {t('home.achievements.title')}
             </Text>
             {progress.achievements
               .slice(-3)
               .reverse()
               .map(achievement => (
-                <View key={achievement.id} style={styles.achievementCard}>
-                  <Text style={styles.achievementIcon}>{achievement.icon}</Text>
+                <View
+                  key={achievement.id}
+                  style={[
+                    styles.achievementCard,
+                    {backgroundColor: theme.colors.backgroundTertiary},
+                  ]}>
+                  <Text style={styles.achievementIcon}>
+                    {achievement.icon}
+                  </Text>
                   <View style={styles.achievementInfo}>
-                    <Text style={styles.achievementTitle}>
+                    <Text
+                      style={[
+                        styles.achievementTitle,
+                        {color: theme.colors.text},
+                      ]}>
                       {achievement.title}
                     </Text>
-                    <Text style={styles.achievementDescription}>
+                    <Text
+                      style={[
+                        styles.achievementDescription,
+                        {color: theme.colors.textSecondary},
+                      ]}>
                       {achievement.description}
                     </Text>
                   </View>
@@ -165,26 +272,21 @@ const HomeScreen = ({navigation}: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
   },
   scrollView: {
     flex: 1,
   },
   header: {
     padding: 20,
-    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#1f2937',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -193,7 +295,6 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#ffffff',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -206,12 +307,10 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#3b82f6',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#6b7280',
     textAlign: 'center',
   },
   buttonContainer: {
@@ -223,59 +322,46 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
   },
-  primaryButton: {
-    backgroundColor: '#3b82f6',
-  },
+  primaryButton: {},
   secondaryButton: {
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
   },
   buttonText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#ffffff',
   },
   secondaryButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
   },
   infoContainer: {
     margin: 20,
     padding: 16,
-    backgroundColor: '#eff6ff',
     borderRadius: 12,
     borderLeftWidth: 4,
-    borderLeftColor: '#3b82f6',
   },
   infoTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
-    color: '#4b5563',
     lineHeight: 20,
   },
   achievementsContainer: {
     margin: 20,
     padding: 16,
-    backgroundColor: '#ffffff',
     borderRadius: 12,
   },
   achievementsTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 12,
   },
   achievementCard: {
     flexDirection: 'row',
     padding: 12,
-    backgroundColor: '#f9fafb',
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -289,12 +375,10 @@ const styles = StyleSheet.create({
   achievementTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 2,
   },
   achievementDescription: {
     fontSize: 12,
-    color: '#6b7280',
   },
   costContainer: {
     marginHorizontal: 20,
