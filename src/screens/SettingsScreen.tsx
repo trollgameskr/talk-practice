@@ -25,14 +25,18 @@ import {
   SENTENCE_LENGTH_CONFIG,
   STORAGE_KEYS,
 } from '../config/gemini.config';
-import {saveLanguage, getAvailableLanguages, getCurrentLanguage} from '../config/i18n.config';
+import {
+  saveLanguage,
+  getAvailableLanguages,
+  getCurrentLanguage,
+} from '../config/i18n.config';
 
 const storageService = new StorageService();
 const firebaseService = new FirebaseService();
 const GEMINI_API_KEY_URL = 'https://makersuite.google.com/app/apikey';
 
 const SettingsScreen = () => {
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
   const [apiKey, setApiKey] = useState('');
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -89,10 +93,7 @@ const SettingsScreen = () => {
     }
 
     if (!isValidApiKey(apiKey)) {
-      Alert.alert(
-        t('common.error'),
-        t('settings.sections.api.errors.invalid'),
-      );
+      Alert.alert(t('common.error'), t('settings.sections.api.errors.invalid'));
       return;
     }
 
@@ -109,10 +110,16 @@ const SettingsScreen = () => {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.SENTENCE_LENGTH, length);
       setSentenceLength(length);
-      Alert.alert(t('common.success'), t('settings.sections.conversation.success'));
+      Alert.alert(
+        t('common.success'),
+        t('settings.sections.conversation.success'),
+      );
     } catch (error) {
       console.error('Error saving sentence length:', error);
-      Alert.alert(t('common.error'), 'Failed to save sentence length preference');
+      Alert.alert(
+        t('common.error'),
+        'Failed to save sentence length preference',
+      );
     }
   };
 
@@ -126,8 +133,6 @@ const SettingsScreen = () => {
       Alert.alert(t('common.error'), 'Failed to change language');
     }
   };
-    }
-  };
 
   const handleGetApiKey = async () => {
     await openURL(GEMINI_API_KEY_URL);
@@ -138,16 +143,25 @@ const SettingsScreen = () => {
       t('settings.sections.data.clearConfirm.title'),
       t('settings.sections.data.clearConfirm.message'),
       [
-        {text: t('settings.sections.data.clearConfirm.cancel'), style: 'cancel'},
+        {
+          text: t('settings.sections.data.clearConfirm.cancel'),
+          style: 'cancel',
+        },
         {
           text: t('settings.sections.data.clearConfirm.confirm'),
           style: 'destructive',
           onPress: async () => {
             try {
               await storageService.clearAllData();
-              Alert.alert(t('common.success'), t('settings.sections.data.clearConfirm.success'));
+              Alert.alert(
+                t('common.success'),
+                t('settings.sections.data.clearConfirm.success'),
+              );
             } catch (error) {
-              Alert.alert(t('common.error'), t('settings.sections.data.clearConfirm.error'));
+              Alert.alert(
+                t('common.error'),
+                t('settings.sections.data.clearConfirm.error'),
+              );
             }
           },
         },
@@ -170,21 +184,34 @@ const SettingsScreen = () => {
   };
 
   const handleLogout = () => {
-    Alert.alert(t('settings.sections.account.logoutConfirm.title'), t('settings.sections.account.logoutConfirm.message'), [
-      {text: t('settings.sections.account.logoutConfirm.cancel'), style: 'cancel'},
-      {
-        text: t('settings.sections.account.logoutConfirm.confirm'),
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await firebaseService.logout();
-            Alert.alert(t('common.success'), t('settings.sections.account.logoutConfirm.success'));
-          } catch (error) {
-            Alert.alert(t('common.error'), t('settings.sections.account.logoutConfirm.error'));
-          }
+    Alert.alert(
+      t('settings.sections.account.logoutConfirm.title'),
+      t('settings.sections.account.logoutConfirm.message'),
+      [
+        {
+          text: t('settings.sections.account.logoutConfirm.cancel'),
+          style: 'cancel',
         },
-      },
-    ]);
+        {
+          text: t('settings.sections.account.logoutConfirm.confirm'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await firebaseService.logout();
+              Alert.alert(
+                t('common.success'),
+                t('settings.sections.account.logoutConfirm.success'),
+              );
+            } catch (error) {
+              Alert.alert(
+                t('common.error'),
+                t('settings.sections.account.logoutConfirm.error'),
+              );
+            }
+          },
+        },
+      ],
+    );
   };
 
   const handleExitGuestMode = () => {
@@ -192,7 +219,10 @@ const SettingsScreen = () => {
       t('settings.sections.guestMode.exitConfirm.title'),
       t('settings.sections.guestMode.exitConfirm.message'),
       [
-        {text: t('settings.sections.guestMode.exitConfirm.cancel'), style: 'cancel'},
+        {
+          text: t('settings.sections.guestMode.exitConfirm.cancel'),
+          style: 'cancel',
+        },
         {
           text: t('settings.sections.guestMode.exitConfirm.confirm'),
           style: 'destructive',
@@ -204,7 +234,10 @@ const SettingsScreen = () => {
                 t('settings.sections.guestMode.exitConfirm.successMessage'),
               );
             } catch (error) {
-              Alert.alert(t('common.error'), t('settings.sections.guestMode.exitConfirm.error'));
+              Alert.alert(
+                t('common.error'),
+                t('settings.sections.guestMode.exitConfirm.error'),
+              );
             }
           },
         },
@@ -232,10 +265,16 @@ const SettingsScreen = () => {
       <ScrollView style={styles.scrollView}>
         {isGuestMode && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('settings.sections.guestMode.title')}</Text>
+            <Text style={styles.sectionTitle}>
+              {t('settings.sections.guestMode.title')}
+            </Text>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{t('settings.sections.guestMode.status')}</Text>
-              <Text style={styles.infoValue}>{t('settings.sections.guestMode.statusValue')}</Text>
+              <Text style={styles.infoLabel}>
+                {t('settings.sections.guestMode.status')}
+              </Text>
+              <Text style={styles.infoValue}>
+                {t('settings.sections.guestMode.statusValue')}
+              </Text>
             </View>
             <View style={styles.guestInfoBox}>
               <Text style={styles.guestInfoText}>
@@ -257,9 +296,13 @@ const SettingsScreen = () => {
 
         {userEmail && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('settings.sections.account.title')}</Text>
+            <Text style={styles.sectionTitle}>
+              {t('settings.sections.account.title')}
+            </Text>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{t('settings.sections.account.loggedInAs')}</Text>
+              <Text style={styles.infoLabel}>
+                {t('settings.sections.account.loggedInAs')}
+              </Text>
               <Text style={styles.infoValue}>{userEmail}</Text>
             </View>
             <TouchableOpacity
@@ -273,13 +316,17 @@ const SettingsScreen = () => {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings.sections.api.title')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.api.title')}
+          </Text>
           <Text style={styles.sectionDescription}>
             {t('settings.sections.api.description')}
           </Text>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>{t('settings.sections.api.apiKeyLabel')}</Text>
+            <Text style={styles.inputLabel}>
+              {t('settings.sections.api.apiKeyLabel')}
+            </Text>
             <TextInput
               style={styles.input}
               value={apiKey}
@@ -294,7 +341,9 @@ const SettingsScreen = () => {
               style={styles.toggleButton}
               onPress={() => setIsApiKeyVisible(!isApiKeyVisible)}>
               <Text style={styles.toggleButtonText}>
-                {isApiKeyVisible ? t('settings.sections.api.hideButton') : t('settings.sections.api.showButton')}
+                {isApiKeyVisible
+                  ? t('settings.sections.api.hideButton')
+                  : t('settings.sections.api.showButton')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -302,7 +351,9 @@ const SettingsScreen = () => {
           <TouchableOpacity
             style={styles.primaryButton}
             onPress={handleSaveApiKey}>
-            <Text style={styles.primaryButtonText}>{t('settings.sections.api.saveButton')}</Text>
+            <Text style={styles.primaryButtonText}>
+              {t('settings.sections.api.saveButton')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -321,13 +372,17 @@ const SettingsScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings.sections.conversation.title')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.conversation.title')}
+          </Text>
           <Text style={styles.sectionDescription}>
             {t('settings.sections.conversation.description')}
           </Text>
 
           <View style={styles.optionGroup}>
-            <Text style={styles.optionLabel}>{t('settings.sections.conversation.responseLength')}</Text>
+            <Text style={styles.optionLabel}>
+              {t('settings.sections.conversation.responseLength')}
+            </Text>
             {(Object.keys(SENTENCE_LENGTH_CONFIG) as SentenceLength[]).map(
               length => (
                 <TouchableOpacity
@@ -344,7 +399,9 @@ const SettingsScreen = () => {
                           styles.optionTitle,
                           sentenceLength === length && styles.optionTitleActive,
                         ]}>
-                        {t(`settings.sections.conversation.lengths.${length}.label`)}
+                        {t(
+                          `settings.sections.conversation.lengths.${length}.label`,
+                        )}
                       </Text>
                       {sentenceLength === length && (
                         <Text style={styles.checkMark}>✓</Text>
@@ -356,7 +413,9 @@ const SettingsScreen = () => {
                         sentenceLength === length &&
                           styles.optionDescriptionActive,
                       ]}>
-                      {t(`settings.sections.conversation.lengths.${length}.description`)}
+                      {t(
+                        `settings.sections.conversation.lengths.${length}.description`,
+                      )}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -372,13 +431,17 @@ const SettingsScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings.sections.language.title')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.language.title')}
+          </Text>
           <Text style={styles.sectionDescription}>
             {t('settings.sections.language.description')}
           </Text>
 
           <View style={styles.optionGroup}>
-            <Text style={styles.optionLabel}>{t('settings.sections.language.currentLanguage')}</Text>
+            <Text style={styles.optionLabel}>
+              {t('settings.sections.language.currentLanguage')}
+            </Text>
             {getAvailableLanguages().map(lang => (
               <TouchableOpacity
                 key={lang.code}
@@ -392,7 +455,8 @@ const SettingsScreen = () => {
                     <Text
                       style={[
                         styles.optionTitle,
-                        currentLanguage === lang.code && styles.optionTitleActive,
+                        currentLanguage === lang.code &&
+                          styles.optionTitleActive,
                       ]}>
                       {lang.nativeName}
                     </Text>
@@ -407,12 +471,16 @@ const SettingsScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings.sections.data.title')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.data.title')}
+          </Text>
 
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={handleExportData}>
-            <Text style={styles.secondaryButtonText}>{t('settings.sections.data.exportButton')}</Text>
+            <Text style={styles.secondaryButtonText}>
+              {t('settings.sections.data.exportButton')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -425,23 +493,33 @@ const SettingsScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settings.sections.about.title')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.about.title')}
+          </Text>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>{t('settings.sections.about.appName')}</Text>
+            <Text style={styles.infoLabel}>
+              {t('settings.sections.about.appName')}
+            </Text>
             <Text style={styles.infoValue}>GeminiTalk</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>{t('settings.sections.about.version')}</Text>
+            <Text style={styles.infoLabel}>
+              {t('settings.sections.about.version')}
+            </Text>
             <Text style={styles.infoValue}>1.0.0</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>{t('settings.sections.about.lastModified')}</Text>
+            <Text style={styles.infoLabel}>
+              {t('settings.sections.about.lastModified')}
+            </Text>
             <Text style={styles.infoValue}>
               {formatDate(BUILD_INFO.timestamp)}
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>{t('settings.sections.about.description')}</Text>
+            <Text style={styles.infoLabel}>
+              {t('settings.sections.about.description')}
+            </Text>
             <Text style={styles.infoValue}>
               {t('settings.sections.about.descriptionValue')}
             </Text>
@@ -449,9 +527,7 @@ const SettingsScreen = () => {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            {t('settings.footer')}
-          </Text>
+          <Text style={styles.footerText}>{t('settings.footer')}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

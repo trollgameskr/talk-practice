@@ -59,9 +59,7 @@ const HomeScreen = ({navigation}: any) => {
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <Text style={styles.title}>{t('home.title')}</Text>
-          <Text style={styles.subtitle}>
-            {t('home.subtitle')}
-          </Text>
+          <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
         </View>
 
         {progress && (
@@ -69,19 +67,25 @@ const HomeScreen = ({navigation}: any) => {
             <View style={styles.statsContainer}>
               <View style={styles.statCard}>
                 <Text style={styles.statValue}>{progress.totalSessions}</Text>
-                <Text style={styles.statLabel}>{t('home.stats.totalSessions')}</Text>
+                <Text style={styles.statLabel}>
+                  {t('home.stats.totalSessions')}
+                </Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statValue}>
                   {formatDuration(progress.totalDuration)}
                 </Text>
-                <Text style={styles.statLabel}>{t('home.stats.practiceTime')}</Text>
+                <Text style={styles.statLabel}>
+                  {t('home.stats.practiceTime')}
+                </Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statValue}>
                   {progress.overallScore.toFixed(0)}
                 </Text>
-                <Text style={styles.statLabel}>{t('home.stats.overallScore')}</Text>
+                <Text style={styles.statLabel}>
+                  {t('home.stats.overallScore')}
+                </Text>
               </View>
             </View>
 
@@ -95,35 +99,46 @@ const HomeScreen = ({navigation}: any) => {
           <TouchableOpacity
             style={[styles.button, styles.primaryButton]}
             onPress={() => navigation.navigate('TopicSelection')}>
-            <Text style={styles.buttonText}>{t('home.buttons.startPractice')}</Text>
+            <Text style={styles.buttonText}>
+              {t('home.buttons.startPractice')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
             onPress={() => navigation.navigate('Progress')}>
-            <Text style={styles.secondaryButtonText}>{t('home.buttons.viewProgress')}</Text>
+            <Text style={styles.secondaryButtonText}>
+              {t('home.buttons.viewProgress')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
             onPress={() => navigation.navigate('Settings')}>
-            <Text style={styles.secondaryButtonText}>{t('home.buttons.settings')}</Text>
+            <Text style={styles.secondaryButtonText}>
+              {t('home.buttons.settings')}
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.infoContainer}>
           <Text style={styles.infoTitle}>{t('home.howItWorks.title')}</Text>
           <Text style={styles.infoText}>
-            {t('home.howItWorks.step1')}{'\n'}
-            {t('home.howItWorks.step2')}{'\n'}
-            {t('home.howItWorks.step3')}{'\n'}
+            {t('home.howItWorks.step1')}
+            {'\n'}
+            {t('home.howItWorks.step2')}
+            {'\n'}
+            {t('home.howItWorks.step3')}
+            {'\n'}
             {t('home.howItWorks.step4')}
           </Text>
         </View>
 
         {progress && progress.achievements.length > 0 && (
           <View style={styles.achievementsContainer}>
-            <Text style={styles.achievementsTitle}>{t('home.achievements.title')}</Text>
+            <Text style={styles.achievementsTitle}>
+              {t('home.achievements.title')}
+            </Text>
             {progress.achievements
               .slice(-3)
               .reverse()

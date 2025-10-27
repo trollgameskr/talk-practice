@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {ConversationTopic} from '../types';
-import {getTopicDisplayName, getTopicIcon} from '../utils/helpers';
+import {getTopicIcon} from '../utils/helpers';
 
 const TopicSelectionScreen = ({navigation}: any) => {
   const {t} = useTranslation();
@@ -55,9 +55,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <Text style={styles.title}>{t('topicSelection.title')}</Text>
-          <Text style={styles.subtitle}>
-            {t('topicSelection.subtitle')}
-          </Text>
+          <Text style={styles.subtitle}>{t('topicSelection.subtitle')}</Text>
         </View>
 
         <View style={styles.topicsContainer}>
@@ -70,9 +68,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
                 <Text style={styles.topicIcon}>{getTopicIcon(topic)}</Text>
               </View>
               <View style={styles.topicInfo}>
-                <Text style={styles.topicName}>
-                  {name}
-                </Text>
+                <Text style={styles.topicName}>{name}</Text>
                 <Text style={styles.topicDescription}>{description}</Text>
               </View>
               <Text style={styles.arrow}>→</Text>
@@ -82,9 +78,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
 
         <View style={styles.tipContainer}>
           <Text style={styles.tipIcon}>{t('topicSelection.tip.icon')}</Text>
-          <Text style={styles.tipText}>
-            {t('topicSelection.tip.text')}
-          </Text>
+          <Text style={styles.tipText}>{t('topicSelection.tip.text')}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
