@@ -86,6 +86,16 @@ const ConversationScreen = ({route, navigation}: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Helper function to safely parse VoicePersonality from storage
+   */
+  const parseVoicePersonality = (
+    value: string | null,
+    defaultValue: VoicePersonality = 'cheerful_female',
+  ): VoicePersonality => {
+    return (value as VoicePersonality) || defaultValue;
+  };
+
   const initializeServices = async () => {
     try {
       setIsLoading(true);
@@ -158,8 +168,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       const aiVoicePersonalityPref = await AsyncStorage.getItem(
         STORAGE_KEYS.AI_VOICE_PERSONALITY,
       );
-      const aiVoicePersonality =
-        (aiVoicePersonalityPref as VoicePersonality) || 'cheerful_female';
+      const aiVoicePersonality = parseVoicePersonality(aiVoicePersonalityPref);
 
       // Response voice accent and personality will be loaded when needed (handleUseSample)
 
@@ -572,9 +581,9 @@ const ConversationScreen = ({route, navigation}: any) => {
         const responseVoicePersonalityPref = await AsyncStorage.getItem(
           STORAGE_KEYS.RESPONSE_VOICE_PERSONALITY,
         );
-        const responseVoicePersonality =
-          (responseVoicePersonalityPref as VoicePersonality) ||
-          'cheerful_female';
+        const responseVoicePersonality = parseVoicePersonality(
+          responseVoicePersonalityPref,
+        );
 
         voiceService.current.setVoiceAccent(responseVoiceAccent);
         voiceService.current.setVoicePersonality(responseVoicePersonality);
@@ -590,8 +599,9 @@ const ConversationScreen = ({route, navigation}: any) => {
         const aiVoicePersonalityPref = await AsyncStorage.getItem(
           STORAGE_KEYS.AI_VOICE_PERSONALITY,
         );
-        const aiVoicePersonality =
-          (aiVoicePersonalityPref as VoicePersonality) || 'cheerful_female';
+        const aiVoicePersonality = parseVoicePersonality(
+          aiVoicePersonalityPref,
+        );
 
         voiceService.current.setVoiceAccent(aiVoiceAccent);
         voiceService.current.setVoicePersonality(aiVoicePersonality);
