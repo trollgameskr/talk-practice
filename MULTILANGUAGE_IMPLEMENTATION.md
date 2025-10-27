@@ -166,7 +166,8 @@ All tests verify:
 
 Potential improvements for future versions:
 1. Add more languages based on user demand
-2. Use target language in conversation prompts
-3. Allow region-specific variants (e.g., zh-CN vs zh-TW)
-4. Add language-specific cultural content
+2. Use target language in conversation prompts to customize practice content
+3. Allow region-specific variants (e.g., Simplified Chinese 'zh-Hans' vs Traditional Chinese 'zh-Hant', or 'en-US' vs 'en-GB')
+4. Add language-specific cultural content and conversation topics
 5. Implement language learning progress tracking per target language
+6. Add voice accent options for target language practice
