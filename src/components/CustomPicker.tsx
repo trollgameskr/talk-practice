@@ -20,16 +20,28 @@ interface PickerItem {
   value: string;
 }
 
+interface Theme {
+  colors: {
+    border?: string;
+    inputBackground?: string;
+    text?: string;
+    primary?: string;
+    primaryLight?: string;
+    card?: string;
+    primaryDark?: string;
+  };
+}
+
 interface CustomPickerProps {
   selectedValue: string;
   onValueChange: (value: string) => void;
   items: PickerItem[];
   placeholder?: string;
-  style?: any;
-  textStyle?: any;
-  dropdownStyle?: any;
-  itemTextStyle?: any;
-  theme?: any;
+  style?: object;
+  textStyle?: object;
+  dropdownStyle?: object;
+  itemTextStyle?: object;
+  theme?: Theme;
 }
 
 const CustomPicker: React.FC<CustomPickerProps> = ({
@@ -54,7 +66,9 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
       <View style={[styles.webContainer, style]}>
         <select
           value={selectedValue}
-          onChange={(e: any) => onValueChange(e.target.value)}
+          onChange={(e: any) => {
+            onValueChange(e.target.value);
+          }}
           style={{
             width: '100%',
             padding: 12,
@@ -121,6 +135,7 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
               styles.modalContent,
               {backgroundColor: theme?.colors?.card || '#ffffff'},
             ]}
+            // Prevent modal from closing when tapping inside content area
             onStartShouldSetResponder={() => true}>
             <View style={styles.modalHeader}>
               <Text
