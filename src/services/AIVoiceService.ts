@@ -118,8 +118,7 @@ export class AIVoiceService {
         }, // Use US voice for Canada
       };
 
-      const voiceSet =
-        voiceNameMap[this.voiceAccent] || voiceNameMap['en-US'];
+      const voiceSet = voiceNameMap[this.voiceAccent] || voiceNameMap['en-US'];
       const voiceName = isMale ? voiceSet.male : voiceSet.female;
 
       // Adjust pitch and speaking rate based on personality
