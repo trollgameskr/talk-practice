@@ -29,6 +29,8 @@ import {
   STORAGE_KEYS,
   VOICE_ACCENT_OPTIONS,
   VoiceAccent,
+  VOICE_PERSONALITY_OPTIONS,
+  VoicePersonality,
 } from '../config/gemini.config';
 import {useTheme} from '../contexts/ThemeContext';
 import {
@@ -63,6 +65,10 @@ const SettingsScreen = ({navigation}: any) => {
   const [aiVoiceAccent, setAiVoiceAccent] = useState<VoiceAccent>('en-US');
   const [responseVoiceAccent, setResponseVoiceAccent] =
     useState<VoiceAccent>('en-US');
+  const [aiVoicePersonality, setAiVoicePersonality] =
+    useState<VoicePersonality>('cheerful_male');
+  const [responseVoicePersonality, setResponseVoicePersonality] =
+    useState<VoicePersonality>('cheerful_female');
 
   useEffect(() => {
     loadApiKey();
@@ -76,6 +82,8 @@ const SettingsScreen = ({navigation}: any) => {
     loadShowGrammarHighlights();
     loadAiVoiceAccent();
     loadResponseVoiceAccent();
+    loadAiVoicePersonality();
+    loadResponseVoicePersonality();
   }, []);
 
   const loadLanguage = async () => {
@@ -127,9 +135,8 @@ const SettingsScreen = ({navigation}: any) => {
       const savedValue = await AsyncStorage.getItem(
         STORAGE_KEYS.AUTO_READ_RESPONSE,
       );
-      if (savedValue !== null) {
-        setAutoReadResponse(savedValue === 'true');
-      }
+      // Default to true if not set (Feature 3)
+      setAutoReadResponse(savedValue !== null ? savedValue === 'true' : true);
     } catch (error) {
       console.error('Error loading auto-read response setting:', error);
     }
@@ -140,9 +147,8 @@ const SettingsScreen = ({navigation}: any) => {
       const savedValue = await AsyncStorage.getItem(
         STORAGE_KEYS.SHOW_TRANSLATION,
       );
-      if (savedValue !== null) {
-        setShowTranslation(savedValue === 'true');
-      }
+      // Default to true if not set (Feature 3)
+      setShowTranslation(savedValue !== null ? savedValue === 'true' : true);
     } catch (error) {
       console.error('Error loading show translation setting:', error);
     }
@@ -153,9 +159,8 @@ const SettingsScreen = ({navigation}: any) => {
       const savedValue = await AsyncStorage.getItem(
         STORAGE_KEYS.SHOW_PRONUNCIATION,
       );
-      if (savedValue !== null) {
-        setShowPronunciation(savedValue === 'true');
-      }
+      // Default to true if not set (Feature 3)
+      setShowPronunciation(savedValue !== null ? savedValue === 'true' : true);
     } catch (error) {
       console.error('Error loading show pronunciation setting:', error);
     }
@@ -166,9 +171,10 @@ const SettingsScreen = ({navigation}: any) => {
       const savedValue = await AsyncStorage.getItem(
         STORAGE_KEYS.SHOW_GRAMMAR_HIGHLIGHTS,
       );
-      if (savedValue !== null) {
-        setShowGrammarHighlights(savedValue === 'true');
-      }
+      // Default to true if not set (Feature 3)
+      setShowGrammarHighlights(
+        savedValue !== null ? savedValue === 'true' : true,
+      );
     } catch (error) {
       console.error('Error loading show grammar highlights setting:', error);
     }
@@ -197,6 +203,32 @@ const SettingsScreen = ({navigation}: any) => {
       }
     } catch (error) {
       console.error('Error loading response voice accent:', error);
+    }
+  };
+
+  const loadAiVoicePersonality = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.AI_VOICE_PERSONALITY,
+      );
+      if (savedValue) {
+        setAiVoicePersonality(savedValue as VoicePersonality);
+      }
+    } catch (error) {
+      console.error('Error loading AI voice personality:', error);
+    }
+  };
+
+  const loadResponseVoicePersonality = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.RESPONSE_VOICE_PERSONALITY,
+      );
+      if (savedValue) {
+        setResponseVoicePersonality(savedValue as VoicePersonality);
+      }
+    } catch (error) {
+      console.error('Error loading response voice personality:', error);
     }
   };
 
@@ -303,6 +335,36 @@ const SettingsScreen = ({navigation}: any) => {
     } catch (error) {
       console.error('Error saving response voice accent:', error);
       Alert.alert('Error', 'Failed to save response voice accent');
+    }
+  };
+
+  const handleAiVoicePersonalityChange = async (
+    personality: VoicePersonality,
+  ) => {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.AI_VOICE_PERSONALITY,
+        personality,
+      );
+      setAiVoicePersonality(personality);
+    } catch (error) {
+      console.error('Error saving AI voice personality:', error);
+      Alert.alert('Error', 'Failed to save AI voice personality');
+    }
+  };
+
+  const handleResponseVoicePersonalityChange = async (
+    personality: VoicePersonality,
+  ) => {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.RESPONSE_VOICE_PERSONALITY,
+        personality,
+      );
+      setResponseVoicePersonality(personality);
+    } catch (error) {
+      console.error('Error saving response voice personality:', error);
+      Alert.alert('Error', 'Failed to save response voice personality');
     }
   };
 
@@ -965,47 +1027,64 @@ const SettingsScreen = ({navigation}: any) => {
               ]}>
               {t('settings.sections.conversation.aiVoiceAccent.description')}
             </Text>
-            {(Object.keys(VOICE_ACCENT_OPTIONS) as VoiceAccent[]).map(
-              accent => (
-                <TouchableOpacity
-                  key={accent}
-                  style={[
-                    styles.optionButton,
-                    {
-                      backgroundColor: theme.colors.inputBackground,
-                      borderColor: theme.colors.border,
-                    },
-                    aiVoiceAccent === accent && {
-                      borderColor: theme.colors.primary,
-                      backgroundColor: theme.colors.primaryLight,
-                    },
-                  ]}
-                  onPress={() => handleAiVoiceAccentChange(accent)}>
-                  <View style={styles.optionContent}>
-                    <View style={styles.optionHeader}>
-                      <Text
-                        style={[
-                          styles.optionTitle,
-                          {color: theme.colors.text},
-                          aiVoiceAccent === accent && {
-                            color: theme.colors.primary,
-                          },
-                        ]}>
-                        {VOICE_ACCENT_OPTIONS[accent].label}
-                      </Text>
-                      {aiVoiceAccent === accent && (
+            {/* Feature 4: Show accent options only when target language is English */}
+            {selectedTargetLanguage === 'en' ? (
+              (Object.keys(VOICE_ACCENT_OPTIONS) as VoiceAccent[]).map(
+                accent => (
+                  <TouchableOpacity
+                    key={accent}
+                    style={[
+                      styles.optionButton,
+                      {
+                        backgroundColor: theme.colors.inputBackground,
+                        borderColor: theme.colors.border,
+                      },
+                      aiVoiceAccent === accent && {
+                        borderColor: theme.colors.primary,
+                        backgroundColor: theme.colors.primaryLight,
+                      },
+                    ]}
+                    onPress={() => handleAiVoiceAccentChange(accent)}>
+                    <View style={styles.optionContent}>
+                      <View style={styles.optionHeader}>
                         <Text
                           style={[
-                            styles.checkMark,
-                            {color: theme.colors.primary},
+                            styles.optionTitle,
+                            {color: theme.colors.text},
+                            aiVoiceAccent === accent && {
+                              color: theme.colors.primary,
+                            },
                           ]}>
-                          ✓
+                          {VOICE_ACCENT_OPTIONS[accent].label}
                         </Text>
-                      )}
+                        {aiVoiceAccent === accent && (
+                          <Text
+                            style={[
+                              styles.checkMark,
+                              {color: theme.colors.primary},
+                            ]}>
+                            ✓
+                          </Text>
+                        )}
+                      </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              ),
+                  </TouchableOpacity>
+                ),
+              )
+            ) : (
+              <View
+                style={[
+                  styles.infoBox,
+                  {
+                    backgroundColor: theme.colors.primaryLight,
+                    borderLeftColor: theme.colors.primary,
+                  },
+                ]}>
+                <Text
+                  style={[styles.infoText, {color: theme.colors.primaryDark}]}>
+                  ℹ️ Accent options are only available when learning English
+                </Text>
+              </View>
             )}
           </View>
 
@@ -1022,48 +1101,119 @@ const SettingsScreen = ({navigation}: any) => {
                 'settings.sections.conversation.responseVoiceAccent.description',
               )}
             </Text>
-            {(Object.keys(VOICE_ACCENT_OPTIONS) as VoiceAccent[]).map(
-              accent => (
-                <TouchableOpacity
-                  key={accent}
-                  style={[
-                    styles.optionButton,
-                    {
-                      backgroundColor: theme.colors.inputBackground,
-                      borderColor: theme.colors.border,
-                    },
-                    responseVoiceAccent === accent && {
-                      borderColor: theme.colors.primary,
-                      backgroundColor: theme.colors.primaryLight,
-                    },
-                  ]}
-                  onPress={() => handleResponseVoiceAccentChange(accent)}>
-                  <View style={styles.optionContent}>
-                    <View style={styles.optionHeader}>
-                      <Text
-                        style={[
-                          styles.optionTitle,
-                          {color: theme.colors.text},
-                          responseVoiceAccent === accent && {
-                            color: theme.colors.primary,
-                          },
-                        ]}>
-                        {VOICE_ACCENT_OPTIONS[accent].label}
-                      </Text>
-                      {responseVoiceAccent === accent && (
+            {/* Feature 4: Show accent options only when target language is English */}
+            {selectedTargetLanguage === 'en' ? (
+              (Object.keys(VOICE_ACCENT_OPTIONS) as VoiceAccent[]).map(
+                accent => (
+                  <TouchableOpacity
+                    key={accent}
+                    style={[
+                      styles.optionButton,
+                      {
+                        backgroundColor: theme.colors.inputBackground,
+                        borderColor: theme.colors.border,
+                      },
+                      responseVoiceAccent === accent && {
+                        borderColor: theme.colors.primary,
+                        backgroundColor: theme.colors.primaryLight,
+                      },
+                    ]}
+                    onPress={() => handleResponseVoiceAccentChange(accent)}>
+                    <View style={styles.optionContent}>
+                      <View style={styles.optionHeader}>
                         <Text
                           style={[
-                            styles.checkMark,
-                            {color: theme.colors.primary},
+                            styles.optionTitle,
+                            {color: theme.colors.text},
+                            responseVoiceAccent === accent && {
+                              color: theme.colors.primary,
+                            },
                           ]}>
-                          ✓
+                          {VOICE_ACCENT_OPTIONS[accent].label}
                         </Text>
-                      )}
+                        {responseVoiceAccent === accent && (
+                          <Text
+                            style={[
+                              styles.checkMark,
+                              {color: theme.colors.primary},
+                            ]}>
+                            ✓
+                          </Text>
+                        )}
+                      </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              ),
+                  </TouchableOpacity>
+                ),
+              )
+            ) : (
+              <View
+                style={[
+                  styles.infoBox,
+                  {
+                    backgroundColor: theme.colors.primaryLight,
+                    borderLeftColor: theme.colors.primary,
+                  },
+                ]}>
+                <Text
+                  style={[styles.infoText, {color: theme.colors.primaryDark}]}>
+                  ℹ️ Accent options are only available when learning English
+                </Text>
+              </View>
             )}
+          </View>
+
+          {/* Feature 6: AI Voice Personality Selection */}
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              AI Voice Personality
+            </Text>
+            <Text
+              style={[
+                styles.optionDescription,
+                {color: theme.colors.textSecondary},
+              ]}>
+              Choose the personality type for the AI conversation partner
+            </Text>
+            <CustomPicker
+              selectedValue={aiVoicePersonality}
+              onValueChange={(value: string) =>
+                handleAiVoicePersonalityChange(value as VoicePersonality)
+              }
+              items={Object.keys(VOICE_PERSONALITY_OPTIONS).map(key => ({
+                label: VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
+                value: key,
+              }))}
+              placeholder="Select AI Voice Personality"
+              theme={theme}
+              style={styles.pickerContainer}
+            />
+          </View>
+
+          {/* Feature 6: Response Voice Personality Selection */}
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              Your Voice Personality
+            </Text>
+            <Text
+              style={[
+                styles.optionDescription,
+                {color: theme.colors.textSecondary},
+              ]}>
+              Choose the personality type for reading your selected responses
+            </Text>
+            <CustomPicker
+              selectedValue={responseVoicePersonality}
+              onValueChange={(value: string) =>
+                handleResponseVoicePersonalityChange(value as VoicePersonality)
+              }
+              items={Object.keys(VOICE_PERSONALITY_OPTIONS).map(key => ({
+                label: VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
+                value: key,
+              }))}
+              placeholder="Select Your Voice Personality"
+              theme={theme}
+              style={styles.pickerContainer}
+            />
           </View>
 
           <View

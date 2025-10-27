@@ -2,7 +2,7 @@
  * Feedback Screen - Send feature requests and suggestions to the operator
  */
 
-import React, {useState} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,74 +10,40 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
-  TextInput,
   Alert,
   Linking,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useTheme} from '../contexts/ThemeContext';
-import {FEEDBACK_CONFIG} from '../config/feedback.config';
 
 const FeedbackScreen = () => {
   const {theme} = useTheme();
   const {t} = useTranslation();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [isSending, setIsSending] = useState(false);
 
   const handleSendFeedback = async () => {
-    // Validate message
-    if (!message.trim()) {
-      Alert.alert(t('common.error'), t('feedback.validation.messageRequired'));
-      return;
-    }
-
-    setIsSending(true);
+    // Feature 5: Open GitHub Issues instead of email
+    const githubIssuesUrl =
+      'https://github.com/trollgameskr/talk-practice/issues';
 
     try {
-      // Prepare email content
-      const subject = encodeURIComponent(
-        t('feedback.emailSubject', {appName: 'GeminiTalk'}),
-      );
-      const emailBody = encodeURIComponent(
-        `${t('feedback.emailBody.name')}: ${name || t('feedback.emailBody.anonymous')}\n` +
-          `${t('feedback.emailBody.email')}: ${email || t('feedback.emailBody.notProvided')}\n\n` +
-          `${t('feedback.emailBody.message')}:\n${message}`,
-      );
-
-      // Open email client with pre-filled content
-      const mailtoUrl = `mailto:${FEEDBACK_CONFIG.OPERATOR_EMAIL}?subject=${subject}&body=${emailBody}`;
-
-      const supported = await Linking.canOpenURL(mailtoUrl);
+      const supported = await Linking.canOpenURL(githubIssuesUrl);
 
       if (supported) {
-        await Linking.openURL(mailtoUrl);
-        // Clear form after sending
-        setName('');
-        setEmail('');
-        setMessage('');
-        Alert.alert(
-          t('common.success'),
-          t('feedback.sendSuccess'),
-          [{text: t('common.ok')}],
-        );
+        await Linking.openURL(githubIssuesUrl);
       } else {
         Alert.alert(
           t('common.error'),
-          t('feedback.errors.cannotOpenEmail'),
+          'Cannot open GitHub Issues. Please visit: ' + githubIssuesUrl,
           [{text: t('common.ok')}],
         );
       }
     } catch (error) {
-      console.error('Error sending feedback:', error);
+      console.error('Error opening GitHub Issues:', error);
       Alert.alert(
         t('common.error'),
-        t('feedback.errors.sendFailed'),
+        'Failed to open GitHub Issues. Please visit: ' + githubIssuesUrl,
         [{text: t('common.ok')}],
       );
-    } finally {
-      setIsSending(false);
     }
   };
 
@@ -97,11 +63,9 @@ const FeedbackScreen = () => {
             {t('feedback.title')}
           </Text>
           <Text
-            style={[
-              styles.description,
-              {color: theme.colors.textSecondary},
-            ]}>
-            {t('feedback.description')}
+            style={[styles.description, {color: theme.colors.textSecondary}]}>
+            Share your feedback, feature requests, and bug reports on our GitHub
+            Issues page.
           </Text>
 
           <View
@@ -113,125 +77,25 @@ const FeedbackScreen = () => {
               },
             ]}>
             <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-              💡 {t('feedback.tip')}
+              💡 Click the button below to open GitHub Issues where you can
+              create a new issue or view existing ones.
             </Text>
           </View>
 
-          <View style={styles.formContainer}>
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, {color: theme.colors.text}]}>
-                {t('feedback.fields.name.label')}
-                <Text
-                  style={[styles.optional, {color: theme.colors.textTertiary}]}>
-                  {' '}
-                  ({t('feedback.fields.optional')})
-                </Text>
-              </Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.colors.inputBackground,
-                    borderColor: theme.colors.inputBorder,
-                    color: theme.colors.text,
-                  },
-                ]}
-                value={name}
-                onChangeText={setName}
-                placeholder={t('feedback.fields.name.placeholder')}
-                placeholderTextColor={theme.colors.textTertiary}
-                autoCapitalize="words"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, {color: theme.colors.text}]}>
-                {t('feedback.fields.email.label')}
-                <Text
-                  style={[styles.optional, {color: theme.colors.textTertiary}]}>
-                  {' '}
-                  ({t('feedback.fields.optional')})
-                </Text>
-              </Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.colors.inputBackground,
-                    borderColor: theme.colors.inputBorder,
-                    color: theme.colors.text,
-                  },
-                ]}
-                value={email}
-                onChangeText={setEmail}
-                placeholder={t('feedback.fields.email.placeholder')}
-                placeholderTextColor={theme.colors.textTertiary}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              <Text
-                style={[
-                  styles.helpText,
-                  {color: theme.colors.textTertiary},
-                ]}>
-                {t('feedback.fields.email.help')}
-              </Text>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, {color: theme.colors.text}]}>
-                {t('feedback.fields.message.label')}
-                <Text style={[styles.required, {color: theme.colors.error}]}>
-                  {' '}
-                  *
-                </Text>
-              </Text>
-              <TextInput
-                style={[
-                  styles.textArea,
-                  {
-                    backgroundColor: theme.colors.inputBackground,
-                    borderColor: theme.colors.inputBorder,
-                    color: theme.colors.text,
-                  },
-                ]}
-                value={message}
-                onChangeText={setMessage}
-                placeholder={t('feedback.fields.message.placeholder')}
-                placeholderTextColor={theme.colors.textTertiary}
-                multiline
-                numberOfLines={6}
-                textAlignVertical="top"
-              />
-              <Text
-                style={[
-                  styles.helpText,
-                  {color: theme.colors.textTertiary},
-                ]}>
-                {t('feedback.fields.message.help')}
-              </Text>
-            </View>
-
-            <TouchableOpacity
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              {backgroundColor: theme.colors.buttonPrimary},
+            ]}
+            onPress={handleSendFeedback}>
+            <Text
               style={[
-                styles.submitButton,
-                {backgroundColor: theme.colors.buttonPrimary},
-                isSending && styles.submitButtonDisabled,
-              ]}
-              onPress={handleSendFeedback}
-              disabled={isSending}>
-              <Text
-                style={[
-                  styles.submitButtonText,
-                  {color: theme.colors.buttonPrimaryText},
-                ]}>
-                {isSending
-                  ? t('feedback.sending')
-                  : t('feedback.submitButton')}
-              </Text>
-            </TouchableOpacity>
-          </View>
+                styles.submitButtonText,
+                {color: theme.colors.buttonPrimaryText},
+              ]}>
+              🐙 Open GitHub Issues
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View
@@ -247,31 +111,19 @@ const FeedbackScreen = () => {
           </Text>
           <View style={styles.exampleList}>
             <Text
-              style={[
-                styles.exampleItem,
-                {color: theme.colors.textSecondary},
-              ]}>
+              style={[styles.exampleItem, {color: theme.colors.textSecondary}]}>
               • {t('feedback.examples.item1')}
             </Text>
             <Text
-              style={[
-                styles.exampleItem,
-                {color: theme.colors.textSecondary},
-              ]}>
+              style={[styles.exampleItem, {color: theme.colors.textSecondary}]}>
               • {t('feedback.examples.item2')}
             </Text>
             <Text
-              style={[
-                styles.exampleItem,
-                {color: theme.colors.textSecondary},
-              ]}>
+              style={[styles.exampleItem, {color: theme.colors.textSecondary}]}>
               • {t('feedback.examples.item3')}
             </Text>
             <Text
-              style={[
-                styles.exampleItem,
-                {color: theme.colors.textSecondary},
-              ]}>
+              style={[styles.exampleItem, {color: theme.colors.textSecondary}]}>
               • {t('feedback.examples.item4')}
             </Text>
           </View>
