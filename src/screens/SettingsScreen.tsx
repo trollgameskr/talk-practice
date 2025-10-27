@@ -15,6 +15,7 @@ import {
   Switch,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useTranslation} from 'react-i18next';
 import StorageService from '../services/StorageService';
 import FirebaseService from '../services/FirebaseService';
 import {isValidApiKey, openURL} from '../utils/helpers';
@@ -26,6 +27,11 @@ import {
   STORAGE_KEYS,
 } from '../config/gemini.config';
 import {useTheme} from '../contexts/ThemeContext';
+import {
+  saveLanguage,
+  getAvailableLanguages,
+  getCurrentLanguage,
+} from '../config/i18n.config';
 
 const storageService = new StorageService();
 const firebaseService = new FirebaseService();
@@ -33,17 +39,20 @@ const GEMINI_API_KEY_URL = 'https://makersuite.google.com/app/apikey';
 
 const SettingsScreen = () => {
   const {theme, isDark, toggleTheme} = useTheme();
+  const {t} = useTranslation();
   const [apiKey, setApiKey] = useState('');
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [sentenceLength, setSentenceLength] =
     useState<SentenceLength>('medium');
+  const [currentLanguage, setCurrentLanguage] = useState('ko');
 
   useEffect(() => {
     loadApiKey();
     loadUserInfo();
     loadSentenceLength();
+    setCurrentLanguage(getCurrentLanguage());
   }, []);
 
   const loadUserInfo = async () => {
@@ -82,24 +91,21 @@ const SettingsScreen = () => {
 
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
-      Alert.alert('Error', 'Please enter an API key');
+      Alert.alert(t('common.error'), t('settings.sections.api.errors.empty'));
       return;
     }
 
     if (!isValidApiKey(apiKey)) {
-      Alert.alert(
-        'Invalid API Key',
-        'The API key format appears to be invalid. Please check and try again.',
-      );
+      Alert.alert(t('common.error'), t('settings.sections.api.errors.invalid'));
       return;
     }
 
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
-      Alert.alert('Success', 'API key saved successfully!');
+      Alert.alert(t('common.success'), t('settings.sections.api.success'));
     } catch (error) {
       console.error('Error saving API key:', error);
-      Alert.alert('Error', 'Failed to save API key');
+      Alert.alert(t('common.error'), 'Failed to save API key');
     }
   };
 
@@ -107,10 +113,27 @@ const SettingsScreen = () => {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.SENTENCE_LENGTH, length);
       setSentenceLength(length);
-      Alert.alert('Success', 'Sentence length preference saved!');
+      Alert.alert(
+        t('common.success'),
+        t('settings.sections.conversation.success'),
+      );
     } catch (error) {
       console.error('Error saving sentence length:', error);
-      Alert.alert('Error', 'Failed to save sentence length preference');
+      Alert.alert(
+        t('common.error'),
+        'Failed to save sentence length preference',
+      );
+    }
+  };
+
+  const handleLanguageChange = async (languageCode: string) => {
+    try {
+      await saveLanguage(languageCode);
+      setCurrentLanguage(languageCode);
+      Alert.alert(t('common.success'), t('settings.sections.language.success'));
+    } catch (error) {
+      console.error('Error changing language:', error);
+      Alert.alert(t('common.error'), 'Failed to change language');
     }
   };
 
@@ -120,19 +143,28 @@ const SettingsScreen = () => {
 
   const handleClearData = () => {
     Alert.alert(
-      'Clear All Data',
-      'This will delete all your conversation history and progress. This action cannot be undone.',
+      t('settings.sections.data.clearConfirm.title'),
+      t('settings.sections.data.clearConfirm.message'),
       [
-        {text: 'Cancel', style: 'cancel'},
         {
-          text: 'Clear Data',
+          text: t('settings.sections.data.clearConfirm.cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('settings.sections.data.clearConfirm.confirm'),
           style: 'destructive',
           onPress: async () => {
             try {
               await storageService.clearAllData();
-              Alert.alert('Success', 'All data has been cleared');
+              Alert.alert(
+                t('common.success'),
+                t('settings.sections.data.clearConfirm.success'),
+              );
             } catch (error) {
-              Alert.alert('Error', 'Failed to clear data');
+              Alert.alert(
+                t('common.error'),
+                t('settings.sections.data.clearConfirm.error'),
+              );
             }
           },
         },
@@ -145,51 +177,70 @@ const SettingsScreen = () => {
       const data = await storageService.exportData();
       // In a real app, you'd implement file saving or sharing here
       Alert.alert(
-        'Export Data',
-        'Data exported successfully!\n\nIn a production app, this would save to a file or share via email.',
+        t('settings.sections.data.exportSuccess.title'),
+        t('settings.sections.data.exportSuccess.message'),
       );
       console.log('Exported data:', data);
     } catch (error) {
-      Alert.alert('Error', 'Failed to export data');
+      Alert.alert(t('common.error'), t('settings.sections.data.exportError'));
     }
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      {text: 'Cancel', style: 'cancel'},
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await firebaseService.logout();
-            Alert.alert('Success', 'Logged out successfully');
-          } catch (error) {
-            Alert.alert('Error', 'Failed to logout');
-          }
+    Alert.alert(
+      t('settings.sections.account.logoutConfirm.title'),
+      t('settings.sections.account.logoutConfirm.message'),
+      [
+        {
+          text: t('settings.sections.account.logoutConfirm.cancel'),
+          style: 'cancel',
         },
-      },
-    ]);
+        {
+          text: t('settings.sections.account.logoutConfirm.confirm'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await firebaseService.logout();
+              Alert.alert(
+                t('common.success'),
+                t('settings.sections.account.logoutConfirm.success'),
+              );
+            } catch (error) {
+              Alert.alert(
+                t('common.error'),
+                t('settings.sections.account.logoutConfirm.error'),
+              );
+            }
+          },
+        },
+      ],
+    );
   };
 
   const handleExitGuestMode = () => {
     Alert.alert(
-      'Exit Guest Mode',
-      'Would you like to create an account to save your data in the cloud?',
+      t('settings.sections.guestMode.exitConfirm.title'),
+      t('settings.sections.guestMode.exitConfirm.message'),
       [
-        {text: 'Cancel', style: 'cancel'},
         {
-          text: 'Exit Guest Mode',
+          text: t('settings.sections.guestMode.exitConfirm.cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('settings.sections.guestMode.exitConfirm.confirm'),
           style: 'destructive',
           onPress: async () => {
             try {
               await AsyncStorage.removeItem(GUEST_MODE_KEY);
               Alert.alert(
-                'Guest Mode Exited',
-                'You will need to restart the app to sign in or create an account.',
+                t('settings.sections.guestMode.exitConfirm.success'),
+                t('settings.sections.guestMode.exitConfirm.successMessage'),
               );
             } catch (error) {
-              Alert.alert('Error', 'Failed to exit guest mode');
+              Alert.alert(
+                t('common.error'),
+                t('settings.sections.guestMode.exitConfirm.error'),
+              );
             }
           },
         },
@@ -248,6 +299,24 @@ const SettingsScreen = () => {
               <Text style={[styles.guestInfoText, {color: isDark ? '#fbbf24' : '#92400e'}]}>
                 💡 Create an account to sync your data across devices and keep
                 it safe in the cloud.
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {t('settings.sections.guestMode.title')}
+            </Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>
+                {t('settings.sections.guestMode.status')}
+              </Text>
+              <Text style={styles.infoValue}>
+                {t('settings.sections.guestMode.statusValue')}
+              </Text>
+            </View>
+            <View style={styles.guestInfoBox}>
+              <Text style={styles.guestInfoText}>
+                {t('settings.sections.guestMode.info1')}
+              </Text>
+              <Text style={styles.guestInfoText}>
+                {t('settings.sections.guestMode.info2')}
               </Text>
             </View>
             <TouchableOpacity
@@ -255,6 +324,8 @@ const SettingsScreen = () => {
               onPress={handleExitGuestMode}>
               <Text style={[styles.secondaryButtonText, styles.dangerText, {color: isDark ? '#fca5a5' : '#dc2626'}]}>
                 🚪 Exit Guest Mode
+              <Text style={[styles.secondaryButtonText, styles.dangerText]}>
+                {t('settings.sections.guestMode.exitButton')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -266,12 +337,23 @@ const SettingsScreen = () => {
             <View style={styles.infoRow}>
               <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Logged in as</Text>
               <Text style={[styles.infoValue, {color: theme.colors.text}]}>  {userEmail}</Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {t('settings.sections.account.title')}
+            </Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>
+                {t('settings.sections.account.loggedInAs')}
+              </Text>
+              <Text style={styles.infoValue}>{userEmail}</Text>
             </View>
             <TouchableOpacity
               style={[styles.secondaryButton, styles.dangerButton, {backgroundColor: isDark ? '#7f1d1d' : '#fef2f2', borderColor: isDark ? '#991b1b' : '#fecaca'}]}
               onPress={handleLogout}>
               <Text style={[styles.secondaryButtonText, styles.dangerText, {color: isDark ? '#fca5a5' : '#dc2626'}]}>
                 🚪 Logout
+              <Text style={[styles.secondaryButtonText, styles.dangerText]}>
+                {t('settings.sections.account.logoutButton')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -285,12 +367,26 @@ const SettingsScreen = () => {
 
           <View style={styles.inputContainer}>
             <Text style={[styles.inputLabel, {color: theme.colors.text}]}>Gemini API Key</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.api.title')}
+          </Text>
+          <Text style={styles.sectionDescription}>
+            {t('settings.sections.api.description')}
+          </Text>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>
+              {t('settings.sections.api.apiKeyLabel')}
+            </Text>
             <TextInput
               style={[styles.input, {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.inputBorder, color: theme.colors.text}]}
               value={apiKey}
               onChangeText={setApiKey}
               placeholder="Enter your Gemini API key"
               placeholderTextColor={theme.colors.textTertiary}
+              placeholder={t('settings.sections.api.apiKeyPlaceholder')}
+              placeholderTextColor="#9ca3af"
               secureTextEntry={!isApiKeyVisible}
               autoCapitalize="none"
               autoCorrect={false}
@@ -300,6 +396,10 @@ const SettingsScreen = () => {
               onPress={() => setIsApiKeyVisible(!isApiKeyVisible)}>
               <Text style={[styles.toggleButtonText, {color: theme.colors.primary}]}>
                 {isApiKeyVisible ? '👁️ Hide' : '👁️‍🗨️ Show'}
+              <Text style={styles.toggleButtonText}>
+                {isApiKeyVisible
+                  ? t('settings.sections.api.hideButton')
+                  : t('settings.sections.api.showButton')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -308,6 +408,9 @@ const SettingsScreen = () => {
             style={[styles.primaryButton, {backgroundColor: theme.colors.buttonPrimary}]}
             onPress={handleSaveApiKey}>
             <Text style={[styles.primaryButtonText, {color: theme.colors.buttonPrimaryText}]}>Save API Key</Text>
+            <Text style={styles.primaryButtonText}>
+              {t('settings.sections.api.saveButton')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -322,6 +425,14 @@ const SettingsScreen = () => {
             <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
               ℹ️ Don't have an API key? Click the button above to get one from
               Google AI Studio (free with usage limits)
+            <Text style={styles.secondaryButtonText}>
+              {t('settings.sections.api.getKeyButton')}
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>
+              {t('settings.sections.api.info')}
             </Text>
           </View>
         </View>
@@ -334,6 +445,18 @@ const SettingsScreen = () => {
 
           <View style={styles.optionGroup}>
             <Text style={[styles.optionLabel, {color: theme.colors.text}]}>Response Length</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.conversation.title')}
+          </Text>
+          <Text style={styles.sectionDescription}>
+            {t('settings.sections.conversation.description')}
+          </Text>
+
+          <View style={styles.optionGroup}>
+            <Text style={styles.optionLabel}>
+              {t('settings.sections.conversation.responseLength')}
+            </Text>
             {(Object.keys(SENTENCE_LENGTH_CONFIG) as SentenceLength[]).map(
               length => (
                 <TouchableOpacity
@@ -352,7 +475,9 @@ const SettingsScreen = () => {
                           {color: theme.colors.text},
                           sentenceLength === length && {...styles.optionTitleActive, color: theme.colors.primary},
                         ]}>
-                        {SENTENCE_LENGTH_CONFIG[length].label}
+                        {t(
+                          `settings.sections.conversation.lengths.${length}.label`,
+                        )}
                       </Text>
                       {sentenceLength === length && (
                         <Text style={[styles.checkMark, {color: theme.colors.primary}]}>✓</Text>
@@ -365,7 +490,9 @@ const SettingsScreen = () => {
                         sentenceLength === length &&
                           {...styles.optionDescriptionActive, color: theme.colors.primaryDark},
                       ]}>
-                      {SENTENCE_LENGTH_CONFIG[length].description}
+                      {t(
+                        `settings.sections.conversation.lengths.${length}.description`,
+                      )}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -378,17 +505,67 @@ const SettingsScreen = () => {
               💡 Shorter responses are easier to follow and respond to, making
               practice more engaging. Longer responses provide more context and
               detail.
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>
+              {t('settings.sections.conversation.info')}
             </Text>
           </View>
         </View>
 
         <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
           <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>Data Management</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.language.title')}
+          </Text>
+          <Text style={styles.sectionDescription}>
+            {t('settings.sections.language.description')}
+          </Text>
+
+          <View style={styles.optionGroup}>
+            <Text style={styles.optionLabel}>
+              {t('settings.sections.language.currentLanguage')}
+            </Text>
+            {getAvailableLanguages().map(lang => (
+              <TouchableOpacity
+                key={lang.code}
+                style={[
+                  styles.optionButton,
+                  currentLanguage === lang.code && styles.optionButtonActive,
+                ]}
+                onPress={() => handleLanguageChange(lang.code)}>
+                <View style={styles.optionContent}>
+                  <View style={styles.optionHeader}>
+                    <Text
+                      style={[
+                        styles.optionTitle,
+                        currentLanguage === lang.code &&
+                          styles.optionTitleActive,
+                      ]}>
+                      {lang.nativeName}
+                    </Text>
+                    {currentLanguage === lang.code && (
+                      <Text style={styles.checkMark}>✓</Text>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.data.title')}
+          </Text>
 
           <TouchableOpacity
             style={[styles.secondaryButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
             onPress={handleExportData}>
             <Text style={[styles.secondaryButtonText, {color: theme.colors.buttonSecondaryText}]}>📤 Export Data</Text>
+            <Text style={styles.secondaryButtonText}>
+              {t('settings.sections.data.exportButton')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -396,6 +573,8 @@ const SettingsScreen = () => {
             onPress={handleClearData}>
             <Text style={[styles.secondaryButtonText, styles.dangerText, {color: isDark ? '#fca5a5' : '#dc2626'}]}>
               🗑️ Clear All Data
+            <Text style={[styles.secondaryButtonText, styles.dangerText]}>
+              {t('settings.sections.data.clearButton')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -413,6 +592,27 @@ const SettingsScreen = () => {
           <View style={styles.infoRow}>
             <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Last Modified</Text>
             <Text style={[styles.infoValue, {color: theme.colors.text}]}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {t('settings.sections.about.title')}
+          </Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>
+              {t('settings.sections.about.appName')}
+            </Text>
+            <Text style={styles.infoValue}>GeminiTalk</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>
+              {t('settings.sections.about.version')}
+            </Text>
+            <Text style={styles.infoValue}>1.0.0</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>
+              {t('settings.sections.about.lastModified')}
+            </Text>
+            <Text style={styles.infoValue}>
               {formatDate(BUILD_INFO.timestamp)}
             </Text>
           </View>
@@ -420,6 +620,11 @@ const SettingsScreen = () => {
             <Text style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>Description</Text>
             <Text style={[styles.infoValue, {color: theme.colors.text}]}>
               Real-time English Conversation Coach
+            <Text style={styles.infoLabel}>
+              {t('settings.sections.about.description')}
+            </Text>
+            <Text style={styles.infoValue}>
+              {t('settings.sections.about.descriptionValue')}
             </Text>
           </View>
         </View>
@@ -428,6 +633,7 @@ const SettingsScreen = () => {
           <Text style={[styles.footerText, {color: theme.colors.textTertiary}]}>
             © 2024 GeminiTalk - Powered by Gemini Live API
           </Text>
+          <Text style={styles.footerText}>{t('settings.footer')}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

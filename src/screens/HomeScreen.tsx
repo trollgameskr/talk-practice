@@ -13,6 +13,7 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useTranslation} from 'react-i18next';
 import StorageService from '../services/StorageService';
 import {UserProgress} from '../types';
 import {formatDuration} from '../utils/helpers';
@@ -24,6 +25,7 @@ const storageService = new StorageService();
 
 const HomeScreen = ({navigation}: any) => {
   const {theme} = useTheme();
+  const {t} = useTranslation();
   const [progress, setProgress] = useState<UserProgress | null>(null);
 
   useEffect(() => {
@@ -41,12 +43,12 @@ const HomeScreen = ({navigation}: any) => {
     const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
     if (!apiKey) {
       Alert.alert(
-        'API Key Required',
-        'You need a Gemini API key to use GeminiTalk. You can get one for free from Google AI Studio.\n\nWould you like to go to Settings to configure your API key now?',
+        t('home.apiKeyRequired.title'),
+        t('home.apiKeyRequired.message'),
         [
-          {text: 'Later', style: 'cancel'},
+          {text: t('home.apiKeyRequired.later'), style: 'cancel'},
           {
-            text: 'Go to Settings',
+            text: t('home.apiKeyRequired.goToSettings'),
             onPress: () => navigation.navigate('Settings'),
           },
         ],
@@ -62,6 +64,9 @@ const HomeScreen = ({navigation}: any) => {
           <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
             Your AI-powered English conversation coach
           </Text>
+        <View style={styles.header}>
+          <Text style={styles.title}>{t('home.title')}</Text>
+          <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
         </View>
 
         {progress && (
@@ -70,18 +75,29 @@ const HomeScreen = ({navigation}: any) => {
               <View style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
                 <Text style={[styles.statValue, {color: theme.colors.primary}]}>{progress.totalSessions}</Text>
                 <Text style={[styles.statLabel, {color: theme.colors.textSecondary}]}>Total Sessions</Text>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{progress.totalSessions}</Text>
+                <Text style={styles.statLabel}>
+                  {t('home.stats.totalSessions')}
+                </Text>
               </View>
               <View style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
                 <Text style={[styles.statValue, {color: theme.colors.primary}]}>
                   {formatDuration(progress.totalDuration)}
                 </Text>
                 <Text style={[styles.statLabel, {color: theme.colors.textSecondary}]}>Practice Time</Text>
+                <Text style={styles.statLabel}>
+                  {t('home.stats.practiceTime')}
+                </Text>
               </View>
               <View style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
                 <Text style={[styles.statValue, {color: theme.colors.primary}]}>
                   {progress.overallScore.toFixed(0)}
                 </Text>
                 <Text style={[styles.statLabel, {color: theme.colors.textSecondary}]}>Overall Score</Text>
+                <Text style={styles.statLabel}>
+                  {t('home.stats.overallScore')}
+                </Text>
               </View>
             </View>
 
@@ -96,12 +112,18 @@ const HomeScreen = ({navigation}: any) => {
             style={[styles.button, styles.primaryButton, {backgroundColor: theme.colors.buttonPrimary}]}
             onPress={() => navigation.navigate('TopicSelection')}>
             <Text style={[styles.buttonText, {color: theme.colors.buttonPrimaryText}]}>🎯 Start Practice</Text>
+            <Text style={styles.buttonText}>
+              {t('home.buttons.startPractice')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
             onPress={() => navigation.navigate('Progress')}>
             <Text style={[styles.secondaryButtonText, {color: theme.colors.buttonSecondaryText}]}>📊 View Progress</Text>
+            <Text style={styles.secondaryButtonText}>
+              {t('home.buttons.viewProgress')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -118,12 +140,32 @@ const HomeScreen = ({navigation}: any) => {
             2. Practice speaking in English{'\n'}
             3. Get instant feedback{'\n'}
             4. Track your progress over time
+            <Text style={styles.secondaryButtonText}>
+              {t('home.buttons.settings')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoTitle}>{t('home.howItWorks.title')}</Text>
+          <Text style={styles.infoText}>
+            {t('home.howItWorks.step1')}
+            {'\n'}
+            {t('home.howItWorks.step2')}
+            {'\n'}
+            {t('home.howItWorks.step3')}
+            {'\n'}
+            {t('home.howItWorks.step4')}
           </Text>
         </View>
 
         {progress && progress.achievements.length > 0 && (
           <View style={[styles.achievementsContainer, {backgroundColor: theme.colors.card}]}>
             <Text style={[styles.achievementsTitle, {color: theme.colors.text}]}>Recent Achievements 🏆</Text>
+          <View style={styles.achievementsContainer}>
+            <Text style={styles.achievementsTitle}>
+              {t('home.achievements.title')}
+            </Text>
             {progress.achievements
               .slice(-3)
               .reverse()

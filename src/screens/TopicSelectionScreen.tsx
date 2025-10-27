@@ -2,7 +2,7 @@
  * Topic Selection Screen
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,9 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {ConversationTopic} from '../types';
 import {getTopicDisplayName, getTopicIcon} from '../utils/helpers';
 import {useTheme} from '../contexts/ThemeContext';
@@ -40,6 +42,39 @@ const topics = [
 
 const TopicSelectionScreen = ({navigation}: any) => {
   const {theme, isDark} = useTheme();
+import {getTopicIcon} from '../utils/helpers';
+
+const TopicSelectionScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
+
+  const topics = [
+    {
+      topic: ConversationTopic.DAILY,
+      name: t('topicSelection.topics.daily.name'),
+      description: t('topicSelection.topics.daily.description'),
+    },
+    {
+      topic: ConversationTopic.TRAVEL,
+      name: t('topicSelection.topics.travel.name'),
+      description: t('topicSelection.topics.travel.description'),
+    },
+    {
+      topic: ConversationTopic.BUSINESS,
+      name: t('topicSelection.topics.business.name'),
+      description: t('topicSelection.topics.business.description'),
+    },
+    {
+      topic: ConversationTopic.CASUAL,
+      name: t('topicSelection.topics.casual.name'),
+      description: t('topicSelection.topics.casual.description'),
+    },
+    {
+      topic: ConversationTopic.PROFESSIONAL,
+      name: t('topicSelection.topics.professional.name'),
+      description: t('topicSelection.topics.professional.description'),
+    },
+  ];
+
   const handleTopicSelect = (topic: ConversationTopic) => {
     navigation.navigate('Conversation', {topic});
   };
@@ -52,10 +87,13 @@ const TopicSelectionScreen = ({navigation}: any) => {
           <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
             Select a conversation topic to practice
           </Text>
+        <View style={styles.header}>
+          <Text style={styles.title}>{t('topicSelection.title')}</Text>
+          <Text style={styles.subtitle}>{t('topicSelection.subtitle')}</Text>
         </View>
 
         <View style={styles.topicsContainer}>
-          {topics.map(({topic, description}) => (
+          {topics.map(({topic, name, description}) => (
             <TouchableOpacity
               key={topic}
               style={[styles.topicCard, {backgroundColor: theme.colors.card}]}
@@ -68,6 +106,8 @@ const TopicSelectionScreen = ({navigation}: any) => {
                   {getTopicDisplayName(topic)}
                 </Text>
                 <Text style={[styles.topicDescription, {color: theme.colors.textSecondary}]}>{description}</Text>
+                <Text style={styles.topicName}>{name}</Text>
+                <Text style={styles.topicDescription}>{description}</Text>
               </View>
               <Text style={[styles.arrow, {color: theme.colors.textTertiary}]}>→</Text>
             </TouchableOpacity>
@@ -80,6 +120,9 @@ const TopicSelectionScreen = ({navigation}: any) => {
             Tip: Start with topics you're comfortable with, then gradually try
             more challenging ones!
           </Text>
+        <View style={styles.tipContainer}>
+          <Text style={styles.tipIcon}>{t('topicSelection.tip.icon')}</Text>
+          <Text style={styles.tipText}>{t('topicSelection.tip.text')}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
