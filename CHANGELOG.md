@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `startConversation()` method in GeminiService now uses AI to generate the first message in the target language
 - Added fallback mechanism to English prompts if AI translation fails
 
+### Note
+- Multi-language support for UI and target languages was implemented in a previous update but not documented in CHANGELOG
+  - See MULTILANGUAGE_IMPLEMENTATION.md for details
+  - Supports 7 languages: English, Korean, Japanese, Chinese, Spanish, French, German
+
 ### Planned Features
 - Offline mode with cached responses
 - Custom conversation scenarios
