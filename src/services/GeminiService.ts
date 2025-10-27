@@ -84,6 +84,7 @@ export class GeminiService {
     const prompt = conversationPrompts[topic];
     const lengthGuideline =
       SENTENCE_LENGTH_CONFIG[this.sentenceLength].guideline;
+    const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
 
     if (this.model && typeof this.model.startChat === 'function') {
       this.chat = this.model.startChat({
@@ -100,7 +101,7 @@ export class GeminiService {
             role: 'model',
             parts: [
               {
-                text: `I understand. I'm ready to help you practice English conversation about ${topic}. Let's begin!`,
+                text: `I understand. I'm ready to help you practice ${targetLangName} conversation about ${topic}. Let's begin!`,
               },
             ],
           },
