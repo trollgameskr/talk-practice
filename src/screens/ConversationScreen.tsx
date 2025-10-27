@@ -588,6 +588,11 @@ const ConversationScreen = ({route, navigation}: any) => {
         voiceService.current.setVoiceAccent(responseVoiceAccent);
         voiceService.current.setVoicePersonality(responseVoicePersonality);
 
+        // Speak the selected sample using response voice
+        setIsSpeaking(true);
+        await voiceService.current.speak(sample);
+        setIsSpeaking(false);
+
         await handleUserMessage(sample, autoReadResponse);
 
         // Restore AI voice accent and personality

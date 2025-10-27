@@ -223,7 +223,13 @@ export class AIVoiceService {
           reject(error);
         };
 
-        this.currentAudio.play().catch(reject);
+        // Wait for audio to be ready before playing to prevent cutting off the beginning
+        this.currentAudio.oncanplaythrough = () => {
+          this.currentAudio.play().catch(reject);
+        };
+
+        // Trigger loading
+        this.currentAudio.load();
       } catch (error) {
         this.isSpeaking = false;
         reject(error);
