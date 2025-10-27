@@ -41,6 +41,13 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [sessionStartTime] = useState(new Date());
   const [elapsedTime, setElapsedTime] = useState(0);
   const [sampleAnswers, setSampleAnswers] = useState<string[]>([]);
+  const [enrichedSampleAnswers, setEnrichedSampleAnswers] = useState<
+    Array<{
+      text: string;
+      translation?: string;
+      pronunciation?: string;
+    }>
+  >([]);
   const [showSamples, setShowSamples] = useState(false);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [wordDefinition, setWordDefinition] = useState<{
@@ -112,31 +119,35 @@ const ConversationScreen = ({route, navigation}: any) => {
       const autoReadPref = await AsyncStorage.getItem(
         STORAGE_KEYS.AUTO_READ_RESPONSE,
       );
-      if (autoReadPref !== null) {
-        setAutoReadResponse(autoReadPref === 'true');
-      }
+      const loadedAutoRead =
+        autoReadPref !== null ? autoReadPref === 'true' : true; // Default to true (Feature 3)
+      setAutoReadResponse(loadedAutoRead);
 
       // Load display preferences
       const showTranslationPref = await AsyncStorage.getItem(
         STORAGE_KEYS.SHOW_TRANSLATION,
       );
-      if (showTranslationPref !== null) {
-        setShowTranslation(showTranslationPref === 'true');
-      }
+      const loadedShowTranslation =
+        showTranslationPref !== null ? showTranslationPref === 'true' : true; // Default to true (Feature 3)
+      setShowTranslation(loadedShowTranslation);
 
       const showPronunciationPref = await AsyncStorage.getItem(
         STORAGE_KEYS.SHOW_PRONUNCIATION,
       );
-      if (showPronunciationPref !== null) {
-        setShowPronunciation(showPronunciationPref === 'true');
-      }
+      const loadedShowPronunciation =
+        showPronunciationPref !== null
+          ? showPronunciationPref === 'true'
+          : true; // Default to true (Feature 3)
+      setShowPronunciation(loadedShowPronunciation);
 
       const showGrammarHighlightsPref = await AsyncStorage.getItem(
         STORAGE_KEYS.SHOW_GRAMMAR_HIGHLIGHTS,
       );
-      if (showGrammarHighlightsPref !== null) {
-        setShowGrammarHighlights(showGrammarHighlightsPref === 'true');
-      }
+      const loadedShowGrammarHighlights =
+        showGrammarHighlightsPref !== null
+          ? showGrammarHighlightsPref === 'true'
+          : true; // Default to true (Feature 3)
+      setShowGrammarHighlights(loadedShowGrammarHighlights);
 
       // Load voice accent preferences
       const aiVoiceAccentPref = await AsyncStorage.getItem(
@@ -183,7 +194,12 @@ const ConversationScreen = ({route, navigation}: any) => {
       };
 
       // Enrich message with translation, pronunciation, and grammar highlights
-      assistantMessage = await enrichAssistantMessage(assistantMessage);
+      // Pass loaded values directly to avoid relying on state (Feature 1 fix)
+      assistantMessage = await enrichAssistantMessage(assistantMessage, {
+        translation: loadedShowTranslation,
+        pronunciation: loadedShowPronunciation,
+        grammarHighlights: loadedShowGrammarHighlights,
+      });
 
       setMessages([assistantMessage]);
 
@@ -283,16 +299,37 @@ const ConversationScreen = ({route, navigation}: any) => {
   /**
    * Enrich assistant message with translation, pronunciation, and grammar highlights
    */
-  const enrichAssistantMessage = async (message: Message): Promise<Message> => {
+  const enrichAssistantMessage = async (
+    message: Message,
+    options?: {
+      translation?: boolean;
+      pronunciation?: boolean;
+      grammarHighlights?: boolean;
+    },
+  ): Promise<Message> => {
     if (!geminiService.current) {
       return message;
     }
 
     const enrichedMessage = {...message};
 
+    // Use provided options or fall back to state values
+    const enableTranslation =
+      options?.translation !== undefined
+        ? options.translation
+        : showTranslation;
+    const enablePronunciation =
+      options?.pronunciation !== undefined
+        ? options.pronunciation
+        : showPronunciation;
+    const enableGrammarHighlights =
+      options?.grammarHighlights !== undefined
+        ? options.grammarHighlights
+        : showGrammarHighlights;
+
     try {
       // Fetch translation if enabled
-      if (showTranslation) {
+      if (enableTranslation) {
         const translation = await geminiService.current.getTranslation(
           message.content,
         );
@@ -300,7 +337,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       }
 
       // Fetch pronunciation if enabled
-      if (showPronunciation) {
+      if (enablePronunciation) {
         const pronunciation = await geminiService.current.getPronunciation(
           message.content,
         );
@@ -308,7 +345,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       }
 
       // Fetch grammar highlights if enabled
-      if (showGrammarHighlights) {
+      if (enableGrammarHighlights) {
         const highlights = await geminiService.current.getGrammarHighlights(
           message.content,
         );
@@ -416,6 +453,35 @@ const ConversationScreen = ({route, navigation}: any) => {
         2,
       );
       setSampleAnswers(samples);
+
+      // Enrich sample answers with translation and pronunciation (Feature 2)
+      const enriched = await Promise.all(
+        samples.map(async sample => {
+          const result: {
+            text: string;
+            translation?: string;
+            pronunciation?: string;
+          } = {text: sample};
+
+          try {
+            if (showTranslation) {
+              result.translation = await geminiService.current!.getTranslation(
+                sample,
+              );
+            }
+            if (showPronunciation) {
+              result.pronunciation =
+                await geminiService.current!.getPronunciation(sample);
+            }
+          } catch (error) {
+            console.error('Error enriching sample answer:', error);
+          }
+
+          return result;
+        }),
+      );
+
+      setEnrichedSampleAnswers(enriched);
       setShowSamples(true);
     } catch (error) {
       console.error('Error generating sample answers:', error);
@@ -750,20 +816,32 @@ const ConversationScreen = ({route, navigation}: any) => {
         )}
 
         {/* 2 Response Test Options - User can select one to practice */}
-        {showSamples && sampleAnswers.length > 0 && (
+        {showSamples && enrichedSampleAnswers.length > 0 && (
           <View style={styles.samplesContainer}>
             <Text style={styles.samplesTitle}>
               💡 Response Options (Choose one to practice):
             </Text>
             <ScrollView style={styles.samplesScrollView}>
-              {sampleAnswers.map((sample, index) => (
+              {enrichedSampleAnswers.map((sample, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.sampleButton}
-                  onPress={() => handleUseSample(sample)}>
+                  onPress={() => handleUseSample(sample.text)}>
                   <View style={styles.sampleButtonContent}>
                     <Text style={styles.sampleNumber}>{index + 1}</Text>
-                    <Text style={styles.sampleText}>{sample}</Text>
+                    <View style={styles.sampleTextContainer}>
+                      <Text style={styles.sampleText}>{sample.text}</Text>
+                      {showTranslation && sample.translation && (
+                        <Text style={styles.sampleTranslationText}>
+                          💬 {sample.translation}
+                        </Text>
+                      )}
+                      {showPronunciation && sample.pronunciation && (
+                        <Text style={styles.samplePronunciationText}>
+                          🔊 {sample.pronunciation}
+                        </Text>
+                      )}
+                    </View>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -1028,10 +1106,26 @@ const styles = StyleSheet.create({
     marginRight: 8,
     minWidth: 20,
   },
-  sampleText: {
+  sampleTextContainer: {
     flex: 1,
+  },
+  sampleText: {
     fontSize: 14,
     color: '#1f2937',
+  },
+  sampleTranslationText: {
+    fontSize: 12,
+    color: '#6b7280',
+    fontStyle: 'italic',
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  samplePronunciationText: {
+    fontSize: 12,
+    color: '#8b5cf6',
+    fontStyle: 'italic',
+    marginTop: 2,
+    lineHeight: 16,
   },
   dismissButton: {
     alignSelf: 'center',
