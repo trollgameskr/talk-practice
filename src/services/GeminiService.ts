@@ -12,6 +12,7 @@ import {
 } from '../config/gemini.config';
 import {ConversationTopic, Message, Feedback, TokenUsage} from '../types';
 import {getConversationPrompts} from '../data/conversationPrompts';
+import {LANGUAGE_NAMES} from '../utils/helpers';
 
 export class GeminiService {
   private genAI!: GoogleGenerativeAI;
@@ -345,16 +346,7 @@ Provide an encouraging summary in 2-3 sentences.`;
     lastMessage: string,
     count: number = 2,
   ): Promise<string[]> {
-    const languageNames: Record<string, string> = {
-      en: 'English',
-      ko: 'Korean',
-      ja: 'Japanese',
-      zh: 'Chinese',
-      es: 'Spanish',
-      fr: 'French',
-      de: 'German',
-    };
-    const targetLangName = languageNames[this.targetLanguage] || 'English';
+    const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
 
     const lengthGuideline =
       SENTENCE_LENGTH_CONFIG[this.sentenceLength].guideline;
@@ -421,19 +413,8 @@ Format: Return only the sample responses in ${targetLangName}, one per line, wit
   async getWordDefinition(
     word: string,
   ): Promise<{definition: string; examples: string[]}> {
-    // Language name mapping
-    const languageNames: Record<string, string> = {
-      en: 'English',
-      ko: 'Korean',
-      ja: 'Japanese',
-      zh: 'Chinese',
-      es: 'Spanish',
-      fr: 'French',
-      de: 'German',
-    };
-
-    const targetLangName = languageNames[this.targetLanguage] || 'English';
-    const nativeLangName = languageNames[this.nativeLanguage] || 'English';
+    const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
+    const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
 
     const definitionPrompt = `Provide a clear and concise explanation of the ${targetLangName} word or phrase "${word}" in ${nativeLangName}, along with 2 example sentences in ${targetLangName}.
 

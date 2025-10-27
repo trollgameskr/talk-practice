@@ -3,17 +3,7 @@
  */
 
 import {ConversationPrompt, ConversationTopic} from '../types';
-
-// Language name mapping
-const languageNames: Record<string, string> = {
-  en: 'English',
-  ko: 'Korean',
-  ja: 'Japanese',
-  zh: 'Chinese',
-  es: 'Spanish',
-  fr: 'French',
-  de: 'German',
-};
+import {LANGUAGE_NAMES} from '../utils/helpers';
 
 /**
  * Get language-specific conversation prompts
@@ -22,8 +12,8 @@ export const getConversationPrompts = (
   targetLanguage: string,
   nativeLanguage: string,
 ): Record<ConversationTopic, ConversationPrompt> => {
-  const targetLangName = languageNames[targetLanguage] || 'English';
-  const nativeLangName = languageNames[nativeLanguage] || 'English';
+  const targetLangName = LANGUAGE_NAMES[targetLanguage] || 'English';
+  const nativeLangName = LANGUAGE_NAMES[nativeLanguage] || 'English';
 
   return {
     [ConversationTopic.DAILY]: {
