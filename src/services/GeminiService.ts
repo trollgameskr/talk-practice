@@ -495,6 +495,59 @@ Please format your response as JSON:
   }
 
   /**
+   * Detect grammar patterns and idioms in text
+   */
+  async detectGrammarPatterns(text: string): Promise<any[]> {
+    const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
+    const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
+
+    const detectionPrompt = `Analyze the following ${targetLangName} text and identify any useful grammar patterns or idioms that would be valuable for language learners to study.
+
+Text: "${text}"
+
+For each pattern or idiom found, provide:
+1. The exact text of the pattern/idiom from the input
+2. Type: "grammar" or "idiom"
+3. A short title/name
+4. A detailed explanation in ${nativeLangName}
+5. 2 example sentences in ${targetLangName}
+
+Please format your response as a JSON array. If no patterns or idioms are found, return an empty array.
+
+Example format:
+[
+  {
+    "pattern": "used to",
+    "type": "grammar",
+    "title": "Past Habits",
+    "explanation": "Used to express past habits or states",
+    "examples": ["I used to play tennis.", "She used to live in Paris."]
+  }
+]`;
+
+    try {
+      if (!this.model) {
+        throw new Error('Model not initialized');
+      }
+
+      const result = await this.model.generateContent(detectionPrompt);
+      const response = result.response.text();
+
+      // Try to parse JSON response
+      const jsonMatch = response.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error detecting grammar patterns:', error);
+      return [];
+    }
+  }
+
+  /**
    * End the current conversation
    */
   endConversation() {

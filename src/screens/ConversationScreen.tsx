@@ -48,6 +48,15 @@ const ConversationScreen = ({route, navigation}: any) => {
     examples: string[];
   } | null>(null);
   const [showDefinitionModal, setShowDefinitionModal] = useState(false);
+  const [grammarHighlightEnabled, setGrammarHighlightEnabled] =
+    useState<boolean>(false);
+  const [messageGrammarPatterns, setMessageGrammarPatterns] = useState<
+    Map<string, any[]>
+  >(new Map());
+  const [selectedGrammarPattern, setSelectedGrammarPattern] = useState<any>(
+    null,
+  );
+  const [showGrammarModal, setShowGrammarModal] = useState(false);
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -60,12 +69,24 @@ const ConversationScreen = ({route, navigation}: any) => {
   useEffect(() => {
     initializeServices();
     startTimer();
+    loadGrammarHighlightSetting();
 
     return () => {
       cleanup();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const loadGrammarHighlightSetting = async () => {
+    try {
+      const saved = await AsyncStorage.getItem(STORAGE_KEYS.GRAMMAR_HIGHLIGHT);
+      if (saved !== null) {
+        setGrammarHighlightEnabled(saved === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading grammar highlight setting:', error);
+    }
+  };
 
   const initializeServices = async () => {
     try {
@@ -132,6 +153,11 @@ const ConversationScreen = ({route, navigation}: any) => {
       };
 
       setMessages([assistantMessage]);
+
+      // Detect grammar patterns if enabled
+      if (grammarHighlightEnabled && geminiService.current) {
+        detectGrammarPatternsInMessage(assistantMessage.id, starterMessage);
+      }
 
       // Generate 2 sample answer options for the user
       await generateSampleAnswers(starterMessage);
@@ -255,6 +281,11 @@ const ConversationScreen = ({route, navigation}: any) => {
 
       setMessages(prev => [...prev, assistantMessage]);
 
+      // Detect grammar patterns if enabled
+      if (grammarHighlightEnabled && geminiService.current) {
+        detectGrammarPatternsInMessage(assistantMessage.id, response);
+      }
+
       // Generate 2 sample answer options for user to practice with
       await generateSampleAnswers(response);
 
@@ -294,6 +325,38 @@ const ConversationScreen = ({route, navigation}: any) => {
         },
       ],
     );
+  };
+
+  const detectGrammarPatternsInMessage = async (
+    messageId: string,
+    text: string,
+  ) => {
+    if (!geminiService.current) {
+      return;
+    }
+
+    try {
+      const patterns = await geminiService.current.detectGrammarPatterns(text);
+      if (patterns && patterns.length > 0) {
+        // Add position information to each pattern
+        const patternsWithPositions = patterns.map((p: any) => {
+          const index = text.toLowerCase().indexOf(p.pattern.toLowerCase());
+          return {
+            ...p,
+            startIndex: index,
+            endIndex: index + p.pattern.length,
+          };
+        });
+
+        setMessageGrammarPatterns(prev => {
+          const newMap = new Map(prev);
+          newMap.set(messageId, patternsWithPositions);
+          return newMap;
+        });
+      }
+    } catch (error) {
+      console.error('Error detecting grammar patterns:', error);
+    }
   };
 
   const generateSampleAnswers = async (aiMessage: string) => {
@@ -354,6 +417,11 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
+  const handleGrammarPatternPress = (pattern: any) => {
+    setSelectedGrammarPattern(pattern);
+    setShowGrammarModal(true);
+  };
+
   const handleUseSample = async (sample: string) => {
     setShowSamples(false);
     await handleUserMessage(sample);
@@ -401,9 +469,84 @@ const ConversationScreen = ({route, navigation}: any) => {
   };
 
   /**
-   * Render text with clickable words
+   * Render text with clickable words and grammar patterns
    */
-  const renderClickableWords = (text: string) => {
+  const renderClickableWords = (text: string, messageId: string) => {
+    const grammarPatterns = messageGrammarPatterns.get(messageId) || [];
+
+    // If no grammar patterns or feature disabled, render with clickable words only
+    if (!grammarHighlightEnabled || grammarPatterns.length === 0) {
+      return renderSimpleClickableWords(text);
+    }
+
+    // Sort patterns by position (earliest first) to handle overlaps
+    const sortedPatterns = [...grammarPatterns].sort(
+      (a, b) => a.startIndex - b.startIndex,
+    );
+
+    const parts: any[] = [];
+    let currentIndex = 0;
+
+    sortedPatterns.forEach((pattern, idx) => {
+      // Add text before the pattern
+      if (currentIndex < pattern.startIndex) {
+        const beforeText = text.substring(currentIndex, pattern.startIndex);
+        parts.push({
+          key: `text-before-${idx}`,
+          text: beforeText,
+          type: 'normal',
+        });
+      }
+
+      // Add the pattern
+      parts.push({
+        key: `pattern-${idx}`,
+        text: text.substring(pattern.startIndex, pattern.endIndex),
+        type: 'grammar',
+        pattern: pattern,
+      });
+
+      currentIndex = pattern.endIndex;
+    });
+
+    // Add remaining text
+    if (currentIndex < text.length) {
+      parts.push({
+        key: 'text-after',
+        text: text.substring(currentIndex),
+        type: 'normal',
+      });
+    }
+
+    return (
+      <Text style={[styles.messageText, styles.assistantText]}>
+        {parts.map(part => {
+          if (part.type === 'grammar') {
+            return (
+              <Text
+                key={part.key}
+                style={[
+                  styles.grammarHighlight,
+                  part.pattern.type === 'idiom'
+                    ? styles.idiomHighlight
+                    : styles.patternHighlight,
+                ]}
+                onPress={() => handleGrammarPatternPress(part.pattern)}>
+                {part.text}
+              </Text>
+            );
+          } else {
+            return renderSimpleClickableWords(part.text, part.key);
+          }
+        })}
+      </Text>
+    );
+  };
+
+  /**
+   * Render text with clickable words only
+   */
+  const renderSimpleClickableWords = (text: string, keyPrefix = '') => {
     // Split text into words while preserving spaces and punctuation
     const parts: {text: string; isWord: boolean}[] = [];
     let currentWord = '';
@@ -437,12 +580,12 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
 
     return (
-      <Text style={[styles.messageText, styles.assistantText]}>
+      <>
         {parts.map((part, index) => {
           if (part.isWord) {
             return (
               <Text
-                key={`word-${index}-${part.text}`}
+                key={`${keyPrefix}-word-${index}-${part.text}`}
                 style={styles.clickableWord}
                 onPress={() => handleWordPress(part.text)}>
                 {part.text}
@@ -451,14 +594,14 @@ const ConversationScreen = ({route, navigation}: any) => {
           } else {
             return (
               <Text
-                key={`nonword-${index}-${part.text.length}`}
+                key={`${keyPrefix}-nonword-${index}-${part.text.length}`}
                 style={styles.normalText}>
                 {part.text}
               </Text>
             );
           }
         })}
-      </Text>
+      </>
     );
   };
 

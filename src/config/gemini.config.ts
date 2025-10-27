@@ -83,4 +83,5 @@ export const GEMINI_PRICING = {
 export const STORAGE_KEYS = {
   API_KEY: '@gemini_api_key',
   SENTENCE_LENGTH: '@sentence_length',
+  GRAMMAR_HIGHLIGHT: '@grammar_highlight',
 } as const;

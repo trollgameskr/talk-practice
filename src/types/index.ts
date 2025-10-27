@@ -112,3 +112,14 @@ export interface VocabularyWord {
   fromSession?: string; // session ID where this word was encountered
   reviewed: boolean;
 }
+
+export interface GrammarPattern {
+  id: string;
+  pattern: string; // The detected pattern/idiom text
+  type: 'grammar' | 'idiom'; // Type of pattern
+  title: string; // Short title/name
+  explanation: string; // Detailed explanation
+  examples: string[]; // Example sentences
+  startIndex: number; // Start position in the text
+  endIndex: number; // End position in the text
+}

@@ -52,6 +52,8 @@ const SettingsScreen = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [selectedTargetLanguage, setSelectedTargetLanguage] =
     useState<string>('en');
+  const [grammarHighlightEnabled, setGrammarHighlightEnabled] =
+    useState<boolean>(false);
 
   useEffect(() => {
     loadApiKey();
@@ -59,6 +61,7 @@ const SettingsScreen = () => {
     loadSentenceLength();
     loadLanguage();
     loadTargetLanguage();
+    loadGrammarHighlight();
   }, []);
 
   const loadLanguage = async () => {
@@ -105,6 +108,17 @@ const SettingsScreen = () => {
     }
   };
 
+  const loadGrammarHighlight = async () => {
+    try {
+      const saved = await AsyncStorage.getItem(STORAGE_KEYS.GRAMMAR_HIGHLIGHT);
+      if (saved !== null) {
+        setGrammarHighlightEnabled(saved === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading grammar highlight setting:', error);
+    }
+  };
+
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
       Alert.alert('Error', 'Please enter an API key');
@@ -136,6 +150,19 @@ const SettingsScreen = () => {
     } catch (error) {
       console.error('Error saving sentence length:', error);
       Alert.alert('Error', 'Failed to save sentence length preference');
+    }
+  };
+
+  const handleGrammarHighlightToggle = async (value: boolean) => {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.GRAMMAR_HIGHLIGHT,
+        value.toString(),
+      );
+      setGrammarHighlightEnabled(value);
+    } catch (error) {
+      console.error('Error saving grammar highlight setting:', error);
+      Alert.alert('Error', 'Failed to save grammar highlight preference');
     }
   };
 
@@ -719,6 +746,69 @@ const SettingsScreen = () => {
               💡 Shorter responses are easier to follow and respond to, making
               practice more engaging. Longer responses provide more context and
               detail.
+            </Text>
+          </View>
+        </View>
+
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            📚 Learning Features
+          </Text>
+          <Text
+            style={[
+              styles.sectionDescription,
+              {color: theme.colors.textSecondary},
+            ]}>
+            Enhance your learning experience with intelligent features
+          </Text>
+
+          <View style={styles.themeRow}>
+            <View style={styles.themeInfo}>
+              <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                Grammar & Idiom Highlighting
+              </Text>
+              <Text
+                style={[
+                  styles.themeDescription,
+                  {color: theme.colors.textSecondary},
+                ]}>
+                Highlight useful grammar patterns and idioms in AI responses
+              </Text>
+            </View>
+            <Switch
+              value={grammarHighlightEnabled}
+              onValueChange={handleGrammarHighlightToggle}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
+              thumbColor={
+                grammarHighlightEnabled
+                  ? theme.colors.buttonPrimaryText
+                  : theme.colors.inputBackground
+              }
+            />
+          </View>
+
+          <View
+            style={[
+              styles.infoBox,
+              {
+                backgroundColor: theme.colors.primaryLight,
+                borderLeftColor: theme.colors.primary,
+              },
+            ]}>
+            <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
+              💡 When enabled, AI responses will highlight grammar patterns and
+              idioms in color. Tap them to view detailed explanations and
+              examples to enhance your learning.
             </Text>
           </View>
         </View>
