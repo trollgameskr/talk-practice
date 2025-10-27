@@ -46,20 +46,28 @@ const TopicSelectionScreen = ({navigation}: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const showApiKeyAlert = (onCancel?: () => void) => {
+    Alert.alert(
+      'API Key Required',
+      'You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nPlease go to Settings to configure your API key.',
+      [
+        {
+          text: 'Cancel',
+          onPress: onCancel,
+          style: onCancel ? 'cancel' : 'default',
+        },
+        {
+          text: 'Go to Settings',
+          onPress: () => navigation.navigate('Settings'),
+        },
+      ],
+    );
+  };
+
   const checkApiKey = async () => {
     const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
     if (!apiKey) {
-      Alert.alert(
-        'API Key Required',
-        'You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nPlease go to Settings to configure your API key.',
-        [
-          {text: 'Cancel', onPress: () => navigation.goBack()},
-          {
-            text: 'Go to Settings',
-            onPress: () => navigation.navigate('Settings'),
-          },
-        ],
-      );
+      showApiKeyAlert(() => navigation.goBack());
     }
   };
 
@@ -67,17 +75,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
     // Check API key again before navigation
     const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
     if (!apiKey) {
-      Alert.alert(
-        'API Key Required',
-        'You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nPlease go to Settings to configure your API key.',
-        [
-          {text: 'Cancel', style: 'cancel'},
-          {
-            text: 'Go to Settings',
-            onPress: () => navigation.navigate('Settings'),
-          },
-        ],
-      );
+      showApiKeyAlert();
       return;
     }
     navigation.navigate('Conversation', {topic});
