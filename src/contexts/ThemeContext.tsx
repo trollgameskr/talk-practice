@@ -2,9 +2,20 @@
  * Theme Context - Provides theme state and toggle functionality
  */
 
-import React, {createContext, useContext, useState, useEffect, ReactNode} from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Theme, lightTheme, darkTheme, STORAGE_KEY_THEME} from '../config/theme.config';
+import {
+  Theme,
+  lightTheme,
+  darkTheme,
+  STORAGE_KEY_THEME,
+} from '../config/theme.config';
 
 interface ThemeContextType {
   theme: Theme;
@@ -19,8 +30,8 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({children}) => {
-  const [theme, setTheme] = useState<Theme>(lightTheme);
-  const [isDark, setIsDark] = useState(false);
+  const [theme, setTheme] = useState<Theme>(darkTheme);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     loadTheme();
@@ -29,12 +40,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({children}) => {
   const loadTheme = async () => {
     try {
       const savedTheme = await AsyncStorage.getItem(STORAGE_KEY_THEME);
-      if (savedTheme === 'dark') {
-        setTheme(darkTheme);
-        setIsDark(true);
-      } else {
+      if (savedTheme === 'light') {
         setTheme(lightTheme);
         setIsDark(false);
+      } else {
+        // Default to dark theme
+        setTheme(darkTheme);
+        setIsDark(true);
       }
     } catch (error) {
       console.error('Error loading theme:', error);
@@ -47,7 +59,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({children}) => {
       const newTheme = newIsDark ? darkTheme : lightTheme;
       setTheme(newTheme);
       setIsDark(newIsDark);
-      await AsyncStorage.setItem(STORAGE_KEY_THEME, newIsDark ? 'dark' : 'light');
+      await AsyncStorage.setItem(
+        STORAGE_KEY_THEME,
+        newIsDark ? 'dark' : 'light',
+      );
     } catch (error) {
       console.error('Error toggling theme:', error);
     }
