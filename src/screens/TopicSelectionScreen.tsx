@@ -54,7 +54,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
         {
           text: 'Cancel',
           onPress: onCancel,
-          style: onCancel ? 'cancel' : 'default',
+          style: 'cancel',
         },
         {
           text: 'Go to Settings',
