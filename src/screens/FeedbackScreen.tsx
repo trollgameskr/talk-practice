@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useTheme} from '../contexts/ThemeContext';
+import {FEEDBACK_CONFIG} from '../config/feedback.config';
 
 const FeedbackScreen = () => {
   const {theme} = useTheme();
@@ -46,8 +47,7 @@ const FeedbackScreen = () => {
       );
 
       // Open email client with pre-filled content
-      // Note: Update this email address to the actual operator's email
-      const mailtoUrl = `mailto:trollgameskr@gmail.com?subject=${subject}&body=${emailBody}`;
+      const mailtoUrl = `mailto:${FEEDBACK_CONFIG.OPERATOR_EMAIL}?subject=${subject}&body=${emailBody}`;
 
       const supported = await Linking.canOpenURL(mailtoUrl);
 

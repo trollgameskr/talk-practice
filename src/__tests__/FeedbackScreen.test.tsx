@@ -3,6 +3,7 @@
  */
 
 import {Linking} from 'react-native';
+import {FEEDBACK_CONFIG} from '../config/feedback.config';
 
 describe('FeedbackScreen Feedback Submission', () => {
   beforeEach(() => {
@@ -35,9 +36,9 @@ describe('FeedbackScreen Feedback Submission', () => {
         `Message:\n${message}`,
     );
 
-    const mailtoUrl = `mailto:trollgameskr@gmail.com?subject=${subject}&body=${emailBody}`;
+    const mailtoUrl = `mailto:${FEEDBACK_CONFIG.OPERATOR_EMAIL}?subject=${subject}&body=${emailBody}`;
 
-    expect(mailtoUrl).toContain('mailto:trollgameskr@gmail.com');
+    expect(mailtoUrl).toContain(`mailto:${FEEDBACK_CONFIG.OPERATOR_EMAIL}`);
     expect(mailtoUrl).toContain('subject=GeminiTalk%20Feedback');
     expect(mailtoUrl).toContain('Name%3A%20John%20Doe');
     expect(mailtoUrl).toContain('Email%3A%20john%40example.com');
@@ -55,7 +56,7 @@ describe('FeedbackScreen Feedback Submission', () => {
         `Message:\n${message}`,
     );
 
-    const mailtoUrl = `mailto:trollgameskr@gmail.com?subject=${subject}&body=${emailBody}`;
+    const mailtoUrl = `mailto:${FEEDBACK_CONFIG.OPERATOR_EMAIL}?subject=${subject}&body=${emailBody}`;
 
     expect(mailtoUrl).toContain('Name%3A%20Anonymous');
     expect(mailtoUrl).toContain('Email%3A%20Not%20provided');
