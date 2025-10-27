@@ -53,8 +53,16 @@ const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
 
   if (compact) {
     return (
-      <View style={[styles.compactContainer, {backgroundColor: isDark ? '#065f46' : '#f0fdf4', borderColor: isDark ? '#10b981' : '#86efac'}]}>
-        <Text style={[styles.compactText, {color: isDark ? '#d1fae5' : '#166534'}]}>
+      <View
+        style={[
+          styles.compactContainer,
+          {
+            backgroundColor: isDark ? '#065f46' : '#f0fdf4',
+            borderColor: isDark ? '#10b981' : '#86efac',
+          },
+        ]}>
+        <Text
+          style={[styles.compactText, {color: isDark ? '#d1fae5' : '#166534'}]}>
           💰 {formatCost(totalCost)} ({formatTokens(totalTokens)} tokens)
         </Text>
       </View>
@@ -62,14 +70,29 @@ const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
   }
 
   return (
-    <View style={[styles.container, {backgroundColor: isDark ? '#065f46' : '#f0fdf4', borderColor: isDark ? '#10b981' : '#86efac'}]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark ? '#065f46' : '#f0fdf4',
+          borderColor: isDark ? '#10b981' : '#86efac',
+        },
+      ]}>
       <View style={styles.row}>
-        <Text style={[styles.label, {color: isDark ? '#d1fae5' : '#166534'}]}>💰 Total Cost:</Text>
-        <Text style={[styles.value, {color: isDark ? '#a7f3d0' : '#15803d'}]}>{formatCost(totalCost)}</Text>
+        <Text style={[styles.label, {color: isDark ? '#d1fae5' : '#166534'}]}>
+          💰 Total Cost:
+        </Text>
+        <Text style={[styles.value, {color: isDark ? '#a7f3d0' : '#15803d'}]}>
+          {formatCost(totalCost)}
+        </Text>
       </View>
       <View style={styles.row}>
-        <Text style={[styles.label, {color: isDark ? '#d1fae5' : '#166534'}]}>🔢 Tokens Used:</Text>
-        <Text style={[styles.value, {color: isDark ? '#a7f3d0' : '#15803d'}]}>{formatTokens(totalTokens)}</Text>
+        <Text style={[styles.label, {color: isDark ? '#d1fae5' : '#166534'}]}>
+          🔢 Tokens Used:
+        </Text>
+        <Text style={[styles.value, {color: isDark ? '#a7f3d0' : '#15803d'}]}>
+          {formatTokens(totalTokens)}
+        </Text>
       </View>
     </View>
   );
