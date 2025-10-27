@@ -57,45 +57,80 @@ const HomeScreen = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {backgroundColor: theme.colors.background},
+      ]}>
       <ScrollView style={styles.scrollView}>
-        <View style={[styles.header, {backgroundColor: theme.colors.backgroundSecondary, borderBottomColor: theme.colors.border}]}>
-          <Text style={[styles.title, {color: theme.colors.text}]}>Welcome to GeminiTalk</Text>
-          <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
-            Your AI-powered English conversation coach
+        <View
+          style={[
+            styles.header,
+            {
+              backgroundColor: theme.colors.backgroundSecondary,
+              borderBottomColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.title, {color: theme.colors.text}]}>
+            {t('home.title')}
           </Text>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('home.title')}</Text>
-          <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
+          <Text
+            style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
+            {t('home.subtitle')}
+          </Text>
         </View>
 
         {progress && (
           <>
             <View style={styles.statsContainer}>
-              <View style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
-                <Text style={[styles.statValue, {color: theme.colors.primary}]}>{progress.totalSessions}</Text>
-                <Text style={[styles.statLabel, {color: theme.colors.textSecondary}]}>Total Sessions</Text>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>{progress.totalSessions}</Text>
-                <Text style={styles.statLabel}>
+              <View
+                style={[
+                  styles.statCard,
+                  {backgroundColor: theme.colors.card},
+                ]}>
+                <Text
+                  style={[styles.statValue, {color: theme.colors.primary}]}>
+                  {progress.totalSessions}
+                </Text>
+                <Text
+                  style={[
+                    styles.statLabel,
+                    {color: theme.colors.textSecondary},
+                  ]}>
                   {t('home.stats.totalSessions')}
                 </Text>
               </View>
-              <View style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
-                <Text style={[styles.statValue, {color: theme.colors.primary}]}>
+              <View
+                style={[
+                  styles.statCard,
+                  {backgroundColor: theme.colors.card},
+                ]}>
+                <Text
+                  style={[styles.statValue, {color: theme.colors.primary}]}>
                   {formatDuration(progress.totalDuration)}
                 </Text>
-                <Text style={[styles.statLabel, {color: theme.colors.textSecondary}]}>Practice Time</Text>
-                <Text style={styles.statLabel}>
+                <Text
+                  style={[
+                    styles.statLabel,
+                    {color: theme.colors.textSecondary},
+                  ]}>
                   {t('home.stats.practiceTime')}
                 </Text>
               </View>
-              <View style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
-                <Text style={[styles.statValue, {color: theme.colors.primary}]}>
+              <View
+                style={[
+                  styles.statCard,
+                  {backgroundColor: theme.colors.card},
+                ]}>
+                <Text
+                  style={[styles.statValue, {color: theme.colors.primary}]}>
                   {progress.overallScore.toFixed(0)}
                 </Text>
-                <Text style={[styles.statLabel, {color: theme.colors.textSecondary}]}>Overall Score</Text>
-                <Text style={styles.statLabel}>
+                <Text
+                  style={[
+                    styles.statLabel,
+                    {color: theme.colors.textSecondary},
+                  ]}>
                   {t('home.stats.overallScore')}
                 </Text>
               </View>
@@ -109,46 +144,73 @@ const HomeScreen = ({navigation}: any) => {
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[styles.button, styles.primaryButton, {backgroundColor: theme.colors.buttonPrimary}]}
+            style={[
+              styles.button,
+              styles.primaryButton,
+              {backgroundColor: theme.colors.buttonPrimary},
+            ]}
             onPress={() => navigation.navigate('TopicSelection')}>
-            <Text style={[styles.buttonText, {color: theme.colors.buttonPrimaryText}]}>🎯 Start Practice</Text>
-            <Text style={styles.buttonText}>
+            <Text
+              style={[
+                styles.buttonText,
+                {color: theme.colors.buttonPrimaryText},
+              ]}>
               {t('home.buttons.startPractice')}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
+            style={[
+              styles.button,
+              styles.secondaryButton,
+              {
+                backgroundColor: theme.colors.buttonSecondary,
+                borderColor: theme.colors.border,
+              },
+            ]}
             onPress={() => navigation.navigate('Progress')}>
-            <Text style={[styles.secondaryButtonText, {color: theme.colors.buttonSecondaryText}]}>📊 View Progress</Text>
-            <Text style={styles.secondaryButtonText}>
+            <Text
+              style={[
+                styles.secondaryButtonText,
+                {color: theme.colors.buttonSecondaryText},
+              ]}>
               {t('home.buttons.viewProgress')}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
+            style={[
+              styles.button,
+              styles.secondaryButton,
+              {
+                backgroundColor: theme.colors.buttonSecondary,
+                borderColor: theme.colors.border,
+              },
+            ]}
             onPress={() => navigation.navigate('Settings')}>
-            <Text style={[styles.secondaryButtonText, {color: theme.colors.buttonSecondaryText}]}>⚙️ Settings</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={[styles.infoContainer, {backgroundColor: theme.colors.primaryLight, borderLeftColor: theme.colors.primary}]}>
-          <Text style={[styles.infoTitle, {color: theme.colors.text}]}>How it works:</Text>
-          <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
-            1. Choose a conversation topic{'\n'}
-            2. Practice speaking in English{'\n'}
-            3. Get instant feedback{'\n'}
-            4. Track your progress over time
-            <Text style={styles.secondaryButtonText}>
+            <Text
+              style={[
+                styles.secondaryButtonText,
+                {color: theme.colors.buttonSecondaryText},
+              ]}>
               {t('home.buttons.settings')}
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoTitle}>{t('home.howItWorks.title')}</Text>
-          <Text style={styles.infoText}>
+        <View
+          style={[
+            styles.infoContainer,
+            {
+              backgroundColor: theme.colors.primaryLight,
+              borderLeftColor: theme.colors.primary,
+            },
+          ]}>
+          <Text style={[styles.infoTitle, {color: theme.colors.text}]}>
+            {t('home.howItWorks.title')}
+          </Text>
+          <Text
+            style={[styles.infoText, {color: theme.colors.textSecondary}]}>
             {t('home.howItWorks.step1')}
             {'\n'}
             {t('home.howItWorks.step2')}
@@ -160,23 +222,41 @@ const HomeScreen = ({navigation}: any) => {
         </View>
 
         {progress && progress.achievements.length > 0 && (
-          <View style={[styles.achievementsContainer, {backgroundColor: theme.colors.card}]}>
-            <Text style={[styles.achievementsTitle, {color: theme.colors.text}]}>Recent Achievements 🏆</Text>
-          <View style={styles.achievementsContainer}>
-            <Text style={styles.achievementsTitle}>
+          <View
+            style={[
+              styles.achievementsContainer,
+              {backgroundColor: theme.colors.card},
+            ]}>
+            <Text
+              style={[styles.achievementsTitle, {color: theme.colors.text}]}>
               {t('home.achievements.title')}
             </Text>
             {progress.achievements
               .slice(-3)
               .reverse()
               .map(achievement => (
-                <View key={achievement.id} style={[styles.achievementCard, {backgroundColor: theme.colors.backgroundTertiary}]}>
-                  <Text style={styles.achievementIcon}>{achievement.icon}</Text>
+                <View
+                  key={achievement.id}
+                  style={[
+                    styles.achievementCard,
+                    {backgroundColor: theme.colors.backgroundTertiary},
+                  ]}>
+                  <Text style={styles.achievementIcon}>
+                    {achievement.icon}
+                  </Text>
                   <View style={styles.achievementInfo}>
-                    <Text style={[styles.achievementTitle, {color: theme.colors.text}]}>
+                    <Text
+                      style={[
+                        styles.achievementTitle,
+                        {color: theme.colors.text},
+                      ]}>
                       {achievement.title}
                     </Text>
-                    <Text style={[styles.achievementDescription, {color: theme.colors.textSecondary}]}>
+                    <Text
+                      style={[
+                        styles.achievementDescription,
+                        {color: theme.colors.textSecondary},
+                      ]}>
                       {achievement.description}
                     </Text>
                   </View>
@@ -242,8 +322,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
   },
-  primaryButton: {
-  },
+  primaryButton: {},
   secondaryButton: {
     borderWidth: 1,
   },

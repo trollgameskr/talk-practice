@@ -2,7 +2,7 @@
  * Topic Selection Screen
  */
 
-import React, {useEffect} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,41 +10,14 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  Alert,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {ConversationTopic} from '../types';
-import {getTopicDisplayName, getTopicIcon} from '../utils/helpers';
+import {getTopicIcon} from '../utils/helpers';
 import {useTheme} from '../contexts/ThemeContext';
-
-const topics = [
-  {
-    topic: ConversationTopic.DAILY,
-    description: 'Practice everyday conversations about daily life',
-  },
-  {
-    topic: ConversationTopic.TRAVEL,
-    description: 'Learn travel-related phrases and scenarios',
-  },
-  {
-    topic: ConversationTopic.BUSINESS,
-    description: 'Professional business English and etiquette',
-  },
-  {
-    topic: ConversationTopic.CASUAL,
-    description: 'Informal chats about entertainment and hobbies',
-  },
-  {
-    topic: ConversationTopic.PROFESSIONAL,
-    description: 'Workplace communication and collaboration',
-  },
-];
 
 const TopicSelectionScreen = ({navigation}: any) => {
   const {theme, isDark} = useTheme();
-import {getTopicIcon} from '../utils/helpers';
-
-const TopicSelectionScreen = ({navigation}: any) => {
   const {t} = useTranslation();
 
   const topics = [
@@ -80,49 +53,80 @@ const TopicSelectionScreen = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <ScrollView style={styles.scrollView}>
-        <View style={[styles.header, {backgroundColor: theme.colors.backgroundSecondary, borderBottomColor: theme.colors.border}]}>
-          <Text style={[styles.title, {color: theme.colors.text}]}>Choose Your Topic</Text>
-          <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
-            Select a conversation topic to practice
+        <View
+          style={[
+            styles.header,
+            {
+              backgroundColor: theme.colors.backgroundSecondary,
+              borderBottomColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.title, {color: theme.colors.text}]}>
+            {t('topicSelection.title')}
           </Text>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('topicSelection.title')}</Text>
-          <Text style={styles.subtitle}>{t('topicSelection.subtitle')}</Text>
+          <Text
+            style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
+            {t('topicSelection.subtitle')}
+          </Text>
         </View>
 
         <View style={styles.topicsContainer}>
           {topics.map(({topic, name, description}) => (
             <TouchableOpacity
               key={topic}
-              style={[styles.topicCard, {backgroundColor: theme.colors.card}]}
+              style={[
+                styles.topicCard,
+                {backgroundColor: theme.colors.card},
+              ]}
               onPress={() => handleTopicSelect(topic)}>
-              <View style={[styles.topicIconContainer, {backgroundColor: theme.colors.primaryLight}]}>
+              <View
+                style={[
+                  styles.topicIconContainer,
+                  {backgroundColor: theme.colors.primaryLight},
+                ]}>
                 <Text style={styles.topicIcon}>{getTopicIcon(topic)}</Text>
               </View>
               <View style={styles.topicInfo}>
                 <Text style={[styles.topicName, {color: theme.colors.text}]}>
-                  {getTopicDisplayName(topic)}
+                  {name}
                 </Text>
-                <Text style={[styles.topicDescription, {color: theme.colors.textSecondary}]}>{description}</Text>
-                <Text style={styles.topicName}>{name}</Text>
-                <Text style={styles.topicDescription}>{description}</Text>
+                <Text
+                  style={[
+                    styles.topicDescription,
+                    {color: theme.colors.textSecondary},
+                  ]}>
+                  {description}
+                </Text>
               </View>
-              <Text style={[styles.arrow, {color: theme.colors.textTertiary}]}>→</Text>
+              <Text
+                style={[styles.arrow, {color: theme.colors.textTertiary}]}>
+                →
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        <View style={[styles.tipContainer, {backgroundColor: isDark ? '#422006' : '#fef3c7', borderLeftColor: theme.colors.warning}]}>
-          <Text style={styles.tipIcon}>💡</Text>
-          <Text style={[styles.tipText, {color: isDark ? '#fbbf24' : '#78350f'}]}>
-            Tip: Start with topics you're comfortable with, then gradually try
-            more challenging ones!
+        <View
+          style={[
+            styles.tipContainer,
+            {
+              backgroundColor: isDark ? '#422006' : '#fef3c7',
+              borderLeftColor: theme.colors.warning,
+            },
+          ]}>
+          <Text style={styles.tipIcon}>
+            {t('topicSelection.tip.icon')}
           </Text>
-        <View style={styles.tipContainer}>
-          <Text style={styles.tipIcon}>{t('topicSelection.tip.icon')}</Text>
-          <Text style={styles.tipText}>{t('topicSelection.tip.text')}</Text>
+          <Text
+            style={[
+              styles.tipText,
+              {color: isDark ? '#fbbf24' : '#78350f'},
+            ]}>
+            {t('topicSelection.tip.text')}
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
