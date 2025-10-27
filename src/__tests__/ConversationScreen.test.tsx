@@ -1,74 +1,69 @@
 /**
- * Tests for ConversationScreen voice input press-and-hold behavior
+ * Tests for ConversationScreen voice input toggle behavior
  */
 
 describe('ConversationScreen Voice Input', () => {
-  describe('Press-and-hold behavior', () => {
-    it('should use onPressIn and onPressOut for voice button', () => {
-      // This test verifies that the voice button uses press-and-hold pattern
-      // instead of toggle pattern to prevent duplicate voice inputs
+  describe('Toggle behavior', () => {
+    it('should use onPress for voice button toggle', () => {
+      // This test verifies that the voice button uses toggle pattern
+      // instead of press-and-hold pattern
 
-      // Mock TouchableOpacity component behavior
-      const mockOnPressIn = jest.fn();
-      const mockOnPressOut = jest.fn();
+      // Mock toggle behavior
+      const mockOnPress = jest.fn();
 
-      // Simulate press-and-hold interaction
-      const simulatePressAndHold = () => {
-        // User presses button
-        mockOnPressIn();
-        expect(mockOnPressIn).toHaveBeenCalledTimes(1);
+      // Simulate toggle interaction
+      const simulateToggle = () => {
+        // User presses button to start
+        mockOnPress();
+        expect(mockOnPress).toHaveBeenCalledTimes(1);
 
-        // User releases button
-        mockOnPressOut();
-        expect(mockOnPressOut).toHaveBeenCalledTimes(1);
+        // User presses button again to stop
+        mockOnPress();
+        expect(mockOnPress).toHaveBeenCalledTimes(2);
       };
 
-      simulatePressAndHold();
+      simulateToggle();
 
-      // Verify both callbacks were called once
-      expect(mockOnPressIn).toHaveBeenCalledTimes(1);
-      expect(mockOnPressOut).toHaveBeenCalledTimes(1);
+      // Verify callback was called twice (start and stop)
+      expect(mockOnPress).toHaveBeenCalledTimes(2);
     });
 
-    it('should handle rapid press and release', () => {
-      const mockOnPressIn = jest.fn();
-      const mockOnPressOut = jest.fn();
+    it('should handle rapid toggle presses', () => {
+      const mockOnPress = jest.fn();
 
-      // Simulate rapid press-release-press-release
-      mockOnPressIn(); // First press
-      mockOnPressOut(); // First release
-      mockOnPressIn(); // Second press
-      mockOnPressOut(); // Second release
+      // Simulate rapid toggle presses
+      mockOnPress(); // First press - start
+      mockOnPress(); // Second press - stop
+      mockOnPress(); // Third press - start
+      mockOnPress(); // Fourth press - stop
 
-      // Should have 2 press and 2 release events
-      expect(mockOnPressIn).toHaveBeenCalledTimes(2);
-      expect(mockOnPressOut).toHaveBeenCalledTimes(2);
+      // Should have 4 press events
+      expect(mockOnPress).toHaveBeenCalledTimes(4);
     });
 
-    it('should prevent recording when button is not pressed', () => {
+    it('should toggle recording state on each press', () => {
       let isListening = false;
-      const mockStartListening = jest.fn(() => {
-        isListening = true;
-      });
-      const mockStopListening = jest.fn(() => {
-        isListening = false;
+      const mockToggleListening = jest.fn(() => {
+        isListening = !isListening;
       });
 
       // Initially not listening
       expect(isListening).toBe(false);
 
       // User presses button - starts listening
-      mockStartListening();
+      mockToggleListening();
       expect(isListening).toBe(true);
-      expect(mockStartListening).toHaveBeenCalledTimes(1);
+      expect(mockToggleListening).toHaveBeenCalledTimes(1);
 
-      // User releases button - stops listening
-      mockStopListening();
+      // User presses button again - stops listening
+      mockToggleListening();
       expect(isListening).toBe(false);
-      expect(mockStopListening).toHaveBeenCalledTimes(1);
+      expect(mockToggleListening).toHaveBeenCalledTimes(2);
 
-      // Should not be listening anymore
-      expect(isListening).toBe(false);
+      // User presses button again - starts listening
+      mockToggleListening();
+      expect(isListening).toBe(true);
+      expect(mockToggleListening).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -88,29 +83,25 @@ describe('ConversationScreen Voice Input', () => {
       expect(handleUserMessage('  Hello  ')).toBe(true);
     });
 
-    it('should not call onPressOut before onPressIn', () => {
+    it('should maintain correct state across multiple toggles', () => {
       let isListening = false;
-      const mockStartListening = jest.fn(() => {
-        isListening = true;
-      });
-      const mockStopListening = jest.fn(() => {
-        if (!isListening) {
-          return; // Guard against stopping when not listening
-        }
-        isListening = false;
+      const mockToggleListening = jest.fn(() => {
+        isListening = !isListening;
       });
 
-      // Try to stop before starting (edge case)
-      mockStopListening();
+      // Start with not listening
       expect(isListening).toBe(false);
-      expect(mockStopListening).toHaveBeenCalledTimes(1);
 
-      // Now proper sequence
-      mockStartListening();
-      expect(isListening).toBe(true);
+      // Multiple toggle cycles
+      for (let i = 0; i < 5; i++) {
+        mockToggleListening();
+        expect(isListening).toBe(true);
 
-      mockStopListening();
-      expect(isListening).toBe(false);
+        mockToggleListening();
+        expect(isListening).toBe(false);
+      }
+
+      expect(mockToggleListening).toHaveBeenCalledTimes(10);
     });
   });
 });

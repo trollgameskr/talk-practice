@@ -162,44 +162,36 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
-  const handleStartListening = async () => {
+  const handleToggleListening = async () => {
     if (!voiceService.current) {
       return;
     }
 
     try {
-      setIsListening(true);
-      await voiceService.current.startListening(
-        async text => {
-          // Don't set isListening to false here - let handleStopListening control it
-          // This prevents the button from appearing released while user is still holding it
-          await handleUserMessage(text);
-        },
-        error => {
-          console.error('Voice error:', error);
-          setIsListening(false);
-          Alert.alert('Error', 'Voice recognition failed. Please try again.');
-        },
-      );
+      if (isListening) {
+        // Stop listening
+        await voiceService.current.stopListening();
+        setIsListening(false);
+
+        // Start silence timer for auto-response (feat 1)
+        startSilenceTimer();
+      } else {
+        // Start listening
+        setIsListening(true);
+        await voiceService.current.startListening(
+          async text => {
+            await handleUserMessage(text);
+          },
+          error => {
+            console.error('Voice error:', error);
+            setIsListening(false);
+            Alert.alert('Error', 'Voice recognition failed. Please try again.');
+          },
+        );
+      }
     } catch (error) {
-      console.error('Error starting listening:', error);
+      console.error('Error toggling listening:', error);
       setIsListening(false);
-    }
-  };
-
-  const handleStopListening = async () => {
-    if (!voiceService.current) {
-      return;
-    }
-
-    try {
-      await voiceService.current.stopListening();
-      setIsListening(false);
-
-      // Start silence timer for auto-response (feat 1)
-      startSilenceTimer();
-    } catch (error) {
-      console.error('Error stopping listening:', error);
     }
   };
 
@@ -502,8 +494,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       <View style={styles.controls}>
         <Pressable
           style={[styles.micButton, isListening && styles.micButtonActive]}
-          onPressIn={handleStartListening}
-          onPressOut={handleStopListening}
+          onPress={handleToggleListening}
           disabled={isLoading || isSpeaking}
           // @ts-ignore - onContextMenu is a web-only prop
           onContextMenu={(e: React.MouseEvent<HTMLElement>) =>
@@ -511,7 +502,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           }>
           <Text style={styles.micIcon}>{isListening ? '⏸️' : '🎤'}</Text>
           <Text style={styles.micText}>
-            {isListening ? 'Recording...' : 'Hold to Speak'}
+            {isListening ? 'Tap to Stop' : 'Tap to Speak'}
           </Text>
         </Pressable>
 
