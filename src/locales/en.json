@@ -203,9 +203,25 @@
         "title": "🌐 Language",
         "description": "Choose your preferred language for the app interface",
         "currentLanguage": "App Language",
+        "nativeLanguage": "Native Language (UI Language)",
+        "targetLanguage": "Target Language",
         "languages": {
           "ko": "한국어",
-          "en": "English"
+          "en": "English",
+          "ja": "日本語",
+          "zh": "中文",
+          "es": "Español",
+          "fr": "Français",
+          "de": "Deutsch"
+        },
+        "targetLanguages": {
+          "en": "English",
+          "ko": "Korean",
+          "ja": "Japanese",
+          "zh": "Chinese",
+          "es": "Spanish",
+          "fr": "French",
+          "de": "German"
         },
         "success": "Language changed successfully!"
       },

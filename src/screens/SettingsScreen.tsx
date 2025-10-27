@@ -31,6 +31,9 @@ import {
   saveLanguage,
   getAvailableLanguages,
   getCurrentLanguage,
+  saveTargetLanguage,
+  getTargetLanguage,
+  getAvailableTargetLanguages,
 } from '../config/i18n.config';
 
 const storageService = new StorageService();
@@ -47,17 +50,25 @@ const SettingsScreen = () => {
   const [sentenceLength, setSentenceLength] =
     useState<SentenceLength>('medium');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
+  const [selectedTargetLanguage, setSelectedTargetLanguage] =
+    useState<string>('en');
 
   useEffect(() => {
     loadApiKey();
     loadUserInfo();
     loadSentenceLength();
     loadLanguage();
+    loadTargetLanguage();
   }, []);
 
   const loadLanguage = async () => {
     const currentLang = await getCurrentLanguage();
     setSelectedLanguage(currentLang);
+  };
+
+  const loadTargetLanguage = async () => {
+    const targetLang = await getTargetLanguage();
+    setSelectedTargetLanguage(targetLang);
   };
 
   const loadUserInfo = async () => {
@@ -248,8 +259,17 @@ const SettingsScreen = () => {
         </View>
 
         <View style={[styles.section, {backgroundColor: theme.colors.card, borderColor: theme.colors.border}]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>🌐 Language</Text>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            {t('settings.sections.language.title')}
+          </Text>
+          <Text style={[styles.sectionDescription, {color: theme.colors.textSecondary}]}>
+            {t('settings.sections.language.description')}
+          </Text>
+
           <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              {t('settings.sections.language.nativeLanguage')}
+            </Text>
             {getAvailableLanguages().map(lang => (
               <TouchableOpacity
                 key={lang.code}
@@ -262,6 +282,10 @@ const SettingsScreen = () => {
                   await saveLanguage(lang.code);
                   await i18n.changeLanguage(lang.code);
                   setSelectedLanguage(lang.code);
+                  Alert.alert(
+                    t('common.success'),
+                    t('settings.sections.language.success'),
+                  );
                 }}>
                 <View style={styles.optionContent}>
                   <View style={styles.optionHeader}>
@@ -274,6 +298,45 @@ const SettingsScreen = () => {
                       {lang.name}
                     </Text>
                     {selectedLanguage === lang.code && (
+                      <Text style={[styles.checkMark, {color: theme.colors.primary}]}>✓</Text>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              {t('settings.sections.language.targetLanguage')}
+            </Text>
+            {getAvailableTargetLanguages().map(lang => (
+              <TouchableOpacity
+                key={lang.code}
+                style={[
+                  styles.optionButton,
+                  {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border},
+                  selectedTargetLanguage === lang.code && {...styles.optionButtonActive, borderColor: theme.colors.primary, backgroundColor: theme.colors.primaryLight},
+                ]}
+                onPress={async () => {
+                  await saveTargetLanguage(lang.code);
+                  setSelectedTargetLanguage(lang.code);
+                  Alert.alert(
+                    t('common.success'),
+                    t('settings.sections.language.success'),
+                  );
+                }}>
+                <View style={styles.optionContent}>
+                  <View style={styles.optionHeader}>
+                    <Text
+                      style={[
+                        styles.optionTitle,
+                        {color: theme.colors.text},
+                        selectedTargetLanguage === lang.code && {...styles.optionTitleActive, color: theme.colors.primary},
+                      ]}>
+                      {t(`settings.sections.language.targetLanguages.${lang.code}`)}
+                    </Text>
+                    {selectedTargetLanguage === lang.code && (
                       <Text style={[styles.checkMark, {color: theme.colors.primary}]}>✓</Text>
                     )}
                   </View>
