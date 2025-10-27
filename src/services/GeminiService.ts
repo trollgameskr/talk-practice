@@ -110,11 +110,48 @@ export class GeminiService {
       });
     }
 
-    // Get a starter prompt (local static selection)
+    // Generate the first message in the target language using AI
     const starterIndex = Math.floor(
       Math.random() * prompt.starterPrompts.length,
     );
-    return prompt.starterPrompts[starterIndex];
+    const englishPromptTemplate = prompt.starterPrompts[starterIndex];
+
+    // Extract the core question from the English template (remove language instruction)
+    const coreQuestion = englishPromptTemplate
+      .replace(/\s*Please respond in [^.]+\./gi, '')
+      .replace(/\s*Respond in [^.]+\./gi, '')
+      .replace(/\s*Tell me in [^.]+\./gi, '')
+      .replace(/\s*Share in [^.]+\./gi, '')
+      .replace(/\s*in [^.]+\./gi, '.')
+      .trim();
+
+    // Ask AI to translate and generate the starter message in target language
+    try {
+      const result = await this.chat.sendMessage(
+        `Please start our ${targetLangName} conversation practice about ${topic}. Ask me this question in natural ${targetLangName}: "${coreQuestion}". ${lengthGuideline}. IMPORTANT: Respond ONLY with the question in ${targetLangName}, nothing else.`,
+      );
+
+      if (!result || !result.response) {
+        // Fallback to English prompt if AI call fails
+        return englishPromptTemplate;
+      }
+
+      const text =
+        typeof result.response.text === 'function'
+          ? result.response.text()
+          : result.response.text;
+
+      // Track token usage if available
+      if (result.response.usageMetadata) {
+        this.updateTokenUsage(result.response.usageMetadata);
+      }
+
+      return text.trim();
+    } catch (error) {
+      console.error('Error generating starter message:', error);
+      // Fallback to English prompt if AI call fails
+      return englishPromptTemplate;
+    }
   }
 
   /**
