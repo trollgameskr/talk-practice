@@ -22,6 +22,7 @@ import FirebaseService from '../services/FirebaseService';
 import {isValidApiKey, openURL} from '../utils/helpers';
 import {BUILD_INFO} from '../config/buildInfo';
 import {GUEST_MODE_KEY} from './LoginScreen';
+import CustomPicker from '../components/CustomPicker';
 import {
   SentenceLength,
   SENTENCE_LENGTH_CONFIG,
@@ -482,113 +483,51 @@ const SettingsScreen = ({navigation}: any) => {
             <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
               {t('settings.sections.language.nativeLanguage')}
             </Text>
-            {getAvailableLanguages().map(lang => (
-              <TouchableOpacity
-                key={lang.code}
-                style={[
-                  styles.optionButton,
-                  {
-                    backgroundColor: theme.colors.inputBackground,
-                    borderColor: theme.colors.border,
-                  },
-                  selectedLanguage === lang.code && {
-                    ...styles.optionButtonActive,
-                    borderColor: theme.colors.primary,
-                    backgroundColor: theme.colors.primaryLight,
-                  },
-                ]}
-                onPress={async () => {
-                  await saveLanguage(lang.code);
-                  await i18n.changeLanguage(lang.code);
-                  setSelectedLanguage(lang.code);
-                  Alert.alert(
-                    t('common.success'),
-                    t('settings.sections.language.success'),
-                  );
-                }}>
-                <View style={styles.optionContent}>
-                  <View style={styles.optionHeader}>
-                    <Text
-                      style={[
-                        styles.optionTitle,
-                        {color: theme.colors.text},
-                        selectedLanguage === lang.code && {
-                          ...styles.optionTitleActive,
-                          color: theme.colors.primary,
-                        },
-                      ]}>
-                      {lang.name}
-                    </Text>
-                    {selectedLanguage === lang.code && (
-                      <Text
-                        style={[
-                          styles.checkMark,
-                          {color: theme.colors.primary},
-                        ]}>
-                        ✓
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
+            <CustomPicker
+              selectedValue={selectedLanguage}
+              onValueChange={async (value: string) => {
+                await saveLanguage(value);
+                await i18n.changeLanguage(value);
+                setSelectedLanguage(value);
+                Alert.alert(
+                  t('common.success'),
+                  t('settings.sections.language.success'),
+                );
+              }}
+              items={getAvailableLanguages().map(lang => ({
+                label: lang.name,
+                value: lang.code,
+              }))}
+              placeholder={t('settings.sections.language.nativeLanguage')}
+              theme={theme}
+              style={styles.pickerContainer}
+            />
           </View>
 
           <View style={styles.optionGroup}>
             <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
               {t('settings.sections.language.targetLanguage')}
             </Text>
-            {getAvailableTargetLanguages().map(lang => (
-              <TouchableOpacity
-                key={lang.code}
-                style={[
-                  styles.optionButton,
-                  {
-                    backgroundColor: theme.colors.inputBackground,
-                    borderColor: theme.colors.border,
-                  },
-                  selectedTargetLanguage === lang.code && {
-                    ...styles.optionButtonActive,
-                    borderColor: theme.colors.primary,
-                    backgroundColor: theme.colors.primaryLight,
-                  },
-                ]}
-                onPress={async () => {
-                  await saveTargetLanguage(lang.code);
-                  setSelectedTargetLanguage(lang.code);
-                  Alert.alert(
-                    t('common.success'),
-                    t('settings.sections.language.success'),
-                  );
-                }}>
-                <View style={styles.optionContent}>
-                  <View style={styles.optionHeader}>
-                    <Text
-                      style={[
-                        styles.optionTitle,
-                        {color: theme.colors.text},
-                        selectedTargetLanguage === lang.code && {
-                          ...styles.optionTitleActive,
-                          color: theme.colors.primary,
-                        },
-                      ]}>
-                      {t(
-                        `settings.sections.language.targetLanguages.${lang.code}`,
-                      )}
-                    </Text>
-                    {selectedTargetLanguage === lang.code && (
-                      <Text
-                        style={[
-                          styles.checkMark,
-                          {color: theme.colors.primary},
-                        ]}>
-                        ✓
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
+            <CustomPicker
+              selectedValue={selectedTargetLanguage}
+              onValueChange={async (value: string) => {
+                await saveTargetLanguage(value);
+                setSelectedTargetLanguage(value);
+                Alert.alert(
+                  t('common.success'),
+                  t('settings.sections.language.success'),
+                );
+              }}
+              items={getAvailableTargetLanguages().map(lang => ({
+                label: t(
+                  `settings.sections.language.targetLanguages.${lang.code}`,
+                ),
+                value: lang.code,
+              }))}
+              placeholder={t('settings.sections.language.targetLanguage')}
+              theme={theme}
+              style={styles.pickerContainer}
+            />
           </View>
         </View>
 
@@ -1440,6 +1379,9 @@ const styles = StyleSheet.create({
   checkMark: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  pickerContainer: {
+    marginBottom: 8,
   },
 });
 
