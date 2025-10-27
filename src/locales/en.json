@@ -1,0 +1,292 @@
+{
+  "app": {
+    "name": "GeminiTalk"
+  },
+  "navigation": {
+    "home": "Home",
+    "topicSelection": "Choose Topic",
+    "conversation": "Practice",
+    "progress": "Your Progress",
+    "settings": "Settings"
+  },
+  "home": {
+    "title": "Welcome to GeminiTalk",
+    "subtitle": "Your AI-powered English conversation coach",
+    "stats": {
+      "totalSessions": "Total Sessions",
+      "practiceTime": "Practice Time",
+      "overallScore": "Overall Score"
+    },
+    "buttons": {
+      "startPractice": "🎯 Start Practice",
+      "viewProgress": "📊 View Progress",
+      "settings": "⚙️ Settings"
+    },
+    "howItWorks": {
+      "title": "How it works:",
+      "step1": "1. Choose a conversation topic",
+      "step2": "2. Practice speaking in English",
+      "step3": "3. Get instant feedback",
+      "step4": "4. Track your progress over time"
+    },
+    "achievements": {
+      "title": "Recent Achievements 🏆"
+    },
+    "apiKeyRequired": {
+      "title": "API Key Required",
+      "message": "You need a Gemini API key to use GeminiTalk. You can get one for free from Google AI Studio.\n\nWould you like to go to Settings to configure your API key now?",
+      "later": "Later",
+      "goToSettings": "Go to Settings"
+    }
+  },
+  "topicSelection": {
+    "title": "Choose Your Topic",
+    "subtitle": "Select a conversation topic to practice",
+    "topics": {
+      "daily": {
+        "name": "Daily Life",
+        "description": "Practice everyday conversations about daily life"
+      },
+      "travel": {
+        "name": "Travel",
+        "description": "Learn travel-related phrases and scenarios"
+      },
+      "business": {
+        "name": "Business",
+        "description": "Professional business English and etiquette"
+      },
+      "casual": {
+        "name": "Casual Chat",
+        "description": "Informal chats about entertainment and hobbies"
+      },
+      "professional": {
+        "name": "Professional",
+        "description": "Workplace communication and collaboration"
+      }
+    },
+    "tip": {
+      "icon": "💡",
+      "text": "Tip: Start with topics you're comfortable with, then gradually try more challenging ones!"
+    }
+  },
+  "conversation": {
+    "apiKeyRequired": {
+      "title": "API Key Required",
+      "message": "You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nGo to Settings to configure your API key.",
+      "cancel": "Cancel",
+      "goToSettings": "Go to Settings"
+    },
+    "buttons": {
+      "startListening": "🎤 Start Talking",
+      "stopListening": "⏹️ Stop",
+      "endConversation": "End Practice",
+      "sampleAnswers": "Sample Answers",
+      "hideSamples": "Hide Samples"
+    },
+    "status": {
+      "listening": "🎤 Listening...",
+      "speaking": "🔊 Speaking...",
+      "thinking": "🤔 Thinking...",
+      "ready": "Ready to practice"
+    },
+    "endSession": {
+      "title": "End Practice Session",
+      "message": "Are you sure you want to end this practice session?",
+      "cancel": "Continue",
+      "confirm": "End Session"
+    },
+    "sessionSummary": {
+      "title": "Session Complete!",
+      "duration": "Duration",
+      "score": "Score",
+      "feedback": "Feedback",
+      "vocabulary": "New Vocabulary",
+      "ok": "OK"
+    },
+    "errors": {
+      "initializationFailed": "Failed to initialize services. Please check your settings.",
+      "noApiKey": "No API key found. Please configure it in Settings.",
+      "voicePermission": "Microphone permission is required to use this feature.",
+      "listeningError": "Error listening",
+      "speakingError": "Error speaking"
+    }
+  },
+  "progress": {
+    "title": "Your Progress",
+    "subtitle": "Track your learning journey",
+    "stats": {
+      "totalSessions": "Total Sessions",
+      "totalDuration": "Total Time",
+      "averageScore": "Average Score"
+    },
+    "recentSessions": {
+      "title": "Recent Sessions",
+      "noSessions": "No practice sessions yet. Start your first conversation!",
+      "score": "Score",
+      "duration": "Duration"
+    },
+    "achievements": {
+      "title": "Achievements",
+      "noAchievements": "Complete practice sessions to unlock achievements!"
+    }
+  },
+  "settings": {
+    "sections": {
+      "guestMode": {
+        "title": "👤 Guest Mode",
+        "status": "Status",
+        "statusValue": "Using as Guest",
+        "info1": "ℹ️ You are using the app in guest mode. Your data is saved locally on this device only.",
+        "info2": "💡 Create an account to sync your data across devices and keep it safe in the cloud.",
+        "exitButton": "🚪 Exit Guest Mode",
+        "exitConfirm": {
+          "title": "Exit Guest Mode",
+          "message": "Would you like to create an account to save your data in the cloud?",
+          "cancel": "Cancel",
+          "confirm": "Exit Guest Mode",
+          "success": "Guest Mode Exited",
+          "successMessage": "You will need to restart the app to sign in or create an account.",
+          "error": "Failed to exit guest mode"
+        }
+      },
+      "account": {
+        "title": "Account",
+        "loggedInAs": "Logged in as",
+        "logoutButton": "🚪 Logout",
+        "logoutConfirm": {
+          "title": "Logout",
+          "message": "Are you sure you want to logout?",
+          "cancel": "Cancel",
+          "confirm": "Logout",
+          "success": "Logged out successfully",
+          "error": "Failed to logout"
+        }
+      },
+      "api": {
+        "title": "API Configuration",
+        "description": "Enter your Gemini API key to enable conversation features",
+        "apiKeyLabel": "Gemini API Key",
+        "apiKeyPlaceholder": "Enter your Gemini API key",
+        "showButton": "👁️‍🗨️ Show",
+        "hideButton": "👁️ Hide",
+        "saveButton": "Save API Key",
+        "getKeyButton": "🔑 Get API Key from Google AI Studio",
+        "info": "ℹ️ Don't have an API key? Click the button above to get one from Google AI Studio (free with usage limits)",
+        "errors": {
+          "empty": "Please enter an API key",
+          "invalid": "The API key format appears to be invalid. Please check and try again."
+        },
+        "success": "API key saved successfully!"
+      },
+      "conversation": {
+        "title": "🗣️ Conversation Settings",
+        "description": "Adjust the length of AI responses and suggested user responses",
+        "responseLength": "Response Length",
+        "lengths": {
+          "short": {
+            "label": "Short",
+            "description": "Quick, concise responses (1-2 sentences)"
+          },
+          "medium": {
+            "label": "Medium",
+            "description": "Balanced responses (2-3 sentences)"
+          },
+          "long": {
+            "label": "Long",
+            "description": "Detailed, comprehensive responses (3-4 sentences)"
+          }
+        },
+        "info": "💡 Shorter responses are easier to follow and respond to, making practice more engaging. Longer responses provide more context and detail.",
+        "success": "Sentence length preference saved!"
+      },
+      "language": {
+        "title": "🌐 Language",
+        "description": "Choose your preferred language for the app interface",
+        "currentLanguage": "App Language",
+        "languages": {
+          "ko": "한국어",
+          "en": "English"
+        },
+        "success": "Language changed successfully!"
+      },
+      "data": {
+        "title": "Data Management",
+        "exportButton": "📤 Export Data",
+        "clearButton": "🗑️ Clear All Data",
+        "clearConfirm": {
+          "title": "Clear All Data",
+          "message": "This will delete all your conversation history and progress. This action cannot be undone.",
+          "cancel": "Cancel",
+          "confirm": "Clear Data",
+          "success": "All data has been cleared",
+          "error": "Failed to clear data"
+        },
+        "exportSuccess": {
+          "title": "Export Data",
+          "message": "Data exported successfully!\n\nIn a production app, this would save to a file or share via email."
+        },
+        "exportError": "Failed to export data"
+      },
+      "about": {
+        "title": "About",
+        "appName": "App Name",
+        "version": "Version",
+        "lastModified": "Last Modified",
+        "description": "Description",
+        "descriptionValue": "Real-time English Conversation Coach"
+      }
+    },
+    "footer": "© 2024 GeminiTalk - Powered by Gemini Live API"
+  },
+  "login": {
+    "title": "Welcome to GeminiTalk",
+    "subtitle": "Your AI-powered English conversation coach",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter your email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "loginButton": "Login",
+    "signupButton": "Sign Up",
+    "guestButton": "Continue as Guest",
+    "forgotPassword": "Forgot Password?",
+    "switchToSignup": "Don't have an account? Sign Up",
+    "switchToLogin": "Already have an account? Login",
+    "errors": {
+      "invalidEmail": "Please enter a valid email address",
+      "shortPassword": "Password must be at least 6 characters",
+      "loginFailed": "Login failed. Please check your credentials.",
+      "signupFailed": "Sign up failed. Please try again.",
+      "resetFailed": "Failed to send reset email. Please try again."
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "message": "Enter your email address and we'll send you instructions to reset your password.",
+      "cancel": "Cancel",
+      "send": "Send Reset Email",
+      "success": "Password Reset Email Sent",
+      "successMessage": "Check your email for instructions to reset your password."
+    }
+  },
+  "cost": {
+    "title": "API Usage Cost",
+    "totalCost": "Total Cost",
+    "currentSession": "Current Session",
+    "disclaimer": "Estimated cost based on Gemini API pricing"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}

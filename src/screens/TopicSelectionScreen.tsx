@@ -12,72 +12,42 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useTranslation} from 'react-i18next';
 import {ConversationTopic} from '../types';
-import {getTopicDisplayName, getTopicIcon} from '../utils/helpers';
-import {STORAGE_KEYS} from '../config/gemini.config';
-
-const topics = [
-  {
-    topic: ConversationTopic.DAILY,
-    description: 'Practice everyday conversations about daily life',
-  },
-  {
-    topic: ConversationTopic.TRAVEL,
-    description: 'Learn travel-related phrases and scenarios',
-  },
-  {
-    topic: ConversationTopic.BUSINESS,
-    description: 'Professional business English and etiquette',
-  },
-  {
-    topic: ConversationTopic.CASUAL,
-    description: 'Informal chats about entertainment and hobbies',
-  },
-  {
-    topic: ConversationTopic.PROFESSIONAL,
-    description: 'Workplace communication and collaboration',
-  },
-];
+import {getTopicIcon} from '../utils/helpers';
 
 const TopicSelectionScreen = ({navigation}: any) => {
-  useEffect(() => {
-    checkApiKey();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const {t} = useTranslation();
 
-  const showApiKeyAlert = (onCancel?: () => void) => {
-    Alert.alert(
-      'API Key Required',
-      'You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nPlease go to Settings to configure your API key.',
-      [
-        {
-          text: 'Cancel',
-          onPress: onCancel,
-          style: 'cancel',
-        },
-        {
-          text: 'Go to Settings',
-          onPress: () => navigation.navigate('Settings'),
-        },
-      ],
-    );
-  };
+  const topics = [
+    {
+      topic: ConversationTopic.DAILY,
+      name: t('topicSelection.topics.daily.name'),
+      description: t('topicSelection.topics.daily.description'),
+    },
+    {
+      topic: ConversationTopic.TRAVEL,
+      name: t('topicSelection.topics.travel.name'),
+      description: t('topicSelection.topics.travel.description'),
+    },
+    {
+      topic: ConversationTopic.BUSINESS,
+      name: t('topicSelection.topics.business.name'),
+      description: t('topicSelection.topics.business.description'),
+    },
+    {
+      topic: ConversationTopic.CASUAL,
+      name: t('topicSelection.topics.casual.name'),
+      description: t('topicSelection.topics.casual.description'),
+    },
+    {
+      topic: ConversationTopic.PROFESSIONAL,
+      name: t('topicSelection.topics.professional.name'),
+      description: t('topicSelection.topics.professional.description'),
+    },
+  ];
 
-  const checkApiKey = async () => {
-    const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
-    if (!apiKey) {
-      showApiKeyAlert(() => navigation.goBack());
-    }
-  };
-
-  const handleTopicSelect = async (topic: ConversationTopic) => {
-    // Check API key again before navigation
-    const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
-    if (!apiKey) {
-      showApiKeyAlert();
-      return;
-    }
+  const handleTopicSelect = (topic: ConversationTopic) => {
     navigation.navigate('Conversation', {topic});
   };
 
@@ -85,14 +55,12 @@ const TopicSelectionScreen = ({navigation}: any) => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
-          <Text style={styles.title}>Choose Your Topic</Text>
-          <Text style={styles.subtitle}>
-            Select a conversation topic to practice
-          </Text>
+          <Text style={styles.title}>{t('topicSelection.title')}</Text>
+          <Text style={styles.subtitle}>{t('topicSelection.subtitle')}</Text>
         </View>
 
         <View style={styles.topicsContainer}>
-          {topics.map(({topic, description}) => (
+          {topics.map(({topic, name, description}) => (
             <TouchableOpacity
               key={topic}
               style={styles.topicCard}
@@ -101,9 +69,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
                 <Text style={styles.topicIcon}>{getTopicIcon(topic)}</Text>
               </View>
               <View style={styles.topicInfo}>
-                <Text style={styles.topicName}>
-                  {getTopicDisplayName(topic)}
-                </Text>
+                <Text style={styles.topicName}>{name}</Text>
                 <Text style={styles.topicDescription}>{description}</Text>
               </View>
               <Text style={styles.arrow}>→</Text>
@@ -112,11 +78,8 @@ const TopicSelectionScreen = ({navigation}: any) => {
         </View>
 
         <View style={styles.tipContainer}>
-          <Text style={styles.tipIcon}>💡</Text>
-          <Text style={styles.tipText}>
-            Tip: Start with topics you're comfortable with, then gradually try
-            more challenging ones!
-          </Text>
+          <Text style={styles.tipIcon}>{t('topicSelection.tip.icon')}</Text>
+          <Text style={styles.tipText}>{t('topicSelection.tip.text')}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
