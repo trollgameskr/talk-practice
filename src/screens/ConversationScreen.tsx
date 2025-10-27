@@ -26,7 +26,7 @@ import GeminiService from '../services/GeminiService';
 import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
 import {generateId, formatDuration} from '../utils/helpers';
-import {STORAGE_KEYS} from '../config/gemini.config';
+import {STORAGE_KEYS, VoicePersonality} from '../config/gemini.config';
 import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
 
 const storageService = new StorageService();
@@ -159,7 +159,7 @@ const ConversationScreen = ({route, navigation}: any) => {
         STORAGE_KEYS.AI_VOICE_PERSONALITY,
       );
       const aiVoicePersonality =
-        (aiVoicePersonalityPref as any) || 'cheerful_female';
+        (aiVoicePersonalityPref as VoicePersonality) || 'cheerful_female';
 
       // Response voice accent and personality will be loaded when needed (handleUseSample)
 
@@ -573,7 +573,8 @@ const ConversationScreen = ({route, navigation}: any) => {
           STORAGE_KEYS.RESPONSE_VOICE_PERSONALITY,
         );
         const responseVoicePersonality =
-          (responseVoicePersonalityPref as any) || 'cheerful_female';
+          (responseVoicePersonalityPref as VoicePersonality) ||
+          'cheerful_female';
 
         voiceService.current.setVoiceAccent(responseVoiceAccent);
         voiceService.current.setVoicePersonality(responseVoicePersonality);
@@ -590,7 +591,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           STORAGE_KEYS.AI_VOICE_PERSONALITY,
         );
         const aiVoicePersonality =
-          (aiVoicePersonalityPref as any) || 'cheerful_female';
+          (aiVoicePersonalityPref as VoicePersonality) || 'cheerful_female';
 
         voiceService.current.setVoiceAccent(aiVoiceAccent);
         voiceService.current.setVoicePersonality(aiVoicePersonality);

@@ -39,6 +39,13 @@ export class AIVoiceService {
   }
 
   /**
+   * Determine if personality is male or female
+   */
+  private isMaleVoice(): boolean {
+    return this.voicePersonality.includes('male');
+  }
+
+  /**
    * Synthesize speech using AI-generated voices
    * Attempts to use Google Cloud TTS API if configured, otherwise uses
    * the best available Web Speech API voice (Google, Microsoft Neural, etc.)
@@ -82,7 +89,7 @@ export class AIVoiceService {
       const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
 
       // Determine gender from personality
-      const isMale = this.voicePersonality.includes('male');
+      const isMale = this.isMaleVoice();
       const gender = isMale ? 'MALE' : 'FEMALE';
 
       // Map voice accent and personality to Google TTS voice
@@ -378,7 +385,7 @@ export class AIVoiceService {
     const baseLang = this.voiceAccent.split('-')[0];
 
     // Determine preferred gender from personality
-    const isMale = this.voicePersonality.includes('male');
+    const isMale = this.isMaleVoice();
 
     // Filter voices by gender preference
     const genderMatchingVoices = voices.filter((v: any) => {
