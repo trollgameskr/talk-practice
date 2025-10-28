@@ -43,14 +43,9 @@ import {
 } from '../config/i18n.config';
 import {TTSCapabilities} from '../services/AIVoiceService';
 
-
 const storageService = new StorageService();
 const firebaseService = new FirebaseService();
 const GEMINI_API_KEY_URL = 'https://makersuite.google.com/app/apikey';
-
-// Informational message for unavailable voice personality feature
-const VOICE_PERSONALITY_UNAVAILABLE_MESSAGE =
-  'ℹ️ Voice personality is only available when using Google Cloud TTS. Please configure your Gemini API key in the API Configuration section to enable this feature.';
 
 const SettingsScreen = ({navigation}: any) => {
   const {theme, isDark, toggleTheme} = useTheme();
@@ -81,16 +76,11 @@ const SettingsScreen = ({navigation}: any) => {
     supportsPersonality: false,
   });
 
-  // Update TTS capabilities when API key changes
-  useEffect(() => {
-    updateTTSCapabilities();
-  }, [apiKey]);
-
-  const updateTTSCapabilities = () => {
+  const updateTTSCapabilities = React.useCallback(() => {
     // Determine capabilities based on API key presence
     // This matches the logic in AIVoiceService.getCurrentTTSModel()
     const hasApiKey = apiKey && apiKey.trim() !== '';
-    
+
     if (hasApiKey) {
       // Google Cloud TTS supports both accent and personality
       setTtsCapabilities({
@@ -106,7 +96,12 @@ const SettingsScreen = ({navigation}: any) => {
         supportsPersonality: false,
       });
     }
-  };
+  }, [apiKey]);
+
+  // Update TTS capabilities when API key changes
+  useEffect(() => {
+    updateTTSCapabilities();
+  }, [updateTTSCapabilities]);
 
   useEffect(() => {
     loadApiKey();
@@ -1166,7 +1161,8 @@ const SettingsScreen = ({navigation}: any) => {
                   handleAiVoicePersonalityChange(value as VoicePersonality)
                 }
                 items={Object.keys(VOICE_PERSONALITY_OPTIONS).map(key => ({
-                  label: VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
+                  label:
+                    VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
                   value: key,
                 }))}
                 placeholder="Select AI Voice Personality"
@@ -1192,10 +1188,13 @@ const SettingsScreen = ({navigation}: any) => {
               <CustomPicker
                 selectedValue={responseVoicePersonality}
                 onValueChange={(value: string) =>
-                  handleResponseVoicePersonalityChange(value as VoicePersonality)
+                  handleResponseVoicePersonalityChange(
+                    value as VoicePersonality,
+                  )
                 }
                 items={Object.keys(VOICE_PERSONALITY_OPTIONS).map(key => ({
-                  label: VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
+                  label:
+                    VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
                   value: key,
                 }))}
                 placeholder="Select Your Voice Personality"

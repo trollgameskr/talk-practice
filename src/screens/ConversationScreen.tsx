@@ -70,7 +70,8 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [showVoiceDisplayModal, setShowVoiceDisplayModal] = useState(false);
   const [voiceDisplayText, setVoiceDisplayText] = useState('');
   const [voiceDisplayTranslation, setVoiceDisplayTranslation] = useState('');
-  const [voiceDisplayPronunciation, setVoiceDisplayPronunciation] = useState('');
+  const [voiceDisplayPronunciation, setVoiceDisplayPronunciation] =
+    useState('');
   const [voiceMethod, setVoiceMethod] = useState<string>('Web Speech API');
 
   const geminiService = useRef<GeminiService | null>(null);
@@ -1056,27 +1057,29 @@ const ConversationScreen = ({route, navigation}: any) => {
           <View style={styles.voiceDisplayContent}>
             <Text style={styles.voiceDisplayTitle}>🔊 음성 재생 중</Text>
             <Text style={styles.voiceDisplayText}>{voiceDisplayText}</Text>
-            
+
             {/* Display translation if available */}
             {showTranslation && voiceDisplayTranslation && (
               <Text style={styles.voiceDisplayTranslation}>
                 💬 {voiceDisplayTranslation}
               </Text>
             )}
-            
+
             {/* Display pronunciation if available */}
             {showPronunciation && voiceDisplayPronunciation && (
               <Text style={styles.voiceDisplayPronunciation}>
                 🔊 {voiceDisplayPronunciation}
               </Text>
             )}
-            
+
             {/* Voice method display - matching token usage display style */}
             <View style={styles.voiceMethodDisplayContainer}>
-              <Text style={styles.voiceMethodDisplayLabel}>🎙️ 음성 재생 모델:</Text>
+              <Text style={styles.voiceMethodDisplayLabel}>
+                🎙️ 음성 재생 모델:
+              </Text>
               <Text style={styles.voiceMethodDisplayText}>{voiceMethod}</Text>
             </View>
-            
+
             <TouchableOpacity
               style={styles.voiceDisplayCloseButton}
               onPress={() => setShowVoiceDisplayModal(false)}>
