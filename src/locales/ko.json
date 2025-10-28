@@ -90,6 +90,12 @@
       "thinking": "🤔 생각하는 중...",
       "ready": "연습 준비 완료"
     },
+    "voiceDisplay": {
+      "title": "🔊 음성 재생 중",
+      "close": "닫기",
+      "methodLabel": "재생 방법:",
+      "methodIndicatorLabel": "🎙️ 음성 재생:"
+    },
     "endSession": {
       "title": "연습 세션 종료",
       "message": "이 연습 세션을 종료하시겠습니까?",
