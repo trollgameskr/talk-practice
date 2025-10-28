@@ -6,6 +6,17 @@
 
 import {VoicePersonality} from '../config/gemini.config';
 
+/**
+ * TTS Model types and their capabilities
+ */
+export type TTSModel = 'Google Cloud TTS' | 'Web Speech API';
+
+export interface TTSCapabilities {
+  supportsAccent: boolean;
+  supportsPersonality: boolean;
+  model: TTSModel;
+}
+
 export class AIVoiceService {
   private isInitialized: boolean = false;
   private isSpeaking: boolean = false;
@@ -512,6 +523,42 @@ export class AIVoiceService {
       return `${this.lastUsedMethod} (${this.lastUsedVoiceName})`;
     }
     return this.lastUsedMethod;
+  }
+
+  /**
+   * Get the TTS model that will be used based on current configuration
+   */
+  getCurrentTTSModel(): TTSModel {
+    // Google Cloud TTS is used when API key is configured
+    if (this.apiKey && this.apiKey.trim() !== '') {
+      return 'Google Cloud TTS';
+    }
+    // Otherwise, fallback to Web Speech API
+    return 'Web Speech API';
+  }
+
+  /**
+   * Get capabilities of the current TTS model
+   */
+  getTTSCapabilities(): TTSCapabilities {
+    const model = this.getCurrentTTSModel();
+    
+    if (model === 'Google Cloud TTS') {
+      // Google Cloud TTS fully supports both accent and personality
+      return {
+        model,
+        supportsAccent: true,
+        supportsPersonality: true,
+      };
+    } else {
+      // Web Speech API supports accent selection but personality
+      // adjustments via pitch/rate are less reliable and model-dependent
+      return {
+        model,
+        supportsAccent: true,
+        supportsPersonality: false,
+      };
+    }
   }
 
   /**
