@@ -102,6 +102,12 @@
       "cancel": "Continuar",
       "confirm": "Finalizar Sesión"
     },
+    "resumeSession": {
+      "title": "¿Reanudar Sesión Anterior?",
+      "message": "Tienes una sesión de práctica sin terminar. ¿Te gustaría continuar desde donde lo dejaste?",
+      "resume": "Reanudar",
+      "startNew": "Iniciar Nueva"
+    },
     "sessionSummary": {
       "title": "¡Sesión Completa!",
       "duration": "Duración",

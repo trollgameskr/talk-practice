@@ -102,6 +102,12 @@
       "cancel": "계속",
       "confirm": "세션 종료"
     },
+    "resumeSession": {
+      "title": "이전 세션 재개하기?",
+      "message": "완료되지 않은 연습 세션이 있습니다. 중단했던 곳부터 계속하시겠습니까?",
+      "resume": "재개",
+      "startNew": "새로 시작"
+    },
     "sessionSummary": {
       "title": "세션 완료!",
       "duration": "소요 시간",

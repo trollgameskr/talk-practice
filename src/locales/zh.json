@@ -102,6 +102,12 @@
       "cancel": "继续",
       "confirm": "结束课程"
     },
+    "resumeSession": {
+      "title": "恢复上次课程？",
+      "message": "您有一个未完成的练习课程。是否要从上次停止的地方继续？",
+      "resume": "恢复",
+      "startNew": "开始新课程"
+    },
     "sessionSummary": {
       "title": "课程完成！",
       "duration": "时长",
