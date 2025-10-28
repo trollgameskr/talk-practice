@@ -1148,7 +1148,7 @@ const SettingsScreen = ({navigation}: any) => {
           </View>
 
           {/* Feature 6: AI Voice Personality Selection */}
-          {ttsCapabilities.supportsPersonality ? (
+          {ttsCapabilities.supportsPersonality && (
             <View style={styles.optionGroup}>
               <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
                 AI Voice Personality
@@ -1174,29 +1174,10 @@ const SettingsScreen = ({navigation}: any) => {
                 style={styles.pickerContainer}
               />
             </View>
-          ) : (
-            <View style={styles.optionGroup}>
-              <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-                AI Voice Personality
-              </Text>
-              <View
-                style={[
-                  styles.infoBox,
-                  {
-                    backgroundColor: theme.colors.primaryLight,
-                    borderLeftColor: theme.colors.primary,
-                  },
-                ]}>
-                <Text
-                  style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-                  {VOICE_PERSONALITY_UNAVAILABLE_MESSAGE}
-                </Text>
-              </View>
-            </View>
           )}
 
           {/* Feature 6: Response Voice Personality Selection */}
-          {ttsCapabilities.supportsPersonality ? (
+          {ttsCapabilities.supportsPersonality && (
             <View style={styles.optionGroup}>
               <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
                 Your Voice Personality
@@ -1221,25 +1202,6 @@ const SettingsScreen = ({navigation}: any) => {
                 theme={theme}
                 style={styles.pickerContainer}
               />
-            </View>
-          ) : (
-            <View style={styles.optionGroup}>
-              <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-                Your Voice Personality
-              </Text>
-              <View
-                style={[
-                  styles.infoBox,
-                  {
-                    backgroundColor: theme.colors.primaryLight,
-                    borderLeftColor: theme.colors.primary,
-                  },
-                ]}>
-                <Text
-                  style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-                  {VOICE_PERSONALITY_UNAVAILABLE_MESSAGE}
-                </Text>
-              </View>
             </View>
           )}
 
