@@ -208,6 +208,10 @@
         "autoReadResponse": {
           "label": "応答選択時に音声で読み上げ",
           "description": "応答オプションをタッチすると、AIが自動的に音声で読み上げます"
+        },
+        "textOnlyMode": {
+          "label": "テキストのみモード",
+          "description": "音声入力/出力を無効にし、テキストベースの会話のみを使用します"
         }
       },
       "language": {

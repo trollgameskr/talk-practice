@@ -208,6 +208,10 @@
         "autoReadResponse": {
           "label": "Lectura automática al seleccionar respuesta",
           "description": "La IA leerá automáticamente en voz alta cuando toques una opción de respuesta"
+        },
+        "textOnlyMode": {
+          "label": "Modo Solo Texto",
+          "description": "Desactivar entrada/salida de voz y usar solo conversación basada en texto"
         }
       },
       "language": {
