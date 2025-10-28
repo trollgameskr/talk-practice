@@ -195,4 +195,5 @@ export const STORAGE_KEYS = {
   RESPONSE_VOICE_ACCENT: '@response_voice_accent',
   AI_VOICE_PERSONALITY: '@ai_voice_personality',
   RESPONSE_VOICE_PERSONALITY: '@response_voice_personality',
+  TEXT_ONLY_MODE: '@text_only_mode',
 } as const;

@@ -208,6 +208,10 @@
         "autoReadResponse": {
           "label": "选择回复时自动朗读",
           "description": "当您触摸回复选项时，AI将自动朗读"
+        },
+        "textOnlyMode": {
+          "label": "纯文本模式",
+          "description": "禁用语音输入/输出，仅使用基于文本的对话"
         }
       },
       "language": {

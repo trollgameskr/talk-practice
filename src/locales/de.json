@@ -208,6 +208,10 @@
         "autoReadResponse": {
           "label": "Automatisches Vorlesen bei Auswahl",
           "description": "Die KI liest automatisch vor, wenn Sie eine Antwortoption berühren"
+        },
+        "textOnlyMode": {
+          "label": "Nur-Text-Modus",
+          "description": "Spracheingabe/-ausgabe deaktivieren und nur textbasierte Konversation verwenden"
         }
       },
       "language": {
