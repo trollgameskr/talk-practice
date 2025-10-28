@@ -221,6 +221,10 @@
           "label": "Highlight grammar and idioms",
           "description": "Highlight useful grammar patterns and idioms in AI messages"
         },
+        "textOnlyMode": {
+          "label": "Text-Only Mode",
+          "description": "Disable voice input/output and use text-based conversation only"
+        },
         "aiVoiceAccent": {
           "label": "AI voice accent",
           "description": "Choose the accent for AI voice responses"

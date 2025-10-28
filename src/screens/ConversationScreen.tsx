@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -73,6 +74,8 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [voiceDisplayPronunciation, setVoiceDisplayPronunciation] =
     useState('');
   const [voiceMethod, setVoiceMethod] = useState<string>('Web Speech API');
+  const [textOnlyMode, setTextOnlyMode] = useState(false);
+  const [userInputText, setUserInputText] = useState('');
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -164,6 +167,14 @@ const ConversationScreen = ({route, navigation}: any) => {
           : true; // Default to true (Feature 3)
       setShowGrammarHighlights(loadedShowGrammarHighlights);
 
+      // Load text-only mode preference
+      const textOnlyModePref = await AsyncStorage.getItem(
+        STORAGE_KEYS.TEXT_ONLY_MODE,
+      );
+      const loadedTextOnlyMode =
+        textOnlyModePref !== null ? textOnlyModePref === 'true' : false; // Default to false
+      setTextOnlyMode(loadedTextOnlyMode);
+
       // Load voice accent preferences
       const aiVoiceAccentPref = await AsyncStorage.getItem(
         STORAGE_KEYS.AI_VOICE_ACCENT,
@@ -199,12 +210,14 @@ const ConversationScreen = ({route, navigation}: any) => {
         }
       });
 
-      // Initialize Voice service with accent and personality
-      voiceService.current = new VoiceService(
-        undefined,
-        aiVoiceAccent,
-        aiVoicePersonality,
-      );
+      // Initialize Voice service with accent and personality (only if not in text-only mode)
+      if (!loadedTextOnlyMode) {
+        voiceService.current = new VoiceService(
+          undefined,
+          aiVoiceAccent,
+          aiVoicePersonality,
+        );
+      }
 
       // Start conversation
       const starterMessage = await geminiService.current.startConversation(
@@ -235,8 +248,8 @@ const ConversationScreen = ({route, navigation}: any) => {
         pronunciation: loadedShowPronunciation,
       });
 
-      // Speak the starter message
-      if (voiceService.current) {
+      // Speak the starter message (only if not in text-only mode)
+      if (!loadedTextOnlyMode && voiceService.current) {
         await voiceService.current.speak(starterMessage);
         // Get the voice method that was used
         const method = voiceService.current.getVoiceMethod();
@@ -326,6 +339,16 @@ const ConversationScreen = ({route, navigation}: any) => {
     // When user stops speaking, onSpeechEnd callback automatically calls
     // handleUserMessage which triggers the AI response. This timer is
     // kept for potential future enhancements to silence detection.
+  };
+
+  const handleSendTextMessage = async () => {
+    if (!userInputText.trim()) {
+      return;
+    }
+
+    const text = userInputText.trim();
+    setUserInputText('');
+    await handleUserMessage(text, !textOnlyMode);
   };
 
   /**
@@ -436,8 +459,8 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Generate 2 sample answer options for user to practice with
       await generateSampleAnswers(response);
 
-      // Speak the response only if shouldSpeak is true
-      if (shouldSpeak && voiceService.current) {
+      // Speak the response only if shouldSpeak is true and not in text-only mode
+      if (shouldSpeak && !textOnlyMode && voiceService.current) {
         setIsSpeaking(true);
         await voiceService.current.speak(response);
         // Get the voice method that was used
@@ -587,8 +610,8 @@ const ConversationScreen = ({route, navigation}: any) => {
     const sample = sampleObj.text;
     setShowSamples(false);
 
-    // If auto-read is enabled, temporarily switch to response voice accent and personality
-    if (autoReadResponse && voiceService.current) {
+    // If auto-read is enabled and not in text-only mode, temporarily switch to response voice accent and personality
+    if (autoReadResponse && !textOnlyMode && voiceService.current) {
       try {
         const responseVoiceAccentPref = await AsyncStorage.getItem(
           STORAGE_KEYS.RESPONSE_VOICE_ACCENT,
@@ -707,7 +730,9 @@ const ConversationScreen = ({route, navigation}: any) => {
 
     for (let i = 0; i < text.length; i++) {
       const char = text[i];
-      if (/[a-zA-Z'-]/.test(char)) {
+      // Match word characters in any language (Unicode letters, digits, apostrophes, hyphens)
+      // This supports English, Korean, Japanese, Chinese, and other languages
+      if (/[\p{L}\p{N}'-]/u.test(char)) {
         // It's part of a word
         if (currentNonWord) {
           parts.push({text: currentNonWord, isWord: false, charIndex});
@@ -888,19 +913,45 @@ const ConversationScreen = ({route, navigation}: any) => {
       </ScrollView>
 
       <View style={styles.controls}>
-        <Pressable
-          style={[styles.micButton, isListening && styles.micButtonActive]}
-          onPress={handleToggleListening}
-          disabled={isLoading || isSpeaking}
-          // @ts-ignore - onContextMenu is a web-only prop
-          onContextMenu={(e: React.MouseEvent<HTMLElement>) =>
-            e.preventDefault()
-          }>
-          <Text style={styles.micIcon}>{isListening ? '⏸️' : '🎤'}</Text>
-          <Text style={styles.micText}>
-            {isListening ? 'Tap to Stop' : 'Tap to Speak'}
-          </Text>
-        </Pressable>
+        {textOnlyMode ? (
+          <View style={styles.textInputContainer}>
+            <TextInput
+              style={[styles.textInput, {color: '#1f2937'}]}
+              value={userInputText}
+              onChangeText={setUserInputText}
+              placeholder="Type your message..."
+              placeholderTextColor="#9ca3af"
+              multiline
+              maxLength={500}
+              onSubmitEditing={handleSendTextMessage}
+              editable={!isLoading && !isSpeaking}
+            />
+            <TouchableOpacity
+              style={[
+                styles.sendButton,
+                (!userInputText.trim() || isLoading || isSpeaking) &&
+                  styles.sendButtonDisabled,
+              ]}
+              onPress={handleSendTextMessage}
+              disabled={!userInputText.trim() || isLoading || isSpeaking}>
+              <Text style={styles.sendButtonText}>📤</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Pressable
+            style={[styles.micButton, isListening && styles.micButtonActive]}
+            onPress={handleToggleListening}
+            disabled={isLoading || isSpeaking}
+            // @ts-ignore - onContextMenu is a web-only prop
+            onContextMenu={(e: React.MouseEvent<HTMLElement>) =>
+              e.preventDefault()
+            }>
+            <Text style={styles.micIcon}>{isListening ? '⏸️' : '🎤'}</Text>
+            <Text style={styles.micText}>
+              {isListening ? 'Tap to Stop' : 'Tap to Speak'}
+            </Text>
+          </Pressable>
+        )}
 
         {isSpeaking && (
           <View style={styles.speakingIndicator}>
@@ -1479,6 +1530,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#4b5563',
+  },
+  textInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  textInput: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 16,
+    maxHeight: 100,
+    minHeight: 48,
+  },
+  sendButton: {
+    backgroundColor: '#3b82f6',
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendButtonDisabled: {
+    backgroundColor: '#9ca3af',
+    opacity: 0.5,
+  },
+  sendButtonText: {
+    fontSize: 24,
   },
 });
 

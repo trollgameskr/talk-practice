@@ -75,6 +75,7 @@ const SettingsScreen = ({navigation}: any) => {
     supportsAccent: true,
     supportsPersonality: false,
   });
+  const [textOnlyMode, setTextOnlyMode] = useState(false);
 
   const updateTTSCapabilities = React.useCallback(() => {
     // Determine capabilities based on API key presence
@@ -117,6 +118,7 @@ const SettingsScreen = ({navigation}: any) => {
     loadResponseVoiceAccent();
     loadAiVoicePersonality();
     loadResponseVoicePersonality();
+    loadTextOnlyMode();
   }, []);
 
   const loadLanguage = async () => {
@@ -268,6 +270,18 @@ const SettingsScreen = ({navigation}: any) => {
     }
   };
 
+  const loadTextOnlyMode = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.TEXT_ONLY_MODE,
+      );
+      // Default to false if not set
+      setTextOnlyMode(savedValue !== null ? savedValue === 'true' : false);
+    } catch (error) {
+      console.error('Error loading text-only mode setting:', error);
+    }
+  };
+
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
       Alert.alert('Error', 'Please enter an API key');
@@ -403,6 +417,19 @@ const SettingsScreen = ({navigation}: any) => {
     } catch (error) {
       console.error('Error saving response voice personality:', error);
       Alert.alert('Error', 'Failed to save response voice personality');
+    }
+  };
+
+  const handleTextOnlyModeToggle = async (value: boolean) => {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.TEXT_ONLY_MODE,
+        value.toString(),
+      );
+      setTextOnlyMode(value);
+    } catch (error) {
+      console.error('Error saving text-only mode setting:', error);
+      Alert.alert('Error', 'Failed to save text-only mode setting');
     }
   };
 
@@ -922,6 +949,36 @@ const SettingsScreen = ({navigation}: any) => {
                 </TouchableOpacity>
               ),
             )}
+          </View>
+
+          <View style={styles.optionGroup}>
+            <View style={styles.themeRow}>
+              <View style={styles.themeInfo}>
+                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                  {t('settings.sections.conversation.textOnlyMode.label')}
+                </Text>
+                <Text
+                  style={[
+                    styles.themeDescription,
+                    {color: theme.colors.textSecondary},
+                  ]}>
+                  {t('settings.sections.conversation.textOnlyMode.description')}
+                </Text>
+              </View>
+              <Switch
+                value={textOnlyMode}
+                onValueChange={handleTextOnlyModeToggle}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={
+                  textOnlyMode
+                    ? theme.colors.buttonPrimaryText
+                    : theme.colors.inputBackground
+                }
+              />
+            </View>
           </View>
 
           <View style={styles.optionGroup}>
