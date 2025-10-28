@@ -238,7 +238,7 @@ export class AIVoiceService {
         };
 
         // Wait for audio to be ready before playing to prevent cutting off the beginning
-        this.currentAudio.oncanplaythrough = () => {
+        this.currentAudio.oncanplay = () => {
           this.currentAudio.play().catch(reject);
         };
 
