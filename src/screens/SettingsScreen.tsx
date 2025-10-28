@@ -55,7 +55,7 @@ const SettingsScreen = ({navigation}: any) => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [sentenceLength, setSentenceLength] =
-    useState<SentenceLength>('medium');
+    useState<SentenceLength>('short');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [selectedTargetLanguage, setSelectedTargetLanguage] =
     useState<string>('en');
