@@ -19,7 +19,7 @@ export class GeminiService {
   private model: any;
   private chat: any;
   private currentTopic: ConversationTopic | null = null;
-  private sentenceLength: SentenceLength = 'medium';
+  private sentenceLength: SentenceLength = 'short';
   private targetLanguage: string = 'en';
   private nativeLanguage: string = 'en';
   private sessionTokenUsage: TokenUsage = {
