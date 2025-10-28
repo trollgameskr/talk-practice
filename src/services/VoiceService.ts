@@ -144,6 +144,13 @@ export class VoiceService {
   }
 
   /**
+   * Get the voice method currently being used
+   */
+  getVoiceMethod(): string {
+    return this.aiVoiceService.getVoiceMethod();
+  }
+
+  /**
    * Check if currently listening
    */
   getIsListening(): boolean {
