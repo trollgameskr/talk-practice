@@ -67,6 +67,9 @@ const ConversationScreen = ({route, navigation}: any) => {
     endIndex: number;
   } | null>(null);
   const [showGrammarModal, setShowGrammarModal] = useState(false);
+  const [showVoiceDisplayModal, setShowVoiceDisplayModal] = useState(false);
+  const [voiceDisplayText, setVoiceDisplayText] = useState('');
+  const [voiceMethod, setVoiceMethod] = useState<string>('Web Speech API');
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -232,6 +235,9 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Speak the starter message
       if (voiceService.current) {
         await voiceService.current.speak(starterMessage);
+        // Get the voice method that was used
+        const method = voiceService.current.getVoiceMethod();
+        setVoiceMethod(method);
       }
 
       setIsLoading(false);
@@ -431,6 +437,9 @@ const ConversationScreen = ({route, navigation}: any) => {
       if (shouldSpeak && voiceService.current) {
         setIsSpeaking(true);
         await voiceService.current.speak(response);
+        // Get the voice method that was used
+        const method = voiceService.current.getVoiceMethod();
+        setVoiceMethod(method);
         setIsSpeaking(false);
       }
 
@@ -588,10 +597,22 @@ const ConversationScreen = ({route, navigation}: any) => {
         voiceService.current.setVoiceAccent(responseVoiceAccent);
         voiceService.current.setVoicePersonality(responseVoicePersonality);
 
+        // Show the text in large modal while playing voice
+        setVoiceDisplayText(sample);
+        setShowVoiceDisplayModal(true);
+
         // Speak the selected sample using response voice
         setIsSpeaking(true);
         await voiceService.current.speak(sample);
+
+        // Get the voice method that was used
+        const method = voiceService.current.getVoiceMethod();
+        setVoiceMethod(method);
+
         setIsSpeaking(false);
+
+        // Hide the modal after voice playback
+        setShowVoiceDisplayModal(false);
 
         await handleUserMessage(sample, autoReadResponse);
 
@@ -612,6 +633,7 @@ const ConversationScreen = ({route, navigation}: any) => {
         voiceService.current.setVoicePersonality(aiVoicePersonality);
       } catch (error) {
         console.error('Error switching voice accent/personality:', error);
+        setShowVoiceDisplayModal(false);
         await handleUserMessage(sample, autoReadResponse);
       }
     } else {
@@ -876,6 +898,14 @@ const ConversationScreen = ({route, navigation}: any) => {
           </View>
         )}
 
+        {/* Voice Method Indicator */}
+        {voiceMethod && (
+          <View style={styles.voiceMethodIndicator}>
+            <Text style={styles.voiceMethodIndicatorLabel}>🎙️ 음성 재생:</Text>
+            <Text style={styles.voiceMethodIndicatorText}>{voiceMethod}</Text>
+          </View>
+        )}
+
         {/* 2 Response Test Options - User can select one to practice */}
         {showSamples && enrichedSampleAnswers.length > 0 && (
           <View style={styles.samplesContainer}>
@@ -1006,6 +1036,29 @@ const ConversationScreen = ({route, navigation}: any) => {
           </View>
         </Pressable>
       </Modal>
+
+      {/* Voice Display Modal - Shows selected response text in large format during playback */}
+      <Modal
+        visible={showVoiceDisplayModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowVoiceDisplayModal(false)}>
+        <View style={styles.voiceDisplayOverlay}>
+          <View style={styles.voiceDisplayContent}>
+            <Text style={styles.voiceDisplayTitle}>🔊 음성 재생 중</Text>
+            <Text style={styles.voiceDisplayText}>{voiceDisplayText}</Text>
+            <View style={styles.voiceMethodContainer}>
+              <Text style={styles.voiceMethodLabel}>재생 방법:</Text>
+              <Text style={styles.voiceMethodText}>{voiceMethod}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.voiceDisplayCloseButton}
+              onPress={() => setShowVoiceDisplayModal(false)}>
+              <Text style={styles.voiceDisplayCloseText}>닫기</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -1129,6 +1182,25 @@ const styles = StyleSheet.create({
   speakingText: {
     fontSize: 14,
     color: '#3b82f6',
+  },
+  voiceMethodIndicator: {
+    marginTop: 8,
+    padding: 10,
+    backgroundColor: '#f0fdf4',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#86efac',
+  },
+  voiceMethodIndicatorLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#15803d',
+    marginBottom: 4,
+  },
+  voiceMethodIndicatorText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#166534',
   },
   samplesContainer: {
     marginTop: 12,
@@ -1293,6 +1365,72 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 11,
     fontWeight: '700',
+  },
+  voiceDisplayOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  voiceDisplayContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 32,
+    width: '90%',
+    maxWidth: 600,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  voiceDisplayTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#3b82f6',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  voiceDisplayText: {
+    fontSize: 28,
+    fontWeight: '600',
+    color: '#1f2937',
+    textAlign: 'center',
+    lineHeight: 42,
+    marginBottom: 32,
+  },
+  voiceMethodContainer: {
+    backgroundColor: '#f0f9ff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    width: '100%',
+  },
+  voiceMethodLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e40af',
+    marginBottom: 6,
+  },
+  voiceMethodText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#3b82f6',
+  },
+  voiceDisplayCloseButton: {
+    backgroundColor: '#e5e7eb',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  voiceDisplayCloseText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4b5563',
   },
 });
 

@@ -90,6 +90,12 @@
       "thinking": "🤔 考えています...",
       "ready": "練習の準備ができました"
     },
+    "voiceDisplay": {
+      "title": "🔊 音声再生中",
+      "close": "閉じる",
+      "methodLabel": "再生方法:",
+      "methodIndicatorLabel": "🎙️ 音声再生:"
+    },
     "endSession": {
       "title": "練習セッションを終了",
       "message": "この練習セッションを終了してもよろしいですか？",

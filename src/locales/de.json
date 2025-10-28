@@ -90,6 +90,12 @@
       "thinking": "🤔 Denke nach...",
       "ready": "Bereit zum Üben"
     },
+    "voiceDisplay": {
+      "title": "🔊 Sprachwiedergabe",
+      "close": "Schließen",
+      "methodLabel": "Wiedergabemethode:",
+      "methodIndicatorLabel": "🎙️ Sprachwiedergabe:"
+    },
     "endSession": {
       "title": "Übungssitzung Beenden",
       "message": "Sind Sie sicher, dass Sie diese Übungssitzung beenden möchten?",

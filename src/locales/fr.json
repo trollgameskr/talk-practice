@@ -90,6 +90,12 @@
       "thinking": "🤔 Réfléchit...",
       "ready": "Prêt à pratiquer"
     },
+    "voiceDisplay": {
+      "title": "🔊 Lecture de la Voix",
+      "close": "Fermer",
+      "methodLabel": "Méthode de Lecture:",
+      "methodIndicatorLabel": "🎙️ Lecture Vocale:"
+    },
     "endSession": {
       "title": "Terminer la Session de Pratique",
       "message": "Êtes-vous sûr de vouloir terminer cette session de pratique ?",

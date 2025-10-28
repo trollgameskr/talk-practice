@@ -90,6 +90,12 @@
       "thinking": "🤔 Thinking...",
       "ready": "Ready to practice"
     },
+    "voiceDisplay": {
+      "title": "🔊 Playing Voice",
+      "close": "Close",
+      "methodLabel": "Playback Method:",
+      "methodIndicatorLabel": "🎙️ Voice Playback:"
+    },
     "endSession": {
       "title": "End Practice Session",
       "message": "Are you sure you want to end this practice session?",

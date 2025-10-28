@@ -13,6 +13,8 @@ export class AIVoiceService {
   private apiKey: string = '';
   private voiceAccent: string = 'en-US'; // Default accent
   private voicePersonality: VoicePersonality = 'cheerful_female'; // Default personality
+  private lastUsedMethod: 'Google Cloud TTS' | 'Web Speech API' = 'Web Speech API';
+  private lastUsedVoiceName: string = '';
 
   constructor(
     apiKey?: string,
@@ -61,6 +63,7 @@ export class AIVoiceService {
       // This will be skipped if no API key is configured
       const audioContent = await this.generateAIVoice(text);
       if (audioContent) {
+        this.lastUsedMethod = 'Google Cloud TTS';
         await this.playAudio(audioContent);
         return;
       }
@@ -70,6 +73,7 @@ export class AIVoiceService {
 
     // Use enhanced Web Speech API with best AI voice selection
     // This automatically selects Google, Microsoft Neural, or other premium voices
+    this.lastUsedMethod = 'Web Speech API';
     await this.speakWithEnhancedVoice(text);
   }
 
@@ -262,8 +266,10 @@ export class AIVoiceService {
         const bestVoice = this.selectBestVoice(voices);
         if (bestVoice) {
           utterance.voice = bestVoice;
+          this.lastUsedVoiceName = bestVoice.name;
           console.log('Using AI voice:', bestVoice.name);
         } else {
+          this.lastUsedVoiceName = 'Default System Voice';
           console.log('Using default system voice');
         }
 
@@ -493,6 +499,19 @@ export class AIVoiceService {
    */
   setVoicePersonality(personality: VoicePersonality) {
     this.voicePersonality = personality;
+  }
+
+  /**
+   * Get the voice method currently being used
+   */
+  getVoiceMethod(): string {
+    if (this.lastUsedMethod === 'Google Cloud TTS') {
+      return 'Google Cloud TTS (AI 음성)';
+    }
+    if (this.lastUsedVoiceName) {
+      return `${this.lastUsedMethod} (${this.lastUsedVoiceName})`;
+    }
+    return this.lastUsedMethod;
   }
 
   /**
