@@ -162,6 +162,9 @@ const SettingsScreen = ({navigation}: any) => {
       );
       if (savedLength) {
         setSentenceLength(savedLength as SentenceLength);
+      } else {
+        // Default to 'short' if not set
+        setSentenceLength('short');
       }
     } catch (error) {
       console.error('Error loading sentence length:', error);

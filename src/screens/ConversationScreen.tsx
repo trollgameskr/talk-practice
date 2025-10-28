@@ -69,6 +69,8 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [showGrammarModal, setShowGrammarModal] = useState(false);
   const [showVoiceDisplayModal, setShowVoiceDisplayModal] = useState(false);
   const [voiceDisplayText, setVoiceDisplayText] = useState('');
+  const [voiceDisplayTranslation, setVoiceDisplayTranslation] = useState('');
+  const [voiceDisplayPronunciation, setVoiceDisplayPronunciation] = useState('');
   const [voiceMethod, setVoiceMethod] = useState<string>('Web Speech API');
 
   const geminiService = useRef<GeminiService | null>(null);
@@ -125,7 +127,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       const sentenceLengthPref = await AsyncStorage.getItem(
         STORAGE_KEYS.SENTENCE_LENGTH,
       );
-      const sentenceLength = (sentenceLengthPref as any) || 'medium';
+      const sentenceLength = (sentenceLengthPref as any) || 'short';
 
       // Load auto-read response preference from storage
       const autoReadPref = await AsyncStorage.getItem(
@@ -576,7 +578,12 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
-  const handleUseSample = async (sample: string) => {
+  const handleUseSample = async (sampleObj: {
+    text: string;
+    translation?: string;
+    pronunciation?: string;
+  }) => {
+    const sample = sampleObj.text;
     setShowSamples(false);
 
     // If auto-read is enabled, temporarily switch to response voice accent and personality
@@ -597,8 +604,10 @@ const ConversationScreen = ({route, navigation}: any) => {
         voiceService.current.setVoiceAccent(responseVoiceAccent);
         voiceService.current.setVoicePersonality(responseVoicePersonality);
 
-        // Show the text in large modal while playing voice
+        // Show the text with translation and pronunciation in large modal while playing voice
         setVoiceDisplayText(sample);
+        setVoiceDisplayTranslation(sampleObj.translation || '');
+        setVoiceDisplayPronunciation(sampleObj.pronunciation || '');
         setShowVoiceDisplayModal(true);
 
         // Speak the selected sample using response voice
@@ -917,7 +926,7 @@ const ConversationScreen = ({route, navigation}: any) => {
                 <TouchableOpacity
                   key={index}
                   style={styles.sampleButton}
-                  onPress={() => handleUseSample(sample.text)}>
+                  onPress={() => handleUseSample(sample)}>
                   <View style={styles.sampleButtonContent}>
                     <Text style={styles.sampleNumber}>{index + 1}</Text>
                     <View style={styles.sampleTextContainer}>
@@ -1047,10 +1056,27 @@ const ConversationScreen = ({route, navigation}: any) => {
           <View style={styles.voiceDisplayContent}>
             <Text style={styles.voiceDisplayTitle}>🔊 음성 재생 중</Text>
             <Text style={styles.voiceDisplayText}>{voiceDisplayText}</Text>
-            <View style={styles.voiceMethodContainer}>
-              <Text style={styles.voiceMethodLabel}>재생 방법:</Text>
-              <Text style={styles.voiceMethodText}>{voiceMethod}</Text>
+            
+            {/* Display translation if available */}
+            {showTranslation && voiceDisplayTranslation && (
+              <Text style={styles.voiceDisplayTranslation}>
+                💬 {voiceDisplayTranslation}
+              </Text>
+            )}
+            
+            {/* Display pronunciation if available */}
+            {showPronunciation && voiceDisplayPronunciation && (
+              <Text style={styles.voiceDisplayPronunciation}>
+                🔊 {voiceDisplayPronunciation}
+              </Text>
+            )}
+            
+            {/* Voice method display - matching token usage display style */}
+            <View style={styles.voiceMethodDisplayContainer}>
+              <Text style={styles.voiceMethodDisplayLabel}>🎙️ 음성 재생 모델:</Text>
+              <Text style={styles.voiceMethodDisplayText}>{voiceMethod}</Text>
             </View>
+            
             <TouchableOpacity
               style={styles.voiceDisplayCloseButton}
               onPress={() => setShowVoiceDisplayModal(false)}>
@@ -1399,27 +1425,46 @@ const styles = StyleSheet.create({
     color: '#1f2937',
     textAlign: 'center',
     lineHeight: 42,
-    marginBottom: 32,
+    marginBottom: 16,
   },
-  voiceMethodContainer: {
-    backgroundColor: '#f0f9ff',
+  voiceDisplayTranslation: {
+    fontSize: 16,
+    color: '#6b7280',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 8,
+  },
+  voiceDisplayPronunciation: {
+    fontSize: 16,
+    color: '#8b5cf6',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  voiceMethodDisplayContainer: {
+    backgroundColor: '#f0fdf4',
     borderRadius: 12,
     padding: 16,
+    marginTop: 8,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: '#bfdbfe',
+    borderColor: '#86efac',
     width: '100%',
   },
-  voiceMethodLabel: {
-    fontSize: 14,
+  voiceMethodDisplayLabel: {
+    fontSize: 12,
     fontWeight: '600',
-    color: '#1e40af',
+    color: '#15803d',
     marginBottom: 6,
+    textAlign: 'center',
   },
-  voiceMethodText: {
-    fontSize: 16,
+  voiceMethodDisplayText: {
+    fontSize: 14,
     fontWeight: '700',
-    color: '#3b82f6',
+    color: '#166534',
+    textAlign: 'center',
   },
   voiceDisplayCloseButton: {
     backgroundColor: '#e5e7eb',
