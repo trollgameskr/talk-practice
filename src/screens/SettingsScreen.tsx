@@ -41,12 +41,16 @@ import {
   getTargetLanguage,
   getAvailableTargetLanguages,
 } from '../config/i18n.config';
-import {AIVoiceService, TTSCapabilities} from '../services/AIVoiceService';
+import {TTSCapabilities} from '../services/AIVoiceService';
 
 
 const storageService = new StorageService();
 const firebaseService = new FirebaseService();
 const GEMINI_API_KEY_URL = 'https://makersuite.google.com/app/apikey';
+
+// Informational message for unavailable voice personality feature
+const VOICE_PERSONALITY_UNAVAILABLE_MESSAGE =
+  'ℹ️ Voice personality is only available when using Google Cloud TTS. Please configure your Gemini API key in the API Configuration section to enable this feature.';
 
 const SettingsScreen = ({navigation}: any) => {
   const {theme, isDark, toggleTheme} = useTheme();
@@ -83,10 +87,25 @@ const SettingsScreen = ({navigation}: any) => {
   }, [apiKey]);
 
   const updateTTSCapabilities = () => {
-    // Create a temporary AIVoiceService instance to check capabilities
-    const tempService = new AIVoiceService(apiKey);
-    const capabilities = tempService.getTTSCapabilities();
-    setTtsCapabilities(capabilities);
+    // Determine capabilities based on API key presence
+    // This matches the logic in AIVoiceService.getCurrentTTSModel()
+    const hasApiKey = apiKey && apiKey.trim() !== '';
+    
+    if (hasApiKey) {
+      // Google Cloud TTS supports both accent and personality
+      setTtsCapabilities({
+        model: 'Google Cloud TTS',
+        supportsAccent: true,
+        supportsPersonality: true,
+      });
+    } else {
+      // Web Speech API supports accent but not reliable personality
+      setTtsCapabilities({
+        model: 'Web Speech API',
+        supportsAccent: true,
+        supportsPersonality: false,
+      });
+    }
   };
 
   useEffect(() => {
@@ -1167,7 +1186,7 @@ const SettingsScreen = ({navigation}: any) => {
                 ]}>
                 <Text
                   style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-                  ℹ️ Voice personality is only available when using Google Cloud TTS. Please configure your Gemini API key in the API Configuration section to enable this feature.
+                  {VOICE_PERSONALITY_UNAVAILABLE_MESSAGE}
                 </Text>
               </View>
             </View>
@@ -1215,7 +1234,7 @@ const SettingsScreen = ({navigation}: any) => {
                 ]}>
                 <Text
                   style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-                  ℹ️ Voice personality is only available when using Google Cloud TTS. Please configure your Gemini API key in the API Configuration section to enable this feature.
+                  {VOICE_PERSONALITY_UNAVAILABLE_MESSAGE}
                 </Text>
               </View>
             </View>
