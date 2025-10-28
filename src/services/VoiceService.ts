@@ -151,6 +151,20 @@ export class VoiceService {
   }
 
   /**
+   * Get the current TTS model
+   */
+  getCurrentTTSModel() {
+    return this.aiVoiceService.getCurrentTTSModel();
+  }
+
+  /**
+   * Get TTS capabilities
+   */
+  getTTSCapabilities() {
+    return this.aiVoiceService.getTTSCapabilities();
+  }
+
+  /**
    * Check if currently listening
    */
   getIsListening(): boolean {
