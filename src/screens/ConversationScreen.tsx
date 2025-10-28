@@ -17,6 +17,7 @@ import {
   TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useTranslation} from 'react-i18next';
 import {
   ConversationTopic,
   Message,
@@ -34,12 +35,13 @@ const storageService = new StorageService();
 
 const ConversationScreen = ({route, navigation}: any) => {
   const {topic} = route.params as {topic: ConversationTopic};
+  const {t} = useTranslation();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionStartTime] = useState(new Date());
+  const [sessionStartTime, setSessionStartTime] = useState(new Date());
   const [elapsedTime, setElapsedTime] = useState(0);
   const [enrichedSampleAnswers, setEnrichedSampleAnswers] = useState<
     Array<{
@@ -84,9 +86,11 @@ const ConversationScreen = ({route, navigation}: any) => {
   const sessionSavedRef = useRef(false);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sessionIdRef = useRef(generateId());
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isResumingRef = useRef(false);
 
   useEffect(() => {
-    initializeServices();
+    checkForSavedSession();
     startTimer();
 
     return () => {
@@ -105,7 +109,127 @@ const ConversationScreen = ({route, navigation}: any) => {
     return (value as VoicePersonality) || defaultValue;
   };
 
-  const initializeServices = async () => {
+  /**
+   * Auto-save session state periodically
+   */
+  useEffect(() => {
+    // Only auto-save if we have messages and haven't saved the final session
+    if (messages.length > 0 && !sessionSavedRef.current) {
+      // Save current session state every 10 seconds
+      const saveCurrentState = async () => {
+        try {
+          const currentSession: Partial<ConversationSession> = {
+            id: sessionIdRef.current,
+            topic,
+            startTime: sessionStartTime,
+            messages,
+            duration: elapsedTime,
+          };
+          await storageService.saveCurrentSession(currentSession);
+        } catch (error) {
+          console.error('Error auto-saving session:', error);
+        }
+      };
+
+      saveCurrentState();
+
+      // Set up periodic auto-save
+      if (autoSaveTimerRef.current) {
+        clearInterval(autoSaveTimerRef.current);
+      }
+      autoSaveTimerRef.current = setInterval(saveCurrentState, 10000); // Save every 10 seconds
+
+      return () => {
+        if (autoSaveTimerRef.current) {
+          clearInterval(autoSaveTimerRef.current);
+        }
+      };
+    }
+  }, [messages, elapsedTime, topic, sessionStartTime]);
+
+  /**
+   * Check for saved session and prompt user to resume
+   */
+  const checkForSavedSession = async () => {
+    try {
+      const savedSession = await storageService.getCurrentSession();
+
+      if (
+        savedSession &&
+        savedSession.messages &&
+        savedSession.messages.length > 0
+      ) {
+        // Check if the saved session is for the same topic
+        if (savedSession.topic === topic) {
+          // Prompt user to resume
+          Alert.alert(
+            t('conversation.resumeSession.title'),
+            t('conversation.resumeSession.message'),
+            [
+              {
+                text: t('conversation.resumeSession.startNew'),
+                onPress: async () => {
+                  await storageService.clearCurrentSession();
+                  await initializeServices();
+                },
+                style: 'cancel',
+              },
+              {
+                text: t('conversation.resumeSession.resume'),
+                onPress: () => resumeSession(savedSession),
+              },
+            ],
+          );
+        } else {
+          // Different topic, clear saved session and start new
+          await storageService.clearCurrentSession();
+          await initializeServices();
+        }
+      } else {
+        // No saved session, start new
+        await initializeServices();
+      }
+    } catch (error) {
+      console.error('Error checking for saved session:', error);
+      await initializeServices();
+    }
+  };
+
+  /**
+   * Resume from saved session
+   */
+  const resumeSession = async (savedSession: Partial<ConversationSession>) => {
+    try {
+      isResumingRef.current = true;
+      setIsLoading(true);
+
+      // Restore session state
+      if (savedSession.id) {
+        sessionIdRef.current = savedSession.id;
+      }
+      if (savedSession.messages) {
+        setMessages(savedSession.messages);
+      }
+      if (savedSession.startTime) {
+        setSessionStartTime(new Date(savedSession.startTime));
+      }
+      if (savedSession.duration) {
+        setElapsedTime(savedSession.duration);
+      }
+
+      // Initialize services
+      await initializeServices(true); // Pass true to indicate resuming
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error resuming session:', error);
+      Alert.alert('Error', 'Failed to resume session. Starting new session.');
+      await storageService.clearCurrentSession();
+      await initializeServices();
+    }
+  };
+
+  const initializeServices = async (isResuming: boolean = false) => {
     try {
       setIsLoading(true);
 
@@ -219,41 +343,57 @@ const ConversationScreen = ({route, navigation}: any) => {
         );
       }
 
-      // Start conversation
-      const starterMessage = await geminiService.current.startConversation(
-        topic,
-      );
+      // Only start a new conversation if not resuming
+      if (!isResuming) {
+        // Start conversation
+        const starterMessage = await geminiService.current.startConversation(
+          topic,
+        );
 
-      let assistantMessage: Message = {
-        id: generateId(),
-        role: 'assistant',
-        content: starterMessage,
-        timestamp: new Date(),
-      };
+        let assistantMessage: Message = {
+          id: generateId(),
+          role: 'assistant',
+          content: starterMessage,
+          timestamp: new Date(),
+        };
 
-      // Enrich message with translation, pronunciation, and grammar highlights
-      // Pass loaded values directly to avoid relying on state (Feature 1 fix)
-      assistantMessage = await enrichAssistantMessage(assistantMessage, {
-        translation: loadedShowTranslation,
-        pronunciation: loadedShowPronunciation,
-        grammarHighlights: loadedShowGrammarHighlights,
-      });
+        // Enrich message with translation, pronunciation, and grammar highlights
+        // Pass loaded values directly to avoid relying on state (Feature 1 fix)
+        assistantMessage = await enrichAssistantMessage(assistantMessage, {
+          translation: loadedShowTranslation,
+          pronunciation: loadedShowPronunciation,
+          grammarHighlights: loadedShowGrammarHighlights,
+        });
 
-      setMessages([assistantMessage]);
+        setMessages([assistantMessage]);
 
-      // Generate 2 sample answer options for the user
-      // Pass loaded values directly to avoid relying on state (Bug 2 fix)
-      await generateSampleAnswers(starterMessage, {
-        translation: loadedShowTranslation,
-        pronunciation: loadedShowPronunciation,
-      });
+        // Generate 2 sample answer options for the user
+        // Pass loaded values directly to avoid relying on state (Bug 2 fix)
+        await generateSampleAnswers(starterMessage, {
+          translation: loadedShowTranslation,
+          pronunciation: loadedShowPronunciation,
+        });
 
-      // Speak the starter message (only if not in text-only mode)
-      if (!loadedTextOnlyMode && voiceService.current) {
-        await voiceService.current.speak(starterMessage);
-        // Get the voice method that was used
-        const method = voiceService.current.getVoiceMethod();
-        setVoiceMethod(method);
+        // Speak the starter message (only if not in text-only mode)
+        if (!loadedTextOnlyMode && voiceService.current) {
+          await voiceService.current.speak(starterMessage);
+          // Get the voice method that was used
+          const method = voiceService.current.getVoiceMethod();
+          setVoiceMethod(method);
+        }
+      } else {
+        // When resuming, we need to restore the conversation context in Gemini
+        // by replaying all the messages
+        await geminiService.current.startConversation(topic);
+
+        // Replay the conversation history to restore context
+        for (let i = 0; i < messages.length; i++) {
+          const msg = messages[i];
+          if (msg.role === 'user') {
+            // Send user messages to rebuild context
+            await geminiService.current.sendMessage(msg.content);
+          }
+        }
       }
 
       setIsLoading(false);
@@ -280,6 +420,10 @@ const ConversationScreen = ({route, navigation}: any) => {
 
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
+    }
+
+    if (autoSaveTimerRef.current) {
+      clearInterval(autoSaveTimerRef.current);
     }
 
     if (geminiService.current) {

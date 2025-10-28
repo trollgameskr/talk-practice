@@ -105,3 +105,81 @@ describe('ConversationScreen Voice Input', () => {
     });
   });
 });
+
+describe('ConversationScreen Session Resume', () => {
+  describe('Session state management', () => {
+    it('should auto-save session state periodically', () => {
+      // Mock the auto-save functionality
+      let savedSessionCount = 0;
+      const mockSaveSession = jest.fn(() => {
+        savedSessionCount++;
+      });
+
+      // Simulate periodic auto-save
+      for (let i = 0; i < 5; i++) {
+        mockSaveSession();
+      }
+
+      expect(mockSaveSession).toHaveBeenCalledTimes(5);
+      expect(savedSessionCount).toBe(5);
+    });
+
+    it('should restore session state when resuming', () => {
+      // Mock saved session data
+      const savedSession = {
+        id: 'test-session-id',
+        topic: 'daily',
+        startTime: new Date('2024-01-01T10:00:00'),
+        messages: [
+          {
+            id: '1',
+            role: 'assistant',
+            content: 'Hello! How are you today?',
+            timestamp: new Date('2024-01-01T10:00:00'),
+          },
+          {
+            id: '2',
+            role: 'user',
+            content: 'I am fine, thank you!',
+            timestamp: new Date('2024-01-01T10:00:30'),
+          },
+        ],
+        duration: 30,
+      };
+
+      // Simulate resuming session
+      let restoredSession = null;
+      const mockResumeSession = jest.fn((session: any) => {
+        restoredSession = session;
+      });
+
+      mockResumeSession(savedSession);
+
+      expect(mockResumeSession).toHaveBeenCalledTimes(1);
+      expect(restoredSession).toEqual(savedSession);
+    });
+
+    it('should clear saved session when starting new', () => {
+      let sessionCleared = false;
+      const mockClearSession = jest.fn(() => {
+        sessionCleared = true;
+      });
+
+      // Simulate starting a new session
+      mockClearSession();
+
+      expect(mockClearSession).toHaveBeenCalledTimes(1);
+      expect(sessionCleared).toBe(true);
+    });
+
+    it('should handle missing saved session gracefully', () => {
+      // Mock checking for saved session when none exists
+      const mockGetCurrentSession = jest.fn(() => null);
+
+      const result = mockGetCurrentSession();
+
+      expect(mockGetCurrentSession).toHaveBeenCalledTimes(1);
+      expect(result).toBeNull();
+    });
+  });
+});

@@ -102,6 +102,12 @@
       "cancel": "Continue",
       "confirm": "End Session"
     },
+    "resumeSession": {
+      "title": "Resume Previous Session?",
+      "message": "You have an unfinished practice session. Would you like to continue from where you left off?",
+      "resume": "Resume",
+      "startNew": "Start New"
+    },
     "sessionSummary": {
       "title": "Session Complete!",
       "duration": "Duration",

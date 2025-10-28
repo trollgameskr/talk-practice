@@ -102,6 +102,12 @@
       "cancel": "続ける",
       "confirm": "セッションを終了"
     },
+    "resumeSession": {
+      "title": "前回のセッションを再開しますか？",
+      "message": "未完了の練習セッションがあります。中断したところから続けますか？",
+      "resume": "再開",
+      "startNew": "新規開始"
+    },
     "sessionSummary": {
       "title": "セッション完了！",
       "duration": "所要時間",

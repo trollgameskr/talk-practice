@@ -102,6 +102,12 @@
       "cancel": "Fortfahren",
       "confirm": "Sitzung Beenden"
     },
+    "resumeSession": {
+      "title": "Vorherige Sitzung Fortsetzen?",
+      "message": "Sie haben eine unvollendete Übungssitzung. Möchten Sie dort fortfahren, wo Sie aufgehört haben?",
+      "resume": "Fortsetzen",
+      "startNew": "Neu Beginnen"
+    },
     "sessionSummary": {
       "title": "Sitzung Abgeschlossen!",
       "duration": "Dauer",
