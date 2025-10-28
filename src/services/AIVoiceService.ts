@@ -24,7 +24,8 @@ export class AIVoiceService {
   private apiKey: string = '';
   private voiceAccent: string = 'en-US'; // Default accent
   private voicePersonality: VoicePersonality = 'cheerful_female'; // Default personality
-  private lastUsedMethod: 'Google Cloud TTS' | 'Web Speech API' = 'Web Speech API';
+  private lastUsedMethod: 'Google Cloud TTS' | 'Web Speech API' =
+    'Web Speech API';
   private lastUsedVoiceName: string = '';
 
   constructor(
@@ -237,8 +238,10 @@ export class AIVoiceService {
           reject(error);
         };
 
-        // Wait for audio to be ready before playing to prevent cutting off the beginning
-        this.currentAudio.oncanplaythrough = () => {
+        // Use canplay instead of canplaythrough for immediate playback
+        // canplay fires as soon as enough data is buffered to begin playback
+        // This provides faster response while still preventing initial cutoff
+        this.currentAudio.oncanplay = () => {
           this.currentAudio.play().catch(reject);
         };
 
@@ -542,7 +545,7 @@ export class AIVoiceService {
    */
   getTTSCapabilities(): TTSCapabilities {
     const model = this.getCurrentTTSModel();
-    
+
     if (model === 'Google Cloud TTS') {
       // Google Cloud TTS fully supports both accent and personality
       return {

@@ -91,19 +91,29 @@ const LoginScreen = ({navigation: _navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}>
         <View style={styles.content}>
-          <Text style={[styles.title, {color: theme.colors.text}]}>GeminiTalk</Text>
+          <Text style={[styles.title, {color: theme.colors.text}]}>
+            GeminiTalk
+          </Text>
           <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
             {isLogin ? 'Sign in to continue' : 'Create your account'}
           </Text>
 
           <View style={styles.formContainer}>
             <TextInput
-              style={[styles.input, {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.inputBorder, color: theme.colors.text}]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.colors.inputBackground,
+                  borderColor: theme.colors.inputBorder,
+                  color: theme.colors.text,
+                },
+              ]}
               placeholder="Email"
               placeholderTextColor={theme.colors.textTertiary}
               value={email}
@@ -115,7 +125,14 @@ const LoginScreen = ({navigation: _navigation}: any) => {
             />
 
             <TextInput
-              style={[styles.input, {backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.inputBorder, color: theme.colors.text}]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.colors.inputBackground,
+                  borderColor: theme.colors.inputBorder,
+                  color: theme.colors.text,
+                },
+              ]}
               placeholder="Password"
               placeholderTextColor={theme.colors.textTertiary}
               value={password}
@@ -127,13 +144,21 @@ const LoginScreen = ({navigation: _navigation}: any) => {
             />
 
             <TouchableOpacity
-              style={[styles.button, {backgroundColor: theme.colors.buttonPrimary}, isLoading && styles.buttonDisabled]}
+              style={[
+                styles.button,
+                {backgroundColor: theme.colors.buttonPrimary},
+                isLoading && styles.buttonDisabled,
+              ]}
               onPress={handleAuth}
               disabled={isLoading}>
               {isLoading ? (
                 <ActivityIndicator color={theme.colors.buttonPrimaryText} />
               ) : (
-                <Text style={[styles.buttonText, {color: theme.colors.buttonPrimaryText}]}>
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {color: theme.colors.buttonPrimaryText},
+                  ]}>
                   {isLogin ? 'Sign In' : 'Sign Up'}
                 </Text>
               )}
@@ -143,7 +168,11 @@ const LoginScreen = ({navigation: _navigation}: any) => {
               style={styles.toggleButton}
               onPress={toggleMode}
               disabled={isLoading}>
-              <Text style={[styles.toggleButtonText, {color: theme.colors.primary}]}>
+              <Text
+                style={[
+                  styles.toggleButtonText,
+                  {color: theme.colors.primary},
+                ]}>
                 {isLogin
                   ? "Don't have an account? Sign Up"
                   : 'Already have an account? Sign In'}
@@ -151,44 +180,97 @@ const LoginScreen = ({navigation: _navigation}: any) => {
             </TouchableOpacity>
 
             <View style={styles.guestDivider}>
-              <View style={[styles.dividerLine, {backgroundColor: theme.colors.border}]} />
-              <Text style={[styles.dividerText, {color: theme.colors.textSecondary}]}>OR</Text>
-              <View style={[styles.dividerLine, {backgroundColor: theme.colors.border}]} />
+              <View
+                style={[
+                  styles.dividerLine,
+                  {backgroundColor: theme.colors.border},
+                ]}
+              />
+              <Text
+                style={[
+                  styles.dividerText,
+                  {color: theme.colors.textSecondary},
+                ]}>
+                OR
+              </Text>
+              <View
+                style={[
+                  styles.dividerLine,
+                  {backgroundColor: theme.colors.border},
+                ]}
+              />
             </View>
 
             <TouchableOpacity
-              style={[styles.guestButton, {backgroundColor: theme.colors.buttonSecondary, borderColor: theme.colors.border}]}
+              style={[
+                styles.guestButton,
+                {
+                  backgroundColor: theme.colors.buttonSecondary,
+                  borderColor: theme.colors.border,
+                },
+              ]}
               onPress={handleGuestMode}
               disabled={isLoading}>
-              <Text style={[styles.guestButtonText, {color: theme.colors.buttonSecondaryText}]}>👤 Continue as Guest</Text>
+              <Text
+                style={[
+                  styles.guestButtonText,
+                  {color: theme.colors.buttonSecondaryText},
+                ]}>
+                👤 Continue as Guest
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <View style={[styles.infoContainer, {backgroundColor: theme.colors.primaryLight, borderLeftColor: theme.colors.primary}]}>
-            <Text style={[styles.infoTitle, {color: theme.colors.text}]}>✨ Guest Mode</Text>
-            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
+          <View
+            style={[
+              styles.infoContainer,
+              {
+                backgroundColor: theme.colors.primaryLight,
+                borderLeftColor: theme.colors.primary,
+              },
+            ]}>
+            <Text style={[styles.infoTitle, {color: theme.colors.text}]}>
+              ✨ Guest Mode
+            </Text>
+            <Text
+              style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               • Try the app without creating an account
             </Text>
-            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
+            <Text
+              style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               • Data saved locally on this device only
             </Text>
-            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
+            <Text
+              style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               • Create an account later to sync across devices
             </Text>
           </View>
 
-          <View style={[styles.infoContainer, {backgroundColor: theme.colors.primaryLight, borderLeftColor: theme.colors.primary}]}>
-            <Text style={[styles.infoTitle, {color: theme.colors.text}]}>🔑 Account Benefits</Text>
-            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
+          <View
+            style={[
+              styles.infoContainer,
+              {
+                backgroundColor: theme.colors.primaryLight,
+                borderLeftColor: theme.colors.primary,
+              },
+            ]}>
+            <Text style={[styles.infoTitle, {color: theme.colors.text}]}>
+              🔑 Account Benefits
+            </Text>
+            <Text
+              style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               🔒 Your data is securely stored in Firebase
             </Text>
-            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
+            <Text
+              style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               📊 Track your conversation history and progress
             </Text>
-            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
+            <Text
+              style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               💰 Monitor your token usage and costs
             </Text>
-            <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
+            <Text
+              style={[styles.infoText, {color: theme.colors.textSecondary}]}>
               🔄 Sync data across multiple devices
             </Text>
           </View>

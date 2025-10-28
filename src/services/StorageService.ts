@@ -146,11 +146,11 @@ export class StorageService {
   }): Promise<void> {
     try {
       const progress = await this.getUserProgress();
-      
+
       // Add the incremental token usage to the totals
       progress.totalCost += tokenUsage.estimatedCost;
       progress.totalTokens += tokenUsage.totalTokens;
-      
+
       await AsyncStorage.setItem(
         STORAGE_KEYS.USER_PROGRESS,
         JSON.stringify(progress),
