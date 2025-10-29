@@ -45,7 +45,8 @@ Implemented a proxy server architecture to securely handle TTS API requests:
    
    # Edit .env and set your API keys
    GEMINI_API_KEY=your-gemini-api-key
-   GOOGLE_TTS_API_KEY=your-google-tts-api-key  # Can be same as GEMINI_API_KEY
+   # The TTS API key should be from the same Google Cloud project with Text-to-Speech API enabled
+   GOOGLE_TTS_API_KEY=your-google-tts-api-key  # Can be same as GEMINI_API_KEY if from same project
    ```
 
 2. **Start the proxy server**:

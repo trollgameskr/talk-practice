@@ -92,23 +92,35 @@ describe('AIVoiceService', () => {
         json: async () => ({audioContent: mockAudioContent}),
       });
 
-      // Mock Audio constructor to avoid browser API errors in tests
-      const mockAudio = {
-        load: jest.fn(),
-        play: jest.fn().mockResolvedValue(undefined),
-        pause: jest.fn(),
-        oncanplay: null as any,
-        onended: null as any,
-        onerror: null as any,
-        currentTime: 0,
-      };
-      (global as any).Audio = jest.fn(() => mockAudio);
+      // Track the audio instance created
+      let audioInstance: any = null;
 
-      // Start speaking in background
-      const speakPromise = service.speak('Hello, world!');
-      
-      // Wait a bit for fetch to be called
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Mock Audio constructor
+      (global as any).Audio = jest.fn(function(this: any) {
+        audioInstance = this;
+        this.load = jest.fn(function() {
+          // Trigger oncanplay and onended immediately for testing
+          if (this.oncanplay) {
+            this.oncanplay();
+          }
+          // Auto-end the audio immediately
+          setTimeout(() => {
+            if (this.onended) {
+              this.onended();
+            }
+          }, 10);
+        });
+        this.play = jest.fn().mockResolvedValue(undefined);
+        this.pause = jest.fn();
+        this.oncanplay = null;
+        this.onended = null;
+        this.onerror = null;
+        this.currentTime = 0;
+        return this;
+      });
+
+      // Start speaking and wait for completion
+      await service.speak('Hello, world!');
 
       // Verify fetch was called with correct URL and body
       expect(global.fetch).toHaveBeenCalledWith(
@@ -127,17 +139,6 @@ describe('AIVoiceService', () => {
       expect(requestBody.voice).toBeDefined();
       expect(requestBody.voice.languageCode).toBe('en-US');
       expect(requestBody.audioConfig).toBeDefined();
-
-      // Simulate audio ready and ended to resolve the promise
-      if (mockAudio.oncanplay) {
-        mockAudio.oncanplay();
-      }
-      if (mockAudio.onended) {
-        mockAudio.onended();
-      }
-
-      // Now wait for speak to complete
-      await speakPromise;
     });
 
     it('should handle API errors gracefully', async () => {
