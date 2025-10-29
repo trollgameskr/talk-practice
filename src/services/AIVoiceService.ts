@@ -130,20 +130,57 @@ export class AIVoiceService {
    * Uses Google Cloud TTS API
    */
   async speak(text: string): Promise<void> {
+    const startTime = Date.now();
+    console.log('[AIVoiceService] Starting speech synthesis', {
+      textLength: text.length,
+      textPreview: text.substring(0, 50),
+      hasApiKey: !!this.apiKey,
+      hasProxyUrl: !!this.proxyUrl,
+      timestamp: new Date().toISOString(),
+    });
+
     // Stop any ongoing speech
     if (this.isSpeaking) {
+      console.log('[AIVoiceService] Stopping ongoing speech');
       await this.stopSpeaking();
     }
 
     try {
       // Use Google Cloud TTS API for AI voice generation
       const audioContent = await this.generateAIVoice(text);
+      const generationTime = Date.now() - startTime;
+
       if (audioContent) {
+        console.log('[AIVoiceService] Audio content generated successfully', {
+          generationTimeMs: generationTime,
+          audioContentLength: audioContent.length,
+        });
         await this.playAudio(audioContent);
+        const totalTime = Date.now() - startTime;
+        console.log('[AIVoiceService] Speech synthesis completed', {
+          totalTimeMs: totalTime,
+        });
         return;
+      } else {
+        const errorMsg =
+          'No audio content generated (API key or proxy not configured)';
+        console.error('[AIVoiceService] Speech synthesis failed:', errorMsg, {
+          hasApiKey: !!this.apiKey,
+          hasProxyUrl: !!this.proxyUrl,
+          generationTimeMs: generationTime,
+        });
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      console.error('Failed to generate AI voice:', error);
+      const totalTime = Date.now() - startTime;
+      console.error('[AIVoiceService] Failed to generate AI voice:', {
+        error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        totalTimeMs: totalTime,
+        hasApiKey: !!this.apiKey,
+        hasProxyUrl: !!this.proxyUrl,
+        proxyUrl: this.proxyUrl,
+      });
       throw error;
     }
   }
@@ -153,11 +190,21 @@ export class AIVoiceService {
    * Supports both proxy server and direct API calls
    */
   private async generateAIVoice(text: string): Promise<string | null> {
+    const startTime = Date.now();
+
+    // Store config state for logging (avoid logging sensitive apiKey)
+    const hasApiKey = !!this.apiKey;
+    const hasProxyUrl = !!this.proxyUrl;
+
     // Check if API key or proxy is available
-    if (!this.apiKey && !this.proxyUrl) {
-      console.warn(
-        'Cannot generate voice: TTS API key or proxy not configured. Please set GOOGLE_TTS_API_KEY environment variable or configure a proxy server.',
-      );
+    if (!hasApiKey && !hasProxyUrl) {
+      const errorMsg =
+        'Cannot generate voice: TTS API key or proxy not configured';
+      console.warn(`[AIVoiceService] ${errorMsg}`, {
+        hasApiKey: false,
+        hasProxyUrl: false,
+        timestamp: new Date().toISOString(),
+      });
       return null;
     }
 
@@ -200,12 +247,18 @@ export class AIVoiceService {
         'Content-Type': 'application/json',
       };
       let body: any;
+      let apiMethod: 'direct' | 'proxy';
 
       // Use direct API call if API key is available, otherwise use proxy
       if (this.apiKey) {
         // Direct API call to Google Cloud TTS
         url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
         body = requestBody;
+        apiMethod = 'direct';
+        console.log('[AIVoiceService] Using direct Google Cloud TTS API', {
+          voiceName,
+          languageCode,
+        });
       } else {
         // Call the proxy server
         url = `${this.proxyUrl}/api/synthesize`;
@@ -223,7 +276,18 @@ export class AIVoiceService {
             volumeGainDb: this.ttsConfig.volumeGainDb,
           },
         };
+        apiMethod = 'proxy';
+        console.log('[AIVoiceService] Using TTS proxy server', {
+          proxyUrl: this.proxyUrl,
+          voiceName,
+          languageCode,
+        });
       }
+
+      console.log('[AIVoiceService] Sending TTS API request', {
+        url: apiMethod === 'direct' ? 'Google Cloud TTS API' : url,
+        textLength: text.length,
+      });
 
       const response = await fetch(url, {
         method: 'POST',
@@ -231,19 +295,55 @@ export class AIVoiceService {
         body: JSON.stringify(body),
       });
 
+      const fetchTime = Date.now() - startTime;
+      console.log('[AIVoiceService] TTS API response received', {
+        status: response.status,
+        ok: response.ok,
+        fetchTimeMs: fetchTime,
+      });
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          `API request failed: ${response.status} - ${
-            errorData.error || 'Unknown error'
-          }`,
-        );
+        const errorMsg = `API request failed: ${response.status} - ${
+          errorData.error || 'Unknown error'
+        }`;
+        console.error('[AIVoiceService] TTS API request failed', {
+          status: response.status,
+          errorData,
+          url: apiMethod === 'direct' ? 'Google Cloud TTS API' : url,
+          fetchTimeMs: fetchTime,
+        });
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();
+      const totalTime = Date.now() - startTime;
+
+      if (!data.audioContent) {
+        console.error('[AIVoiceService] No audio content in response', {
+          hasData: !!data,
+          dataKeys: Object.keys(data || {}),
+          totalTimeMs: totalTime,
+        });
+      } else {
+        console.log('[AIVoiceService] Audio content received', {
+          audioContentLength: data.audioContent.length,
+          totalTimeMs: totalTime,
+        });
+      }
+
       return data.audioContent; // Base64 encoded audio
     } catch (error) {
-      console.error('Error generating AI voice:', error);
+      const totalTime = Date.now() - startTime;
+      console.error('[AIVoiceService] Error generating AI voice', {
+        error: error instanceof Error ? error.message : String(error),
+        errorType:
+          error instanceof Error ? error.constructor.name : typeof error,
+        totalTimeMs: totalTime,
+        hasApiKey,
+        hasProxyUrl,
+        proxyUrl: this.proxyUrl,
+      });
       throw error;
     }
   }
@@ -252,6 +352,12 @@ export class AIVoiceService {
    * Play audio content
    */
   private async playAudio(base64Audio: string): Promise<void> {
+    const startTime = Date.now();
+    console.log('[AIVoiceService] Starting audio playback', {
+      audioDataLength: base64Audio.length,
+      timestamp: new Date().toISOString(),
+    });
+
     return new Promise((resolve, reject) => {
       try {
         this.isSpeaking = true;
@@ -262,31 +368,62 @@ export class AIVoiceService {
         // Use any type to avoid TypeScript DOM type issues
         const AudioConstructor = (globalThis as any).Audio;
         if (!AudioConstructor) {
-          throw new Error('Audio API not available');
+          const errorMsg = 'Audio API not available in this environment';
+          console.error('[AIVoiceService]', errorMsg);
+          throw new Error(errorMsg);
         }
 
         this.currentAudio = new AudioConstructor(audioSrc);
+        console.log('[AIVoiceService] Audio element created');
 
         // Wait for audio to be ready before playing to prevent cutting off the beginning
         this.currentAudio.oncanplay = () => {
-          this.currentAudio.play().catch(reject);
+          const loadTime = Date.now() - startTime;
+          console.log('[AIVoiceService] Audio ready to play', {
+            loadTimeMs: loadTime,
+          });
+          this.currentAudio.play().catch((playError: any) => {
+            console.error('[AIVoiceService] Audio play failed', {
+              error:
+                playError instanceof Error
+                  ? playError.message
+                  : String(playError),
+              loadTimeMs: loadTime,
+            });
+            reject(playError);
+          });
         };
 
         this.currentAudio.onended = () => {
+          const totalTime = Date.now() - startTime;
+          console.log('[AIVoiceService] Audio playback completed', {
+            totalTimeMs: totalTime,
+          });
           this.isSpeaking = false;
           this.currentAudio = null;
           resolve();
         };
 
         this.currentAudio.onerror = (error: any) => {
+          const totalTime = Date.now() - startTime;
+          console.error('[AIVoiceService] Audio playback error', {
+            error: error instanceof Error ? error.message : String(error),
+            totalTimeMs: totalTime,
+          });
           this.isSpeaking = false;
           this.currentAudio = null;
           reject(error);
         };
 
         // Trigger loading
+        console.log('[AIVoiceService] Loading audio...');
         this.currentAudio.load();
       } catch (error) {
+        const totalTime = Date.now() - startTime;
+        console.error('[AIVoiceService] Failed to initialize audio playback', {
+          error: error instanceof Error ? error.message : String(error),
+          totalTimeMs: totalTime,
+        });
         this.isSpeaking = false;
         reject(error);
       }

@@ -350,10 +350,44 @@ const ConversationScreen = ({route, navigation}: any) => {
 
         // Speak the starter message (only if not in text-only mode)
         if (!loadedTextOnlyMode && voiceService.current) {
-          await voiceService.current.speak(starterMessage);
-          // Get the voice method that was used
-          const method = voiceService.current.getVoiceMethod();
-          setVoiceMethod(method);
+          try {
+            console.log(
+              '[ConversationScreen] Starting AI speech for starter message',
+            );
+            await voiceService.current.speak(starterMessage);
+            // Get the voice method that was used
+            const method = voiceService.current.getVoiceMethod();
+            setVoiceMethod(method);
+            console.log(
+              '[ConversationScreen] AI speech completed successfully',
+            );
+          } catch (speechError) {
+            console.error(
+              '[ConversationScreen] Failed to speak starter message',
+              {
+                error:
+                  speechError instanceof Error
+                    ? speechError.message
+                    : String(speechError),
+                starterMessageLength: starterMessage.length,
+              },
+            );
+            // Show user-friendly error message
+            Alert.alert(
+              t('conversation.errors.aiSpeechFailed.title'),
+              t('conversation.errors.aiSpeechFailed.message'),
+              [
+                {
+                  text: t('conversation.errors.aiSpeechFailed.continue'),
+                  style: 'cancel',
+                },
+                {
+                  text: t('conversation.errors.aiSpeechFailed.goToSettings'),
+                  onPress: () => navigation.navigate('Settings'),
+                },
+              ],
+            );
+          }
         }
       } else {
         // When resuming, we need to restore the conversation context in Gemini
@@ -580,11 +614,39 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Speak the response only if shouldSpeak is true and not in text-only mode
       if (shouldSpeak && !textOnlyMode && voiceService.current) {
         setIsSpeaking(true);
-        await voiceService.current.speak(response);
-        // Get the voice method that was used
-        const method = voiceService.current.getVoiceMethod();
-        setVoiceMethod(method);
-        setIsSpeaking(false);
+        try {
+          console.log('[ConversationScreen] Starting AI speech for response');
+          await voiceService.current.speak(response);
+          // Get the voice method that was used
+          const method = voiceService.current.getVoiceMethod();
+          setVoiceMethod(method);
+          console.log('[ConversationScreen] AI speech for response completed');
+        } catch (speechError) {
+          console.error('[ConversationScreen] Failed to speak AI response', {
+            error:
+              speechError instanceof Error
+                ? speechError.message
+                : String(speechError),
+            responseLength: response.length,
+          });
+          // Show user-friendly error message
+          Alert.alert(
+            t('conversation.errors.aiSpeechFailed.title'),
+            t('conversation.errors.aiSpeechFailed.message'),
+            [
+              {
+                text: t('conversation.errors.aiSpeechFailed.continue'),
+                style: 'cancel',
+              },
+              {
+                text: t('conversation.errors.aiSpeechFailed.goToSettings'),
+                onPress: () => navigation.navigate('Settings'),
+              },
+            ],
+          );
+        } finally {
+          setIsSpeaking(false);
+        }
       }
 
       setIsLoading(false);
@@ -739,20 +801,49 @@ const ConversationScreen = ({route, navigation}: any) => {
 
         // Speak the selected sample
         setIsSpeaking(true);
-        await voiceService.current.speak(sample);
 
-        // Get the voice method that was used
-        const method = voiceService.current.getVoiceMethod();
-        setVoiceMethod(method);
+        try {
+          console.log(
+            '[ConversationScreen] Starting AI speech for sample response',
+          );
+          await voiceService.current.speak(sample);
 
-        setIsSpeaking(false);
-
-        // Hide the modal after voice playback
-        setShowVoiceDisplayModal(false);
+          // Get the voice method that was used
+          const method = voiceService.current.getVoiceMethod();
+          setVoiceMethod(method);
+          console.log('[ConversationScreen] AI speech for sample completed');
+        } catch (speechError) {
+          console.error(
+            '[ConversationScreen] Failed to speak sample response',
+            {
+              error:
+                speechError instanceof Error
+                  ? speechError.message
+                  : String(speechError),
+              sampleLength: sample.length,
+            },
+          );
+          // Show user-friendly error message
+          Alert.alert(
+            t('conversation.errors.aiSpeechFailed.title'),
+            t('conversation.errors.aiSpeechFailed.message'),
+            [
+              {
+                text: t('conversation.errors.aiSpeechFailed.continue'),
+                style: 'cancel',
+              },
+            ],
+          );
+        } finally {
+          setIsSpeaking(false);
+          // Hide the modal after voice playback attempt
+          setShowVoiceDisplayModal(false);
+        }
 
         await handleUserMessage(sample, autoReadResponse);
       } catch (error) {
-        console.error('Error reading sample:', error);
+        console.error('[ConversationScreen] Error in handleUseSample:', error);
+        setIsSpeaking(false);
         setShowVoiceDisplayModal(false);
         await handleUserMessage(sample, autoReadResponse);
       }

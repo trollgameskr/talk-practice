@@ -3,9 +3,30 @@
 This document contains solutions to common issues you might encounter when running GeminiTalk.
 
 ## Table of Contents
+- [AI Speech Issues](#ai-speech-issues)
 - [404 Errors for JavaScript Files](#404-errors-for-javascript-files)
 - [Service Worker Issues](#service-worker-issues)
 - [Build Issues](#build-issues)
+
+## AI Speech Issues
+
+### AI Not Speaking During Conversation
+
+If the AI generates text responses but doesn't speak them, see the detailed [AI Speech Troubleshooting Guide](./TROUBLESHOOTING_AI_SPEECH.md) for:
+
+- How to read console logs for diagnosis
+- Common error messages and their solutions
+- Configuration issues (API key, proxy server)
+- Network and browser audio issues
+- Workarounds to continue practicing
+
+**Quick Solutions:**
+- Check browser console (F12) for detailed error logs prefixed with `[AIVoiceService]`
+- Ensure TTS API key is configured or proxy server is running
+- Enable "Text-only mode" in Settings as a workaround
+- Allow audio autoplay in browser settings
+
+For detailed troubleshooting steps, see [TROUBLESHOOTING_AI_SPEECH.md](./TROUBLESHOOTING_AI_SPEECH.md).
 
 ## 404 Errors for JavaScript Files
 

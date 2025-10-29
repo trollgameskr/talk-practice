@@ -121,7 +121,19 @@
       "noApiKey": "No API key found. Please configure it in Settings.",
       "voicePermission": "Microphone permission is required to use this feature.",
       "listeningError": "Error listening",
-      "speakingError": "Error speaking"
+      "speakingError": "Error speaking",
+      "aiSpeechFailed": {
+        "title": "AI Speech Failed",
+        "message": "The AI failed to speak the response.\n\nPossible causes:\n• TTS API key or proxy not configured\n• Network connection issues\n• TTS service temporary error\n\n💡 You can read the text response and continue the conversation.\n\nCheck the browser console logs for detailed error information.",
+        "checkConsole": "Open browser developer tools (F12) and check the Console tab for detailed error information.",
+        "continue": "Continue",
+        "goToSettings": "Go to Settings"
+      },
+      "aiSpeechTimeout": {
+        "title": "AI Not Responding",
+        "message": "The AI generated a response but speech playback didn't start.\n\nPossible causes:\n• TTS service response delay\n• Slow network connection\n• Browser audio playback blocked\n\n💡 You can read the text response and continue the conversation.\n\nCheck the browser console logs for detailed information.",
+        "continue": "Continue"
+      }
     }
   },
   "progress": {
