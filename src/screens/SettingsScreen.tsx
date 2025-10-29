@@ -967,7 +967,7 @@ const SettingsScreen = ({navigation}: any) => {
           </View>
         </View>
 
-        <TTSSettings />
+        <TTSSettings targetLanguage={selectedTargetLanguage} />
 
         <View
           style={[
