@@ -17,9 +17,9 @@ export class VoiceService {
   // Debounce delay for speech result processing (in milliseconds)
   private static readonly RESULT_DEBOUNCE_DELAY = 100;
 
-  constructor(apiKey?: string) {
+  constructor(proxyUrl?: string) {
     this.initializeVoice();
-    this.aiVoiceService = new AIVoiceService(apiKey);
+    this.aiVoiceService = new AIVoiceService(proxyUrl);
   }
 
   /**
@@ -114,10 +114,10 @@ export class VoiceService {
   }
 
   /**
-   * Set API key for AI voice service
+   * Set proxy URL for TTS service
    */
-  setApiKey(apiKey: string) {
-    this.aiVoiceService.setApiKey(apiKey);
+  setProxyUrl(proxyUrl: string) {
+    this.aiVoiceService.setProxyUrl(proxyUrl);
   }
 
   /**

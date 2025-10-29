@@ -74,6 +74,65 @@ app.post('/api/generateContent', async (req, res) => {
   }
 });
 
+// POST /api/synthesize - Text-to-Speech proxy
+// Request body: { text, voice: { languageCode, name, ssmlGender }, audioConfig: { speakingRate, pitch, volumeGainDb } }
+app.post('/api/synthesize', async (req, res) => {
+  const apiKey = process.env.GOOGLE_TTS_API_KEY || process.env.GEMINI_API_KEY || null;
+
+  if (!apiKey) {
+    console.error('TTS proxy request but no GOOGLE_TTS_API_KEY or GEMINI_API_KEY configured');
+    return res.status(400).json({error: 'Missing GOOGLE_TTS_API_KEY on server'});
+  }
+
+  const {text, voice, audioConfig} = req.body;
+
+  if (!text) {
+    return res.status(400).json({error: 'Missing text parameter'});
+  }
+
+  try {
+    const requestBody = {
+      input: {
+        text: text,
+      },
+      voice: voice || {
+        languageCode: 'en-US',
+        name: 'en-US-Neural2-A',
+        ssmlGender: 'FEMALE',
+      },
+      audioConfig: {
+        audioEncoding: 'MP3',
+        speakingRate: audioConfig?.speakingRate || 1.0,
+        pitch: audioConfig?.pitch || 0.0,
+        volumeGainDb: audioConfig?.volumeGainDb || 0.0,
+      },
+    };
+
+    const ttsUrl = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
+    const response = await fetch(ttsUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`TTS API error (${response.status}):`, errorText);
+      throw new Error(`TTS API request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.json({audioContent: data.audioContent});
+  } catch (err) {
+    console.error('Proxy TTS error:', err?.message || err);
+    const message = err?.message || String(err);
+    const status = err?.code === 400 ? 400 : 500;
+    res.status(status).json({error: message});
+  }
+});
+
 // Catch-all for other /api routes to return JSON instead of Express HTML 404 page.
 app.all('/api/*', (req, res) => {
   console.warn(`[proxy] 404 for ${req.method} ${req.originalUrl}`);
