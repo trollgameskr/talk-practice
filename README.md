@@ -83,8 +83,9 @@ Use it like a native app on your mobile device!
 - 🏠 홈 화면에서 바로 실행
 
 **참고사항:**
-- ⚠️ **TTS (Text-to-Speech) 제한**: GitHub Pages 버전에서는 AI 음성 합성(TTS) 기능이 지원되지 않습니다. 로컬 개발 환경에서 프록시 서버를 실행해야 TTS 기능을 사용할 수 있습니다. 자세한 내용은 [로컬 웹 버전](#💻-로컬-웹-버전-local-web-version) 섹션을 참조하세요.
+- ✅ **TTS (Text-to-Speech) 지원**: GitHub Pages 버전에서 AI 음성 합성(TTS) 기능이 이제 지원됩니다! Google Cloud Text-to-Speech Neural2 API를 직접 사용합니다.
 - ✅ 음성 인식 및 텍스트 기반 대화는 정상적으로 작동합니다.
+- ℹ️ TTS 기능의 보안 및 설정에 대한 자세한 내용은 [Direct TTS API 문서](./docs/DIRECT_TTS_API.md)를 참조하세요.
 
 ### 💻 로컬 웹 버전 (Local Web Version)
 
@@ -109,15 +110,25 @@ npm run web
 자세한 사용법은 [WEB_SETUP.md](./WEB_SETUP.md)를 참조하세요.
 
 **AI 음성 합성(TTS) 사용하기:**  
-로컬 환경에서 TTS 기능을 사용하려면 프록시 서버를 함께 실행해야 합니다:
+로컬 환경에서는 두 가지 방법으로 TTS를 사용할 수 있습니다:
 
+**방법 1: 프록시 서버 사용 (권장)**
 ```bash
 # 별도 터미널에서 프록시 서버 실행
 npm run proxy
 ```
+프록시 서버는 http://localhost:4000 에서 실행되며, Google Cloud TTS API에 안전하게 접근합니다.
 
-프록시 서버는 http://localhost:4000 에서 실행되며, Google Cloud TTS API에 안전하게 접근합니다.  
-자세한 내용은 [LOCAL_PROXY.md](./docs/LOCAL_PROXY.md)를 참조하세요.
+**방법 2: 직접 API 접근**
+```bash
+# 환경 변수에 API 키 설정
+export GOOGLE_TTS_API_KEY=your-api-key-here
+
+# 웹 버전 빌드 및 실행
+npm run build:web
+```
+
+자세한 내용은 [Direct TTS API 문서](./docs/DIRECT_TTS_API.md)를 참조하세요.
 
 ### 📱 모바일 앱 (Mobile App)
 
@@ -237,6 +248,7 @@ talk-practice/
 - [사용 가이드](./docs/README.md#usage-guide)
 - [API 통합](./docs/README.md#api-integration)
 - [개발 가이드](./docs/README.md#development)
+- [Direct TTS API 설정](./docs/DIRECT_TTS_API.md) - GitHub Pages에서 TTS 기능 사용하기
 - [문제 해결](./TROUBLESHOOTING.md) - 404 에러, 서비스 워커 등 일반적인 문제 해결
 
 ### 🔧 일반적인 문제 해결
