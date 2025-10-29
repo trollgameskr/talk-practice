@@ -192,8 +192,13 @@ export class AIVoiceService {
   private async generateAIVoice(text: string): Promise<string | null> {
     const startTime = Date.now();
 
+    // Store config state for logging (avoid logging sensitive apiKey)
+    const hasApiKey = !!this.apiKey;
+    const hasProxyUrl = !!this.proxyUrl;
+    const usingDirectApi = hasApiKey;
+
     // Check if API key or proxy is available
-    if (!this.apiKey && !this.proxyUrl) {
+    if (!hasApiKey && !hasProxyUrl) {
       const errorMsg =
         'Cannot generate voice: TTS API key or proxy not configured';
       console.warn(`[AIVoiceService] ${errorMsg}`, {
@@ -243,12 +248,14 @@ export class AIVoiceService {
         'Content-Type': 'application/json',
       };
       let body: any;
+      let apiMethod: 'direct' | 'proxy';
 
       // Use direct API call if API key is available, otherwise use proxy
       if (this.apiKey) {
         // Direct API call to Google Cloud TTS
         url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
         body = requestBody;
+        apiMethod = 'direct';
         console.log('[AIVoiceService] Using direct Google Cloud TTS API', {
           voiceName,
           languageCode,
@@ -270,6 +277,7 @@ export class AIVoiceService {
             volumeGainDb: this.ttsConfig.volumeGainDb,
           },
         };
+        apiMethod = 'proxy';
         console.log('[AIVoiceService] Using TTS proxy server', {
           proxyUrl: this.proxyUrl,
           voiceName,
@@ -278,7 +286,7 @@ export class AIVoiceService {
       }
 
       console.log('[AIVoiceService] Sending TTS API request', {
-        url: this.apiKey ? 'Google Cloud TTS API' : url,
+        url: apiMethod === 'direct' ? 'Google Cloud TTS API' : url,
         textLength: text.length,
       });
 
@@ -303,7 +311,7 @@ export class AIVoiceService {
         console.error('[AIVoiceService] TTS API request failed', {
           status: response.status,
           errorData,
-          url: this.apiKey ? 'Google Cloud TTS API' : url,
+          url: apiMethod === 'direct' ? 'Google Cloud TTS API' : url,
           fetchTimeMs: fetchTime,
         });
         throw new Error(errorMsg);
@@ -333,8 +341,8 @@ export class AIVoiceService {
         errorType:
           error instanceof Error ? error.constructor.name : typeof error,
         totalTimeMs: totalTime,
-        hasApiKey: !!this.apiKey,
-        hasProxyUrl: !!this.proxyUrl,
+        hasApiKey,
+        hasProxyUrl,
         proxyUrl: this.proxyUrl,
       });
       throw error;
