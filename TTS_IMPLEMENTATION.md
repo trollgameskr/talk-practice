@@ -134,6 +134,55 @@ Settings Screen
 }
 ```
 
+## Security and Proxy Setup
+
+### Overview
+To protect API keys from being exposed in client-side code, the TTS functionality uses a proxy server to make API calls to Google Cloud Text-to-Speech.
+
+### Architecture
+```
+Client (Browser)
+    ↓ POST /api/synthesize
+Proxy Server (server/proxy.js)
+    ↓ Authenticated API call
+Google Cloud Text-to-Speech API
+```
+
+### Configuration
+
+1. **Environment Variables**
+   - Set `GOOGLE_TTS_API_KEY` in your `.env` file
+   - Can use the same API key as `GEMINI_API_KEY` if using the same Google Cloud project
+   - The proxy server will use `GOOGLE_TTS_API_KEY` first, falling back to `GEMINI_API_KEY`
+
+2. **Proxy Server**
+   - Endpoint: `POST /api/synthesize`
+   - Default URL: `http://localhost:4000`
+   - Accepts: `{ text, voice, audioConfig }`
+   - Returns: `{ audioContent }` (base64 MP3)
+
+3. **Client Configuration**
+   - AIVoiceService accepts a proxy URL in the constructor
+   - Default: `http://localhost:4000`
+   - No API key is required or stored in client code
+
+### Running the Proxy
+
+```bash
+# Start the proxy server
+npm run proxy
+
+# Or with custom port
+PROXY_PORT=5000 npm run proxy
+```
+
+### Benefits
+- ✅ API keys never exposed in client-side code
+- ✅ Centralized API key management
+- ✅ Better security and control
+- ✅ CORS handling done server-side
+- ✅ Easier to monitor and rate-limit API usage
+
 ## Language Coverage (As Specified)
 
 ### 영어 (English)
