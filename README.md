@@ -82,6 +82,10 @@ Use it like a native app on your mobile device!
 - 🚀 빠른 로딩과 부드러운 성능
 - 🏠 홈 화면에서 바로 실행
 
+**참고사항:**
+- ⚠️ **TTS (Text-to-Speech) 제한**: GitHub Pages 버전에서는 AI 음성 합성(TTS) 기능이 지원되지 않습니다. 로컬 개발 환경에서 프록시 서버를 실행해야 TTS 기능을 사용할 수 있습니다. 자세한 내용은 [로컬 웹 버전](#💻-로컬-웹-버전-local-web-version) 섹션을 참조하세요.
+- ✅ 음성 인식 및 텍스트 기반 대화는 정상적으로 작동합니다.
+
 ### 💻 로컬 웹 버전 (Local Web Version)
 
 **Windows OS 사용자를 위한 웹 버전이 추가되었습니다!**  
@@ -103,6 +107,17 @@ npm run web
 
 웹 버전은 http://localhost:3000 에서 실행됩니다.  
 자세한 사용법은 [WEB_SETUP.md](./WEB_SETUP.md)를 참조하세요.
+
+**AI 음성 합성(TTS) 사용하기:**  
+로컬 환경에서 TTS 기능을 사용하려면 프록시 서버를 함께 실행해야 합니다:
+
+```bash
+# 별도 터미널에서 프록시 서버 실행
+npm run proxy
+```
+
+프록시 서버는 http://localhost:4000 에서 실행되며, Google Cloud TTS API에 안전하게 접근합니다.  
+자세한 내용은 [LOCAL_PROXY.md](./docs/LOCAL_PROXY.md)를 참조하세요.
 
 ### 📱 모바일 앱 (Mobile App)
 
