@@ -43,7 +43,9 @@ const SettingsScreen = ({navigation}: any) => {
   const {theme, isDark, toggleTheme} = useTheme();
   const {t, i18n} = useTranslation();
   const [apiKey, setApiKey] = useState('');
+  const [ttsApiKey, setTtsApiKey] = useState('');
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
+  const [isTtsApiKeyVisible, setIsTtsApiKeyVisible] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [sentenceLength, setSentenceLength] = useState<SentenceLength>('short');
@@ -57,6 +59,7 @@ const SettingsScreen = ({navigation}: any) => {
   const [textOnlyMode, setTextOnlyMode] = useState(false);
   useEffect(() => {
     loadApiKey();
+    loadTtsApiKey();
     loadUserInfo();
     loadSentenceLength();
     loadLanguage();
@@ -96,6 +99,17 @@ const SettingsScreen = ({navigation}: any) => {
       }
     } catch (error) {
       console.error('Error loading API key:', error);
+    }
+  };
+
+  const loadTtsApiKey = async () => {
+    try {
+      const savedKey = await AsyncStorage.getItem(STORAGE_KEYS.TTS_API_KEY);
+      if (savedKey) {
+        setTtsApiKey(savedKey);
+      }
+    } catch (error) {
+      console.error('Error loading TTS API key:', error);
     }
   };
 
@@ -197,6 +211,29 @@ const SettingsScreen = ({navigation}: any) => {
     } catch (error) {
       console.error('Error saving API key:', error);
       Alert.alert('Error', 'Failed to save API key');
+    }
+  };
+
+  const handleSaveTtsApiKey = async () => {
+    if (!ttsApiKey.trim()) {
+      Alert.alert('Error', 'Please enter a TTS API key');
+      return;
+    }
+
+    if (!isValidApiKey(ttsApiKey)) {
+      Alert.alert(
+        'Invalid API Key',
+        'The API key format appears to be invalid. Please check and try again.',
+      );
+      return;
+    }
+
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.TTS_API_KEY, ttsApiKey);
+      Alert.alert('Success', 'TTS API key saved successfully!');
+    } catch (error) {
+      console.error('Error saving TTS API key:', error);
+      Alert.alert('Error', 'Failed to save TTS API key');
     }
   };
 
@@ -707,6 +744,91 @@ const SettingsScreen = ({navigation}: any) => {
             <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
               ℹ️ Don't have an API key? Click the button above to get one from
               Google AI Studio (free with usage limits)
+            </Text>
+          </View>
+        </View>
+
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            🎤 TTS API Configuration (Optional)
+          </Text>
+          <Text
+            style={[
+              styles.sectionDescription,
+              {color: theme.colors.textSecondary},
+            ]}>
+            Enter your Google Cloud Text-to-Speech API key to enable AI voice
+            synthesis (can use the same key as Gemini)
+          </Text>
+
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+              TTS API Key
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.colors.inputBackground,
+                  borderColor: theme.colors.inputBorder,
+                  color: theme.colors.text,
+                },
+              ]}
+              value={ttsApiKey}
+              onChangeText={setTtsApiKey}
+              placeholder="Enter your TTS API key (optional)"
+              placeholderTextColor={theme.colors.textTertiary}
+              secureTextEntry={!isTtsApiKeyVisible}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TouchableOpacity
+              style={styles.toggleButton}
+              onPress={() => setIsTtsApiKeyVisible(!isTtsApiKeyVisible)}>
+              <Text
+                style={[
+                  styles.toggleButtonText,
+                  {color: theme.colors.primary},
+                ]}>
+                {isTtsApiKeyVisible ? '👁️ Hide' : '👁️‍🗨️ Show'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.primaryButton,
+              {backgroundColor: theme.colors.buttonPrimary},
+            ]}
+            onPress={handleSaveTtsApiKey}>
+            <Text
+              style={[
+                styles.primaryButtonText,
+                {color: theme.colors.buttonPrimaryText},
+              ]}>
+              Save TTS API Key
+            </Text>
+          </TouchableOpacity>
+
+          <View
+            style={[
+              styles.infoBox,
+              {
+                backgroundColor: theme.colors.primaryLight,
+                borderLeftColor: theme.colors.primary,
+              },
+            ]}>
+            <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
+              💡 You can use the same API key for both Gemini and TTS, or use
+              separate keys. Without this, the app will work in text-only mode
+              for AI responses.
             </Text>
           </View>
         </View>
