@@ -9,7 +9,7 @@
     "ios": "react-native run-ios",
     "web": "webpack serve --mode development --config webpack.config.js",
     "proxy": "node server/proxy.js",
-    "build:web": "NODE_ENV=production webpack --mode production --config webpack.config.js",
+    "build:web": "webpack --mode production --config webpack.config.js",
     "test": "jest",
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
