@@ -65,8 +65,14 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
       };
       // Update config silently without showing success alert
       setConfig(newConfig);
-      AsyncStorage.setItem(STORAGE_KEYS.TTS_CONFIG, JSON.stringify(newConfig));
+      // Save to storage with error handling
+      AsyncStorage.setItem(STORAGE_KEYS.TTS_CONFIG, JSON.stringify(newConfig))
+        .catch(error => {
+          console.error('Error saving TTS config on language change:', error);
+        });
     }
+    // Note: config is intentionally excluded from dependencies to prevent infinite loops
+    // This effect should only run when targetLanguage changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetLanguage]);
 
