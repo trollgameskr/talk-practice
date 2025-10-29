@@ -80,7 +80,10 @@ describe('LogCaptureService', () => {
   it('should capture object logs as JSON', () => {
     logCaptureService.startCapture();
 
-    console.log('[AIVoiceService] Test object', {status: 'success', code: 200});
+    console.log('[AIVoiceService] Test object', {
+      status: 'success',
+      code: 200,
+    });
 
     const logs = logCaptureService.getLogs();
     expect(logs).toContain('[AIVoiceService] Test object');
@@ -118,15 +121,15 @@ describe('LogCaptureService', () => {
 
   it('should restore original console methods on stop', () => {
     logCaptureService.startCapture();
-    
+
     // After starting capture, console.log should be overridden
-    const capturedLog = console.log;
+    const modifiedConsoleLog = console.log;
     expect(console.log).not.toBe(originalConsoleLog);
 
     logCaptureService.stopCapture();
 
     // After stop, the original console.log should be restored
     expect(console.log).toBe(originalConsoleLog);
-    expect(console.log).not.toBe(capturedLog);
+    expect(console.log).not.toBe(modifiedConsoleLog);
   });
 });
