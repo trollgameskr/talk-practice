@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -18,18 +18,63 @@ import {
   SPEAKING_RATE_OPTIONS,
   TTS_DOCUMENTATION_URL,
   findVoiceByName,
+  getLanguageGroupIndexByTargetLanguage,
 } from '../config/tts.config';
 import {STORAGE_KEYS} from '../config/gemini.config';
 import {openURL} from '../utils/helpers';
 
-const TTSSettings: React.FC = () => {
+interface TTSSettingsProps {
+  targetLanguage: string;
+}
+
+const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
   const {theme} = useTheme();
   const [config, setConfig] = useState<TTSConfig>(DEFAULT_TTS_CONFIG);
   const [selectedLanguageGroup, setSelectedLanguageGroup] = useState(0);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     loadTTSConfig();
   }, []);
+
+  // Auto-select language group and voice when target language changes
+  useEffect(() => {
+    // Skip the initial mount to avoid overwriting loaded config
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // Set the initial language group
+      const initialGroupIndex =
+        getLanguageGroupIndexByTargetLanguage(targetLanguage);
+      setSelectedLanguageGroup(initialGroupIndex);
+      return;
+    }
+
+    const newLanguageGroupIndex =
+      getLanguageGroupIndexByTargetLanguage(targetLanguage);
+    setSelectedLanguageGroup(newLanguageGroupIndex);
+
+    // Auto-select first voice for the language group
+    const voices = DEFAULT_VOICES[newLanguageGroupIndex]?.voices || [];
+    if (voices.length > 0) {
+      const firstVoice = voices[0];
+      const newConfig = {
+        ...config,
+        voiceName: firstVoice.name,
+        languageCode: firstVoice.languageCode,
+        ssmlGender: firstVoice.gender,
+      };
+      // Update config silently without showing success alert
+      setConfig(newConfig);
+      // Save to storage with error handling
+      AsyncStorage.setItem(STORAGE_KEYS.TTS_CONFIG, JSON.stringify(newConfig))
+        .catch(error => {
+          console.error('Error saving TTS config on language change:', error);
+        });
+    }
+    // Note: config is intentionally excluded from dependencies to prevent infinite loops
+    // This effect should only run when targetLanguage changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetLanguage]);
 
   const loadTTSConfig = async () => {
     try {
@@ -103,27 +148,7 @@ const TTSSettings: React.FC = () => {
         Google Cloud Text-to-Speech 음성 설정을 커스터마이징하세요
       </Text>
 
-      {/* Language Group Selection */}
-      <View style={styles.optionGroup}>
-        <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-          언어 선택
-        </Text>
-        <CustomPicker
-          selectedValue={selectedLanguageGroup.toString()}
-          onValueChange={(value: string) => {
-            setSelectedLanguageGroup(parseInt(value, 10));
-          }}
-          items={DEFAULT_VOICES.map((group, index) => ({
-            label: group.language,
-            value: index.toString(),
-          }))}
-          placeholder="언어를 선택하세요"
-          theme={theme}
-          style={styles.pickerContainer}
-        />
-      </View>
-
-      {/* Voice Selection */}
+      {/* Voice Selection - moved to be first after description */}
       <View style={styles.optionGroup}>
         <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
           음성 선택
@@ -161,26 +186,7 @@ const TTSSettings: React.FC = () => {
         />
       </View>
 
-      {/* Documentation Link */}
-      <TouchableOpacity
-        style={[
-          styles.linkButton,
-          {
-            backgroundColor: theme.colors.buttonSecondary,
-            borderColor: theme.colors.border,
-          },
-        ]}
-        onPress={handleOpenDocumentation}>
-        <Text
-          style={[
-            styles.linkButtonText,
-            {color: theme.colors.buttonSecondaryText},
-          ]}>
-          📚 다양한 음성 타입 보기 (Google Cloud 문서)
-        </Text>
-      </TouchableOpacity>
-
-      {/* Custom Voice Toggle */}
+      {/* Custom Voice Toggle - moved below voice selection */}
       <View style={styles.optionGroup}>
         <View style={styles.themeRow}>
           <View style={styles.themeInfo}>
@@ -210,6 +216,27 @@ const TTSSettings: React.FC = () => {
           />
         </View>
       </View>
+
+      {/* Documentation Link - only shown when custom voice is enabled */}
+      {config.useCustomVoice && (
+        <TouchableOpacity
+          style={[
+            styles.linkButton,
+            {
+              backgroundColor: theme.colors.buttonSecondary,
+              borderColor: theme.colors.border,
+            },
+          ]}
+          onPress={handleOpenDocumentation}>
+          <Text
+            style={[
+              styles.linkButtonText,
+              {color: theme.colors.buttonSecondaryText},
+            ]}>
+            📚 다양한 음성 타입 보기 (Google Cloud 문서)
+          </Text>
+        </TouchableOpacity>
+      )}
 
       {/* Custom Voice Inputs */}
       {config.useCustomVoice && (

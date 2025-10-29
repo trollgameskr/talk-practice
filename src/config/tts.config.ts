@@ -325,3 +325,19 @@ export function getAllVoices(): VoiceOption[] {
 export function findVoiceByName(name: string): VoiceOption | undefined {
   return getAllVoices().find(voice => voice.name === name);
 }
+
+// Helper function to map target language code to TTS language group index
+export function getLanguageGroupIndexByTargetLanguage(
+  targetLang: string,
+): number {
+  const languageMap: {[key: string]: number} = {
+    en: 0, // 영어 (English)
+    ko: 1, // 한국어 (Korean)
+    ja: 2, // 일본어 (Japanese)
+    zh: 3, // 중국어 (Chinese)
+    es: 4, // 스페인어 (Spanish)
+    fr: 5, // 프랑스어 (French)
+    de: 6, // 독일어 (German)
+  };
+  return languageMap[targetLang] ?? 0; // Default to English if not found
+}
