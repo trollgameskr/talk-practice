@@ -195,7 +195,6 @@ export class AIVoiceService {
     // Store config state for logging (avoid logging sensitive apiKey)
     const hasApiKey = !!this.apiKey;
     const hasProxyUrl = !!this.proxyUrl;
-    const usingDirectApi = hasApiKey;
 
     // Check if API key or proxy is available
     if (!hasApiKey && !hasProxyUrl) {
