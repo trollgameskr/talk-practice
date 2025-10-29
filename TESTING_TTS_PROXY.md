@@ -29,6 +29,11 @@ Edit `.env`:
 ```bash
 GEMINI_API_KEY=AIza...your-actual-api-key...
 GOOGLE_TTS_API_KEY=AIza...your-actual-api-key...  # Can be the same as GEMINI_API_KEY
+
+# Optional: Configure proxy server if needed
+# HTTPS_PROXY=http://proxy.example.com:8080
+# HTTP_PROXY=http://proxy.example.com:8080
+# NO_PROXY=localhost,127.0.0.1
 ```
 
 ### 3. Start the Proxy Server

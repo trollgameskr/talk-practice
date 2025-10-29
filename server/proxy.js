@@ -2,6 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const {GoogleGenerativeAI} = require('@google/generative-ai');
+const {HttpsProxyAgent} = require('https-proxy-agent');
 
 // Load .env for local development (if present)
 try {
@@ -21,6 +22,37 @@ const GEMINI_CONFIG = {
     candidateCount: 1,
   },
 };
+
+// Proxy configuration for Google Cloud TTS API
+// Support for HTTP_PROXY, HTTPS_PROXY, and NO_PROXY environment variables
+const PROXY_CONFIG = {
+  httpProxy: process.env.HTTP_PROXY || process.env.http_proxy || null,
+  httpsProxy: process.env.HTTPS_PROXY || process.env.https_proxy || null,
+  noProxy: process.env.NO_PROXY || process.env.no_proxy || null,
+};
+
+/**
+ * Create an HTTPS proxy agent if proxy is configured
+ * @returns {HttpsProxyAgent|undefined} Proxy agent or undefined if no proxy configured
+ */
+function createProxyAgent() {
+  const proxyUrl = PROXY_CONFIG.httpsProxy || PROXY_CONFIG.httpProxy;
+
+  if (!proxyUrl) {
+    return undefined;
+  }
+
+  try {
+    console.log(`[proxy] Using proxy server: ${proxyUrl}`);
+    return new HttpsProxyAgent(proxyUrl);
+  } catch (error) {
+    console.error(
+      '[proxy] Failed to create proxy agent:',
+      error?.message || error,
+    );
+    return undefined;
+  }
+}
 
 const app = express();
 const port = process.env.PROXY_PORT || 4000;
@@ -77,11 +109,16 @@ app.post('/api/generateContent', async (req, res) => {
 // POST /api/synthesize - Text-to-Speech proxy
 // Request body: { text, voice: { languageCode, name, ssmlGender }, audioConfig: { speakingRate, pitch, volumeGainDb } }
 app.post('/api/synthesize', async (req, res) => {
-  const apiKey = process.env.GOOGLE_TTS_API_KEY || process.env.GEMINI_API_KEY || null;
+  const apiKey =
+    process.env.GOOGLE_TTS_API_KEY || process.env.GEMINI_API_KEY || null;
 
   if (!apiKey) {
-    console.error('TTS proxy request but no GOOGLE_TTS_API_KEY or GEMINI_API_KEY configured');
-    return res.status(400).json({error: 'Missing GOOGLE_TTS_API_KEY on server'});
+    console.error(
+      'TTS proxy request but no GOOGLE_TTS_API_KEY or GEMINI_API_KEY configured',
+    );
+    return res
+      .status(400)
+      .json({error: 'Missing GOOGLE_TTS_API_KEY on server'});
   }
 
   const {text, voice, audioConfig} = req.body;
@@ -109,13 +146,23 @@ app.post('/api/synthesize', async (req, res) => {
     };
 
     const ttsUrl = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
-    const response = await fetch(ttsUrl, {
+
+    // Create fetch options with proxy agent if configured
+    const fetchOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(requestBody),
-    });
+    };
+
+    // Add proxy agent if configured
+    const proxyAgent = createProxyAgent();
+    if (proxyAgent) {
+      fetchOptions.agent = proxyAgent;
+    }
+
+    const response = await fetch(ttsUrl, fetchOptions);
 
     if (!response.ok) {
       const errorText = await response.text();

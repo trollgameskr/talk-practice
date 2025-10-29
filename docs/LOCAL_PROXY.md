@@ -25,6 +25,49 @@ The proxy listens on port `4000` by default. It exposes the endpoint:
 
 The webpack dev server is configured to proxy `/api` to this local proxy during development.
 
+## Proxy Server Configuration (Optional)
+
+If you need to access Google Cloud services through a corporate or network proxy, you can configure the proxy server to use an HTTP/HTTPS proxy.
+
+### Environment Variables
+
+The proxy server supports standard proxy environment variables:
+
+- `HTTPS_PROXY` or `https_proxy`: HTTPS proxy server URL
+- `HTTP_PROXY` or `http_proxy`: HTTP proxy server URL (used as fallback)
+- `NO_PROXY` or `no_proxy`: Comma-separated list of domains to exclude from proxying
+
+### Configuration Examples
+
+#### Basic Proxy Configuration
+
+```bash
+# In .env file or environment
+HTTPS_PROXY=http://proxy.example.com:8080
+```
+
+#### Authenticated Proxy
+
+```bash
+HTTPS_PROXY=http://username:password@proxy.example.com:8080
+```
+
+#### Excluding Domains from Proxy
+
+```bash
+HTTPS_PROXY=http://proxy.example.com:8080
+NO_PROXY=localhost,127.0.0.1,.example.com
+```
+
+### Testing Proxy Configuration
+
+When the proxy server starts with a proxy configured, you'll see:
+
+```
+[proxy] Using proxy server: http://proxy.example.com:8080
+Proxy server listening on http://localhost:4000
+```
+
 ## Quick test (from terminal)
 
 PowerShell:
@@ -47,6 +90,7 @@ Successful response example:
 
 ## Notes
 - Keep your API key secret. Do not commit `.env` to source control.
+- The proxy configuration applies to both Gemini API and Google Cloud Text-to-Speech API calls.
 - If you want automatic restart during development, install `nodemon` globally and run:
 
 ```bash
