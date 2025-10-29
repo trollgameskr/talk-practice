@@ -26,7 +26,20 @@ export class AIVoiceService {
 
   constructor(proxyUrl?: string) {
     // Accept proxy URL instead of API key for security
-    this.proxyUrl = proxyUrl || 'http://localhost:4000';
+    // In production (GitHub Pages), don't default to localhost as it won't work
+    if (proxyUrl) {
+      this.proxyUrl = proxyUrl;
+    } else if (
+      typeof globalThis !== 'undefined' &&
+      (globalThis as any).location &&
+      (globalThis as any).location.hostname === 'localhost'
+    ) {
+      // Only use localhost in local development
+      this.proxyUrl = 'http://localhost:4000';
+    } else {
+      // Production: no proxy available, TTS will be disabled
+      this.proxyUrl = '';
+    }
     this.initialize();
   }
 
@@ -112,19 +125,30 @@ export class AIVoiceService {
    * This ensures API keys are not exposed in client-side code
    */
   private async generateAIVoice(text: string): Promise<string | null> {
+    // Check if proxy is available
+    if (!this.proxyUrl) {
+      console.warn(
+        'TTS proxy not available in production. Voice synthesis disabled.',
+      );
+      return null;
+    }
+
     try {
       // Use custom voice if enabled, otherwise use selected voice
-      const voiceName = this.ttsConfig.useCustomVoice && this.ttsConfig.customVoiceName
-        ? this.ttsConfig.customVoiceName
-        : this.ttsConfig.voiceName;
-      
-      const languageCode = this.ttsConfig.useCustomVoice && this.ttsConfig.customLanguageCode
-        ? this.ttsConfig.customLanguageCode
-        : this.ttsConfig.languageCode;
-      
-      const gender = this.ttsConfig.useCustomVoice && this.ttsConfig.customGender
-        ? this.ttsConfig.customGender
-        : this.ttsConfig.ssmlGender;
+      const voiceName =
+        this.ttsConfig.useCustomVoice && this.ttsConfig.customVoiceName
+          ? this.ttsConfig.customVoiceName
+          : this.ttsConfig.voiceName;
+
+      const languageCode =
+        this.ttsConfig.useCustomVoice && this.ttsConfig.customLanguageCode
+          ? this.ttsConfig.customLanguageCode
+          : this.ttsConfig.languageCode;
+
+      const gender =
+        this.ttsConfig.useCustomVoice && this.ttsConfig.customGender
+          ? this.ttsConfig.customGender
+          : this.ttsConfig.ssmlGender;
 
       const requestBody = {
         text: text,
@@ -152,7 +176,11 @@ export class AIVoiceService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`API request failed: ${response.status} - ${errorData.error || 'Unknown error'}`);
+        throw new Error(
+          `API request failed: ${response.status} - ${
+            errorData.error || 'Unknown error'
+          }`,
+        );
       }
 
       const data = await response.json();
@@ -244,6 +272,9 @@ export class AIVoiceService {
    * Get the voice method currently being used
    */
   getVoiceMethod(): string {
+    if (!this.proxyUrl) {
+      return 'TTS Not Available (Production)';
+    }
     return 'Google Cloud TTS (AI 음성)';
   }
 
