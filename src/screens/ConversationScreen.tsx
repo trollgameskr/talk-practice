@@ -312,7 +312,7 @@ const ConversationScreen = ({route, navigation}: any) => {
 
       // Initialize Voice service (only if not in text-only mode)
       if (!loadedTextOnlyMode) {
-        voiceService.current = new VoiceService(undefined);
+        voiceService.current = new VoiceService(apiKey);
       }
 
       // Only start a new conversation if not resuming
