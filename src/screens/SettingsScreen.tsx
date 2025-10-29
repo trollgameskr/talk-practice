@@ -1,7 +1,3 @@
-/**
- * Settings Screen
- */
-
 import React, {useState, useEffect} from 'react';
 import {
   View,
@@ -27,10 +23,6 @@ import {
   SentenceLength,
   SENTENCE_LENGTH_CONFIG,
   STORAGE_KEYS,
-  VOICE_ACCENT_OPTIONS,
-  VoiceAccent,
-  VOICE_PERSONALITY_OPTIONS,
-  VoicePersonality,
 } from '../config/gemini.config';
 import {useTheme} from '../contexts/ThemeContext';
 import {
@@ -41,7 +33,6 @@ import {
   getTargetLanguage,
   getAvailableTargetLanguages,
 } from '../config/i18n.config';
-import {TTSCapabilities} from '../services/AIVoiceService';
 
 const storageService = new StorageService();
 const firebaseService = new FirebaseService();
@@ -63,47 +54,7 @@ const SettingsScreen = ({navigation}: any) => {
   const [showTranslation, setShowTranslation] = useState(false);
   const [showPronunciation, setShowPronunciation] = useState(false);
   const [showGrammarHighlights, setShowGrammarHighlights] = useState(false);
-  const [aiVoiceAccent, setAiVoiceAccent] = useState<VoiceAccent>('en-US');
-  const [responseVoiceAccent, setResponseVoiceAccent] =
-    useState<VoiceAccent>('en-US');
-  const [aiVoicePersonality, setAiVoicePersonality] =
-    useState<VoicePersonality>('cheerful_male');
-  const [responseVoicePersonality, setResponseVoicePersonality] =
-    useState<VoicePersonality>('cheerful_female');
-  const [ttsCapabilities, setTtsCapabilities] = useState<TTSCapabilities>({
-    model: 'Web Speech API',
-    supportsAccent: true,
-    supportsPersonality: false,
-  });
   const [textOnlyMode, setTextOnlyMode] = useState(false);
-
-  const updateTTSCapabilities = React.useCallback(() => {
-    // Determine capabilities based on API key presence
-    // This matches the logic in AIVoiceService.getCurrentTTSModel()
-    const hasApiKey = apiKey && apiKey.trim() !== '';
-
-    if (hasApiKey) {
-      // Google Cloud TTS supports both accent and personality
-      setTtsCapabilities({
-        model: 'Google Cloud TTS',
-        supportsAccent: true,
-        supportsPersonality: true,
-      });
-    } else {
-      // Web Speech API supports accent but not reliable personality
-      setTtsCapabilities({
-        model: 'Web Speech API',
-        supportsAccent: true,
-        supportsPersonality: false,
-      });
-    }
-  }, [apiKey]);
-
-  // Update TTS capabilities when API key changes
-  useEffect(() => {
-    updateTTSCapabilities();
-  }, [updateTTSCapabilities]);
-
   useEffect(() => {
     loadApiKey();
     loadUserInfo();
@@ -114,10 +65,6 @@ const SettingsScreen = ({navigation}: any) => {
     loadShowTranslation();
     loadShowPronunciation();
     loadShowGrammarHighlights();
-    loadAiVoiceAccent();
-    loadResponseVoiceAccent();
-    loadAiVoicePersonality();
-    loadResponseVoicePersonality();
     loadTextOnlyMode();
   }, []);
 
@@ -218,58 +165,6 @@ const SettingsScreen = ({navigation}: any) => {
     }
   };
 
-  const loadAiVoiceAccent = async () => {
-    try {
-      const savedValue = await AsyncStorage.getItem(
-        STORAGE_KEYS.AI_VOICE_ACCENT,
-      );
-      if (savedValue) {
-        setAiVoiceAccent(savedValue as VoiceAccent);
-      }
-    } catch (error) {
-      console.error('Error loading AI voice accent:', error);
-    }
-  };
-
-  const loadResponseVoiceAccent = async () => {
-    try {
-      const savedValue = await AsyncStorage.getItem(
-        STORAGE_KEYS.RESPONSE_VOICE_ACCENT,
-      );
-      if (savedValue) {
-        setResponseVoiceAccent(savedValue as VoiceAccent);
-      }
-    } catch (error) {
-      console.error('Error loading response voice accent:', error);
-    }
-  };
-
-  const loadAiVoicePersonality = async () => {
-    try {
-      const savedValue = await AsyncStorage.getItem(
-        STORAGE_KEYS.AI_VOICE_PERSONALITY,
-      );
-      if (savedValue) {
-        setAiVoicePersonality(savedValue as VoicePersonality);
-      }
-    } catch (error) {
-      console.error('Error loading AI voice personality:', error);
-    }
-  };
-
-  const loadResponseVoicePersonality = async () => {
-    try {
-      const savedValue = await AsyncStorage.getItem(
-        STORAGE_KEYS.RESPONSE_VOICE_PERSONALITY,
-      );
-      if (savedValue) {
-        setResponseVoicePersonality(savedValue as VoicePersonality);
-      }
-    } catch (error) {
-      console.error('Error loading response voice personality:', error);
-    }
-  };
-
   const loadTextOnlyMode = async () => {
     try {
       const savedValue = await AsyncStorage.getItem(
@@ -298,8 +193,6 @@ const SettingsScreen = ({navigation}: any) => {
 
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
-      // Update TTS capabilities after saving API key
-      updateTTSCapabilities();
       Alert.alert('Success', 'API key saved successfully!');
     } catch (error) {
       console.error('Error saving API key:', error);
@@ -370,62 +263,9 @@ const SettingsScreen = ({navigation}: any) => {
     }
   };
 
-  const handleAiVoiceAccentChange = async (accent: VoiceAccent) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEYS.AI_VOICE_ACCENT, accent);
-      setAiVoiceAccent(accent);
-    } catch (error) {
-      console.error('Error saving AI voice accent:', error);
-      Alert.alert('Error', 'Failed to save AI voice accent');
-    }
-  };
-
-  const handleResponseVoiceAccentChange = async (accent: VoiceAccent) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEYS.RESPONSE_VOICE_ACCENT, accent);
-      setResponseVoiceAccent(accent);
-    } catch (error) {
-      console.error('Error saving response voice accent:', error);
-      Alert.alert('Error', 'Failed to save response voice accent');
-    }
-  };
-
-  const handleAiVoicePersonalityChange = async (
-    personality: VoicePersonality,
-  ) => {
-    try {
-      await AsyncStorage.setItem(
-        STORAGE_KEYS.AI_VOICE_PERSONALITY,
-        personality,
-      );
-      setAiVoicePersonality(personality);
-    } catch (error) {
-      console.error('Error saving AI voice personality:', error);
-      Alert.alert('Error', 'Failed to save AI voice personality');
-    }
-  };
-
-  const handleResponseVoicePersonalityChange = async (
-    personality: VoicePersonality,
-  ) => {
-    try {
-      await AsyncStorage.setItem(
-        STORAGE_KEYS.RESPONSE_VOICE_PERSONALITY,
-        personality,
-      );
-      setResponseVoicePersonality(personality);
-    } catch (error) {
-      console.error('Error saving response voice personality:', error);
-      Alert.alert('Error', 'Failed to save response voice personality');
-    }
-  };
-
   const handleTextOnlyModeToggle = async (value: boolean) => {
     try {
-      await AsyncStorage.setItem(
-        STORAGE_KEYS.TEXT_ONLY_MODE,
-        value.toString(),
-      );
+      await AsyncStorage.setItem(STORAGE_KEYS.TEXT_ONLY_MODE, value.toString());
       setTextOnlyMode(value);
     } catch (error) {
       console.error('Error saving text-only mode setting:', error);
@@ -1110,156 +950,6 @@ const SettingsScreen = ({navigation}: any) => {
               />
             </View>
           </View>
-
-          <View style={styles.optionGroup}>
-            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-              {t('settings.sections.conversation.aiVoiceAccent.label')}
-            </Text>
-            <Text
-              style={[
-                styles.optionDescription,
-                {color: theme.colors.textSecondary},
-              ]}>
-              {t('settings.sections.conversation.aiVoiceAccent.description')}
-            </Text>
-            {/* Feature 4: Show accent options only when target language is English */}
-            {selectedTargetLanguage === 'en' ? (
-              <CustomPicker
-                selectedValue={aiVoiceAccent}
-                onValueChange={(value: string) =>
-                  handleAiVoiceAccentChange(value as VoiceAccent)
-                }
-                items={Object.keys(VOICE_ACCENT_OPTIONS).map(key => ({
-                  label: VOICE_ACCENT_OPTIONS[key as VoiceAccent].label,
-                  value: key,
-                }))}
-                placeholder="Select AI Voice Accent"
-                theme={theme}
-                style={styles.pickerContainer}
-              />
-            ) : (
-              <View
-                style={[
-                  styles.infoBox,
-                  {
-                    backgroundColor: theme.colors.primaryLight,
-                    borderLeftColor: theme.colors.primary,
-                  },
-                ]}>
-                <Text
-                  style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-                  ℹ️ Accent options are only available when learning English
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.optionGroup}>
-            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-              {t('settings.sections.conversation.responseVoiceAccent.label')}
-            </Text>
-            <Text
-              style={[
-                styles.optionDescription,
-                {color: theme.colors.textSecondary},
-              ]}>
-              {t(
-                'settings.sections.conversation.responseVoiceAccent.description',
-              )}
-            </Text>
-            {/* Feature 4: Show accent options only when target language is English */}
-            {selectedTargetLanguage === 'en' ? (
-              <CustomPicker
-                selectedValue={responseVoiceAccent}
-                onValueChange={(value: string) =>
-                  handleResponseVoiceAccentChange(value as VoiceAccent)
-                }
-                items={Object.keys(VOICE_ACCENT_OPTIONS).map(key => ({
-                  label: VOICE_ACCENT_OPTIONS[key as VoiceAccent].label,
-                  value: key,
-                }))}
-                placeholder="Select Response Voice Accent"
-                theme={theme}
-                style={styles.pickerContainer}
-              />
-            ) : (
-              <View
-                style={[
-                  styles.infoBox,
-                  {
-                    backgroundColor: theme.colors.primaryLight,
-                    borderLeftColor: theme.colors.primary,
-                  },
-                ]}>
-                <Text
-                  style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-                  ℹ️ Accent options are only available when learning English
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Feature 6: AI Voice Personality Selection */}
-          {ttsCapabilities.supportsPersonality && (
-            <View style={styles.optionGroup}>
-              <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-                AI Voice Personality
-              </Text>
-              <Text
-                style={[
-                  styles.optionDescription,
-                  {color: theme.colors.textSecondary},
-                ]}>
-                Choose the personality type for the AI conversation partner
-              </Text>
-              <CustomPicker
-                selectedValue={aiVoicePersonality}
-                onValueChange={(value: string) =>
-                  handleAiVoicePersonalityChange(value as VoicePersonality)
-                }
-                items={Object.keys(VOICE_PERSONALITY_OPTIONS).map(key => ({
-                  label:
-                    VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
-                  value: key,
-                }))}
-                placeholder="Select AI Voice Personality"
-                theme={theme}
-                style={styles.pickerContainer}
-              />
-            </View>
-          )}
-
-          {/* Feature 6: Response Voice Personality Selection */}
-          {ttsCapabilities.supportsPersonality && (
-            <View style={styles.optionGroup}>
-              <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-                Your Voice Personality
-              </Text>
-              <Text
-                style={[
-                  styles.optionDescription,
-                  {color: theme.colors.textSecondary},
-                ]}>
-                Choose the personality type for reading your selected responses
-              </Text>
-              <CustomPicker
-                selectedValue={responseVoicePersonality}
-                onValueChange={(value: string) =>
-                  handleResponseVoicePersonalityChange(
-                    value as VoicePersonality,
-                  )
-                }
-                items={Object.keys(VOICE_PERSONALITY_OPTIONS).map(key => ({
-                  label:
-                    VOICE_PERSONALITY_OPTIONS[key as VoicePersonality].label,
-                  value: key,
-                }))}
-                placeholder="Select Your Voice Personality"
-                theme={theme}
-                style={styles.pickerContainer}
-              />
-            </View>
-          )}
 
           <View
             style={[

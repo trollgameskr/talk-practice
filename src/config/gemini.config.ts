@@ -72,109 +72,7 @@ export const SENTENCE_LENGTH_CONFIG = {
   },
 };
 
-// Voice accent options
-export type VoiceAccent = 'en-US' | 'en-GB' | 'en-AU' | 'en-IN' | 'en-CA';
 
-export const VOICE_ACCENT_OPTIONS = {
-  'en-US': {
-    label: 'American English',
-    code: 'en-US',
-  },
-  'en-GB': {
-    label: 'British English',
-    code: 'en-GB',
-  },
-  'en-AU': {
-    label: 'Australian English',
-    code: 'en-AU',
-  },
-  'en-IN': {
-    label: 'Indian English',
-    code: 'en-IN',
-  },
-  'en-CA': {
-    label: 'Canadian English',
-    code: 'en-CA',
-  },
-};
-
-// Feature 6: Voice personality types
-export type VoicePersonality =
-  | 'cheerful_male'
-  | 'calm_male'
-  | 'friendly_male'
-  | 'serious_male'
-  | 'humorous_male'
-  | 'cautious_male'
-  | 'lively_female'
-  | 'energetic_female'
-  | 'calm_female'
-  | 'warm_female'
-  | 'cheerful_female'
-  | 'cautious_female';
-
-export const VOICE_PERSONALITY_OPTIONS = {
-  cheerful_male: {
-    label: '괘활한 남성',
-    labelEn: 'Cheerful Male',
-    code: 'cheerful_male',
-  },
-  calm_male: {
-    label: '차분한 남자',
-    labelEn: 'Calm Male',
-    code: 'calm_male',
-  },
-  friendly_male: {
-    label: '친절한 아저씨',
-    labelEn: 'Friendly Male',
-    code: 'friendly_male',
-  },
-  serious_male: {
-    label: '진지한 남자',
-    labelEn: 'Serious Male',
-    code: 'serious_male',
-  },
-  humorous_male: {
-    label: '유머러스한 남자',
-    labelEn: 'Humorous Male',
-    code: 'humorous_male',
-  },
-  cautious_male: {
-    label: '신중한 남자',
-    labelEn: 'Cautious Male',
-    code: 'cautious_male',
-  },
-  lively_female: {
-    label: '발랄한 여성',
-    labelEn: 'Lively Female',
-    code: 'lively_female',
-  },
-  energetic_female: {
-    label: '활기찬 소녀',
-    labelEn: 'Energetic Female',
-    code: 'energetic_female',
-  },
-  calm_female: {
-    label: '차분한 여자',
-    labelEn: 'Calm Female',
-    code: 'calm_female',
-  },
-  warm_female: {
-    label: '따뜻한 언니',
-    labelEn: 'Warm Female',
-    code: 'warm_female',
-  },
-  cheerful_female: {
-    label: '유쾌한 여자',
-    labelEn: 'Cheerful Female',
-    code: 'cheerful_female',
-  },
-  cautious_female: {
-    label: '신중한 여자',
-    labelEn: 'Cautious Female',
-    code: 'cautious_female',
-  },
-};
 
 // Gemini 1.5 Pro pricing (as of 2024)
 // See: https://ai.google.dev/pricing
@@ -191,9 +89,5 @@ export const STORAGE_KEYS = {
   SHOW_TRANSLATION: '@show_translation',
   SHOW_PRONUNCIATION: '@show_pronunciation',
   SHOW_GRAMMAR_HIGHLIGHTS: '@show_grammar_highlights',
-  AI_VOICE_ACCENT: '@ai_voice_accent',
-  RESPONSE_VOICE_ACCENT: '@response_voice_accent',
-  AI_VOICE_PERSONALITY: '@ai_voice_personality',
-  RESPONSE_VOICE_PERSONALITY: '@response_voice_personality',
   TEXT_ONLY_MODE: '@text_only_mode',
 } as const;
