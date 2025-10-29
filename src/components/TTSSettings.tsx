@@ -166,26 +166,6 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
         />
       </View>
 
-      {/* Speaking Rate */}
-      <View style={styles.optionGroup}>
-        <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-          말하기 속도
-        </Text>
-        <CustomPicker
-          selectedValue={config.speakingRate.toString()}
-          onValueChange={(value: string) =>
-            handleSpeakingRateChange(parseFloat(value))
-          }
-          items={SPEAKING_RATE_OPTIONS.map(option => ({
-            label: option.label,
-            value: option.value.toString(),
-          }))}
-          placeholder="말하기 속도를 선택하세요"
-          theme={theme}
-          style={styles.pickerContainer}
-        />
-      </View>
-
       {/* Custom Voice Toggle - moved below voice selection */}
       <View style={styles.optionGroup}>
         <View style={styles.themeRow}>
@@ -237,6 +217,26 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
           </Text>
         </TouchableOpacity>
       )}
+
+      {/* Speaking Rate */}
+      <View style={styles.optionGroup}>
+        <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+          말하기 속도
+        </Text>
+        <CustomPicker
+          selectedValue={config.speakingRate.toString()}
+          onValueChange={(value: string) =>
+            handleSpeakingRateChange(parseFloat(value))
+          }
+          items={SPEAKING_RATE_OPTIONS.map(option => ({
+            label: option.label,
+            value: option.value.toString(),
+          }))}
+          placeholder="말하기 속도를 선택하세요"
+          theme={theme}
+          style={styles.pickerContainer}
+        />
+      </View>
 
       {/* Custom Voice Inputs */}
       {config.useCustomVoice && (
