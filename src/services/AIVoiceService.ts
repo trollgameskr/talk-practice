@@ -67,7 +67,19 @@ export class AIVoiceService {
       // Load TTS configuration from storage
       await this.loadTTSConfig();
       this.isInitialized = true;
-      console.log('AI Voice Service initialized');
+
+      // Log initialization status with availability info
+      if (this.apiKey) {
+        console.log('AI Voice Service initialized with direct API access');
+      } else if (this.proxyUrl) {
+        console.log(
+          `AI Voice Service initialized with proxy: ${this.proxyUrl}`,
+        );
+      } else {
+        console.log(
+          'AI Voice Service initialized (TTS unavailable - no API key or proxy configured)',
+        );
+      }
     } catch (error) {
       console.error('Error initializing AI Voice Service:', error);
       this.isInitialized = false;
@@ -144,7 +156,7 @@ export class AIVoiceService {
     // Check if API key or proxy is available
     if (!this.apiKey && !this.proxyUrl) {
       console.warn(
-        'TTS API key or proxy not available. Voice synthesis disabled.',
+        'Cannot generate voice: TTS API key or proxy not configured. Please set GOOGLE_TTS_API_KEY environment variable or configure a proxy server.',
       );
       return null;
     }
