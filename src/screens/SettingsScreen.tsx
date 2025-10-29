@@ -19,6 +19,7 @@ import {isValidApiKey, openURL} from '../utils/helpers';
 import {BUILD_INFO} from '../config/buildInfo';
 import {GUEST_MODE_KEY} from './LoginScreen';
 import CustomPicker from '../components/CustomPicker';
+import TTSSettings from '../components/TTSSettings';
 import {
   SentenceLength,
   SENTENCE_LENGTH_CONFIG,
@@ -965,6 +966,8 @@ const SettingsScreen = ({navigation}: any) => {
             </Text>
           </View>
         </View>
+
+        <TTSSettings />
 
         <View
           style={[

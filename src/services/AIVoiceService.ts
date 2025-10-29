@@ -4,6 +4,10 @@
  * This service generates natural-sounding AI voices instead of using basic TTS
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {TTSConfig, DEFAULT_TTS_CONFIG} from '../config/tts.config';
+import {STORAGE_KEYS} from '../config/gemini.config';
+
 /**
  * TTS Model types and their capabilities
  */
@@ -18,6 +22,7 @@ export class AIVoiceService {
   private isSpeaking: boolean = false;
   private currentAudio: any = null; // HTMLAudioElement in browser
   private apiKey: string = '';
+  private ttsConfig: TTSConfig = DEFAULT_TTS_CONFIG;
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey || '';
@@ -29,12 +34,53 @@ export class AIVoiceService {
    */
   private async initialize() {
     try {
+      // Load TTS configuration from storage
+      await this.loadTTSConfig();
       this.isInitialized = true;
       console.log('AI Voice Service initialized');
     } catch (error) {
       console.error('Error initializing AI Voice Service:', error);
       this.isInitialized = false;
     }
+  }
+
+  /**
+   * Load TTS configuration from storage
+   */
+  private async loadTTSConfig() {
+    try {
+      const savedConfig = await AsyncStorage.getItem(STORAGE_KEYS.TTS_CONFIG);
+      if (savedConfig) {
+        this.ttsConfig = JSON.parse(savedConfig);
+      } else {
+        this.ttsConfig = DEFAULT_TTS_CONFIG;
+      }
+    } catch (error) {
+      console.error('Error loading TTS config:', error);
+      this.ttsConfig = DEFAULT_TTS_CONFIG;
+    }
+  }
+
+  /**
+   * Update TTS configuration
+   */
+  async updateTTSConfig(config: Partial<TTSConfig>) {
+    this.ttsConfig = {...this.ttsConfig, ...config};
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.TTS_CONFIG,
+        JSON.stringify(this.ttsConfig),
+      );
+    } catch (error) {
+      console.error('Error saving TTS config:', error);
+    }
+  }
+
+  /**
+   * Get current TTS configuration
+   */
+  getTTSConfig(): TTSConfig {
+    return this.ttsConfig;
   }
 
   /**
@@ -71,26 +117,35 @@ export class AIVoiceService {
     }
 
     try {
-      const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
+      const url = `${this.ttsConfig.endpoint}/v1/text:synthesize?key=${this.apiKey}`;
 
-      // Use a standard English voice
-      const voiceName = 'en-US-Neural2-F';
-      const gender = 'FEMALE';
+      // Use custom voice if enabled, otherwise use selected voice
+      const voiceName = this.ttsConfig.useCustomVoice && this.ttsConfig.customVoiceName
+        ? this.ttsConfig.customVoiceName
+        : this.ttsConfig.voiceName;
+      
+      const languageCode = this.ttsConfig.useCustomVoice && this.ttsConfig.customLanguageCode
+        ? this.ttsConfig.customLanguageCode
+        : this.ttsConfig.languageCode;
+      
+      const gender = this.ttsConfig.useCustomVoice && this.ttsConfig.customGender
+        ? this.ttsConfig.customGender
+        : this.ttsConfig.ssmlGender;
 
       const requestBody = {
         input: {
           text: text,
         },
         voice: {
-          languageCode: 'en-US',
+          languageCode: languageCode,
           name: voiceName,
           ssmlGender: gender,
         },
         audioConfig: {
           audioEncoding: 'MP3',
-          speakingRate: 0.95,
-          pitch: 0.0,
-          volumeGainDb: 0.0,
+          speakingRate: this.ttsConfig.speakingRate,
+          pitch: this.ttsConfig.pitch,
+          volumeGainDb: this.ttsConfig.volumeGainDb,
         },
       };
 
