@@ -57,6 +57,10 @@ This document explains how the application now supports direct Google Cloud Text
    - If proxy URL is provided → Use proxy server
    - If neither → TTS is disabled
 
+## Security Note
+
+⚠️ **Important**: This implementation embeds API keys in the client-side bundle. See [SECURITY_SUMMARY.md](../SECURITY_SUMMARY.md) for a comprehensive security analysis and mitigation strategies.
+
 ## Configuration
 
 ### GitHub Actions Setup
@@ -68,6 +72,8 @@ Add the `GOOGLE_TTS_API_KEY` secret to your GitHub repository:
 3. Click "New repository secret"
 4. Name: `GOOGLE_TTS_API_KEY`
 5. Value: Your Google Cloud API key (e.g., `AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`)
+
+⚠️ **Critical**: After adding the secret, you MUST configure API key restrictions in Google Cloud Console. See [Security Considerations](#security-considerations) below.
 
 ### Local Development
 
