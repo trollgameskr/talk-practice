@@ -703,22 +703,31 @@ const ConversationScreen = ({route, navigation}: any) => {
       const logs = logCaptureService.current.getLogs();
 
       // Copy to clipboard - using a cross-platform approach
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      // Type assertion for web APIs
+      const nav = typeof navigator !== 'undefined' ? (navigator as any) : null;
+      if (nav && nav.clipboard) {
         // Modern browsers
-        await navigator.clipboard.writeText(logs);
+        await nav.clipboard.writeText(logs);
         Alert.alert(t('conversation.copyLogs.success'));
-      } else {
+      } else if (
+        typeof globalThis !== 'undefined' &&
+        (globalThis as any).document
+      ) {
         // Fallback for older browsers or environments without clipboard API
         // Create a temporary textarea element
-        const textarea = document.createElement('textarea');
+        const doc = (globalThis as any).document;
+        const textarea = doc.createElement('textarea');
         textarea.value = logs;
         textarea.style.position = 'fixed';
         textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
+        doc.body.appendChild(textarea);
         textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
+        doc.execCommand('copy');
+        doc.body.removeChild(textarea);
         Alert.alert(t('conversation.copyLogs.success'));
+      } else {
+        // No clipboard API available
+        Alert.alert(t('conversation.copyLogs.error'));
       }
     } catch (error) {
       console.error('Error copying logs:', error);
