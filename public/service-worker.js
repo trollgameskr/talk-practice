@@ -1,4 +1,4 @@
-/* global self, caches */
+/* global self, caches, Response */
 // Service Worker for GeminiTalk PWA
 const CACHE_NAME = 'geminitalk-__BUILD_TIMESTAMP__';
 
@@ -69,6 +69,44 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     (async () => {
       try {
+        // Parse the request URL to check its properties
+        let reqUrl;
+        try {
+          reqUrl = new URL(event.request.url);
+        } catch (e) {
+          // If URL parsing fails, just fetch normally
+          return fetch(event.request);
+        }
+
+        // Skip caching non-http(s) schemes (e.g., chrome-extension://)
+        if (reqUrl.protocol !== 'http:' && reqUrl.protocol !== 'https:') {
+          return fetch(event.request);
+        }
+
+        // Skip localhost requests - these are only for local development
+        // In production (GitHub Pages), there's no localhost proxy server
+        if (
+          reqUrl.hostname === 'localhost' ||
+          reqUrl.hostname === '127.0.0.1'
+        ) {
+          console.log(
+            'Service worker skipping localhost request:',
+            reqUrl.href,
+          );
+          // Don't try to fetch localhost in production - it will always fail
+          // Return a synthetic error response instead of attempting the fetch
+          return new Response(
+            JSON.stringify({
+              error: 'Localhost proxy not available in production',
+            }),
+            {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: {'Content-Type': 'application/json'},
+            },
+          );
+        }
+
         const cached = await caches.match(event.request);
         if (cached) {
           return cached;
@@ -76,17 +114,6 @@ self.addEventListener('fetch', event => {
 
         // Only handle GET requests for caching
         if (event.request.method !== 'GET') {
-          return fetch(event.request);
-        }
-
-        // Skip caching non-http(s) schemes (e.g., chrome-extension://)
-        try {
-          const reqUrl = new URL(event.request.url);
-          if (reqUrl.protocol !== 'http:' && reqUrl.protocol !== 'https:') {
-            return fetch(event.request);
-          }
-        } catch (e) {
-          // If URL parsing fails, just fetch
           return fetch(event.request);
         }
 
