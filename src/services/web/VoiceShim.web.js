@@ -85,6 +85,7 @@ class Voice {
   stop = async () => {
     if (this.recognition && this.isRecognizing) {
       this.recognition.stop();
+      this.isRecognizing = false;
     }
   };
 
@@ -100,6 +101,8 @@ class Voice {
       this.recognition.stop();
       this.recognition = null;
     }
+    this.isRecognizing = false;
+    this.lastResultIndex = 0;
     this.onSpeechStart = null;
     this.onSpeechEnd = null;
     this.onSpeechResults = null;
