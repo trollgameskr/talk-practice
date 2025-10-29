@@ -7,7 +7,6 @@ import {
   TextInput,
   Alert,
   Switch,
-  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTheme} from '../contexts/ThemeContext';
@@ -24,7 +23,7 @@ import {STORAGE_KEYS} from '../config/gemini.config';
 import {openURL} from '../utils/helpers';
 
 const TTSSettings: React.FC = () => {
-  const {theme, isDark} = useTheme();
+  const {theme} = useTheme();
   const [config, setConfig] = useState<TTSConfig>(DEFAULT_TTS_CONFIG);
   const [selectedLanguageGroup, setSelectedLanguageGroup] = useState(0);
 
@@ -317,7 +316,8 @@ const TTSSettings: React.FC = () => {
         <Text
           style={[
             styles.infoText,
-            {color: theme.colors.primaryDark, marginTop: 8},
+            {color: theme.colors.primaryDark},
+            {marginTop: 8},
           ]}>
           🌏 서버 리전: {config.region} (한국과 가까운 아시아 리전)
         </Text>

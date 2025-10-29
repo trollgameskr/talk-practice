@@ -305,11 +305,11 @@ export const DEFAULT_TTS_CONFIG: TTSConfig = {
 
 // Speaking rate options
 export const SPEAKING_RATE_OPTIONS = [
-  { label: '매우 느림 (0.5x)', value: 0.5 },
-  { label: '느림 (0.75x)', value: 0.75 },
-  { label: '보통 (1.0x)', value: 1.0 },
-  { label: '빠름 (1.25x)', value: 1.25 },
-  { label: '매우 빠름 (1.5x)', value: 1.5 },
+  {label: '매우 느림 (0.5x)', value: 0.5},
+  {label: '느림 (0.75x)', value: 0.75},
+  {label: '보통 (1.0x)', value: 1.0},
+  {label: '빠름 (1.25x)', value: 1.25},
+  {label: '매우 빠름 (1.5x)', value: 1.5},
 ];
 
 // Google Cloud TTS documentation URL
