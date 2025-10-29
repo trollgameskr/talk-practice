@@ -51,9 +51,7 @@ export class AIVoiceService {
       // Load TTS configuration from storage
       await this.loadTTSConfig();
       this.isInitialized = true;
-      if (__DEV__) {
-        console.log('AI Voice Service initialized');
-      }
+      console.log('AI Voice Service initialized');
     } catch (error) {
       console.error('Error initializing AI Voice Service:', error);
       this.isInitialized = false;
@@ -129,11 +127,9 @@ export class AIVoiceService {
   private async generateAIVoice(text: string): Promise<string | null> {
     // Check if proxy is available
     if (!this.proxyUrl) {
-      if (__DEV__) {
-        console.warn(
-          'TTS proxy not available in production. Voice synthesis disabled.',
-        );
-      }
+      console.warn(
+        'TTS proxy not available in production. Voice synthesis disabled.',
+      );
       return null;
     }
 
