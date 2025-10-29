@@ -89,16 +89,33 @@ export class VoiceService {
 
   /**
    * Speak text using AI voice generation
-   * Note: Errors are logged but not propagated to maintain smooth UX.
-   * Speech synthesis failures should not interrupt the conversation flow.
+   * Propagates errors to allow callers to handle speech failures
    */
   async speak(text: string): Promise<void> {
+    const startTime = Date.now();
+    console.log('[VoiceService] Speech request received', {
+      textLength: text.length,
+      textPreview: text.substring(0, 50),
+      timestamp: new Date().toISOString(),
+    });
+
     try {
       await this.aiVoiceService.speak(text);
+      const duration = Date.now() - startTime;
+      console.log('[VoiceService] Speech completed successfully', {
+        durationMs: duration,
+      });
     } catch (error) {
-      // Log error for debugging but don't propagate
-      // Speech failure is non-critical - user can still read the text
-      console.error('AI voice synthesis failed:', error);
+      const duration = Date.now() - startTime;
+      console.error('[VoiceService] Speech synthesis failed', {
+        error: error instanceof Error ? error.message : String(error),
+        errorType:
+          error instanceof Error ? error.constructor.name : typeof error,
+        durationMs: duration,
+        textLength: text.length,
+      });
+      // Propagate error to allow caller to handle it
+      throw error;
     }
   }
 
