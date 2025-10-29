@@ -23,8 +23,20 @@ export class AIVoiceService {
   private currentAudio: any = null; // HTMLAudioElement in browser
   private ttsConfig: TTSConfig = DEFAULT_TTS_CONFIG;
   private proxyUrl: string = '';
+  private apiKey: string = '';
 
   constructor(proxyUrl?: string) {
+    // Check if GOOGLE_TTS_API_KEY is available in environment (for development/GitHub Pages)
+    // This allows direct API calls without a proxy server
+    const envApiKey =
+      typeof process !== 'undefined' &&
+      process.env &&
+      process.env.GOOGLE_TTS_API_KEY;
+    if (envApiKey) {
+      this.apiKey = envApiKey;
+      console.log('AI Voice Service: Using direct API key from environment');
+    }
+
     // Accept proxy URL instead of API key for security
     // In production (GitHub Pages), don't default to localhost as it won't work
     if (proxyUrl) {
@@ -34,11 +46,15 @@ export class AIVoiceService {
       (globalThis as any).location &&
       (globalThis as any).location.hostname === 'localhost'
     ) {
-      // Only use localhost in local development
-      this.proxyUrl = 'http://localhost:4000';
+      // Only use localhost in local development if no API key is available
+      if (!this.apiKey) {
+        this.proxyUrl = 'http://localhost:4000';
+      }
     } else {
-      // Production: no proxy available, TTS will be disabled
-      this.proxyUrl = '';
+      // Production: check if API key is available, otherwise TTS will be disabled
+      if (!this.apiKey) {
+        this.proxyUrl = '';
+      }
     }
     this.initialize();
   }
@@ -121,14 +137,14 @@ export class AIVoiceService {
   }
 
   /**
-   * Generate AI voice using Google Cloud Text-to-Speech API via proxy server
-   * This ensures API keys are not exposed in client-side code
+   * Generate AI voice using Google Cloud Text-to-Speech API
+   * Supports both proxy server and direct API calls
    */
   private async generateAIVoice(text: string): Promise<string | null> {
-    // Check if proxy is available
-    if (!this.proxyUrl) {
+    // Check if API key or proxy is available
+    if (!this.apiKey && !this.proxyUrl) {
       console.warn(
-        'TTS proxy not available in production. Voice synthesis disabled.',
+        'TTS API key or proxy not available. Voice synthesis disabled.',
       );
       return null;
     }
@@ -151,27 +167,56 @@ export class AIVoiceService {
           : this.ttsConfig.ssmlGender;
 
       const requestBody = {
-        text: text,
+        input: {
+          text: text,
+        },
         voice: {
           languageCode: languageCode,
           name: voiceName,
           ssmlGender: gender,
         },
         audioConfig: {
+          audioEncoding: 'MP3',
           speakingRate: this.ttsConfig.speakingRate,
           pitch: this.ttsConfig.pitch,
           volumeGainDb: this.ttsConfig.volumeGainDb,
         },
       };
 
-      // Call the proxy server instead of Google TTS API directly
-      const url = `${this.proxyUrl}/api/synthesize`;
+      let url: string;
+      let headers: any = {
+        'Content-Type': 'application/json',
+      };
+      let body: any;
+
+      // Use direct API call if API key is available, otherwise use proxy
+      if (this.apiKey) {
+        // Direct API call to Google Cloud TTS
+        url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
+        body = requestBody;
+      } else {
+        // Call the proxy server
+        url = `${this.proxyUrl}/api/synthesize`;
+        // Proxy expects a slightly different format
+        body = {
+          text: text,
+          voice: {
+            languageCode: languageCode,
+            name: voiceName,
+            ssmlGender: gender,
+          },
+          audioConfig: {
+            speakingRate: this.ttsConfig.speakingRate,
+            pitch: this.ttsConfig.pitch,
+            volumeGainDb: this.ttsConfig.volumeGainDb,
+          },
+        };
+      }
+
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
+        headers: headers,
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -272,10 +317,13 @@ export class AIVoiceService {
    * Get the voice method currently being used
    */
   getVoiceMethod(): string {
-    if (!this.proxyUrl) {
-      return 'TTS Not Available (Production)';
+    if (this.apiKey) {
+      return 'Google Cloud TTS (Direct API - AI 음성)';
     }
-    return 'Google Cloud TTS (AI 음성)';
+    if (this.proxyUrl) {
+      return 'Google Cloud TTS (Proxy - AI 음성)';
+    }
+    return 'TTS Not Available';
   }
 
   /**

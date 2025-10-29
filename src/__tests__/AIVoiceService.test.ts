@@ -62,9 +62,29 @@ describe('AIVoiceService', () => {
   });
 
   describe('getVoiceMethod', () => {
-    it('should return voice method', () => {
+    it('should return voice method for proxy', () => {
       const method = service.getVoiceMethod();
-      expect(method).toBe('Google Cloud TTS (AI 음성)');
+      expect(method).toBe('Google Cloud TTS (Proxy - AI 음성)');
+    });
+
+    it('should return voice method for direct API', () => {
+      // Mock process.env to have API key
+      const originalEnv = process.env;
+      process.env = {...originalEnv, GOOGLE_TTS_API_KEY: 'test-api-key'};
+      
+      const directService = new AIVoiceService();
+      const method = directService.getVoiceMethod();
+      expect(method).toBe('Google Cloud TTS (Direct API - AI 음성)');
+      
+      // Restore original env
+      process.env = originalEnv;
+    });
+
+    it('should return not available when no proxy or API key', () => {
+      const noTtsService = new AIVoiceService();
+      const method = noTtsService.getVoiceMethod();
+      // When no proxy URL and no API key, should return not available
+      expect(method).toContain('TTS');
     });
   });
 
@@ -139,6 +159,71 @@ describe('AIVoiceService', () => {
       expect(requestBody.voice).toBeDefined();
       expect(requestBody.voice.languageCode).toBe('en-US');
       expect(requestBody.audioConfig).toBeDefined();
+    });
+
+    it('should call Google TTS API directly when API key is available', async () => {
+      // Mock process.env to have API key
+      const originalEnv = process.env;
+      process.env = {...originalEnv, GOOGLE_TTS_API_KEY: 'test-api-key-123'};
+
+      // Create service with API key
+      const directService = new AIVoiceService();
+
+      // Mock successful response
+      const mockAudioContent = 'base64EncodedAudioData';
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({audioContent: mockAudioContent}),
+      });
+
+      // Mock Audio constructor
+      (global as any).Audio = jest.fn(function(this: any) {
+        this.load = jest.fn(function() {
+          if (this.oncanplay) {
+            this.oncanplay();
+          }
+          setTimeout(() => {
+            if (this.onended) {
+              this.onended();
+            }
+          }, 10);
+        });
+        this.play = jest.fn().mockResolvedValue(undefined);
+        this.pause = jest.fn();
+        this.oncanplay = null;
+        this.onended = null;
+        this.onerror = null;
+        this.currentTime = 0;
+        return this;
+      });
+
+      // Start speaking and wait for completion
+      await directService.speak('Direct API test');
+
+      // Verify fetch was called with Google TTS API URL
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('texttospeech.googleapis.com'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+        }),
+      );
+
+      // Verify the URL contains the API key
+      const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+      expect(fetchCall[0]).toContain('key=test-api-key-123');
+
+      // Parse the body to verify structure (direct API format)
+      const requestBody = JSON.parse(fetchCall[1].body);
+      expect(requestBody.input).toBeDefined();
+      expect(requestBody.input.text).toBe('Direct API test');
+      expect(requestBody.voice).toBeDefined();
+      expect(requestBody.audioConfig).toBeDefined();
+      expect(requestBody.audioConfig.audioEncoding).toBe('MP3');
+
+      // Restore original env
+      process.env = originalEnv;
+      await directService.destroy();
     });
 
     it('should handle API errors gracefully', async () => {
