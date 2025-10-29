@@ -236,6 +236,53 @@ describe('AIVoiceService', () => {
 
       await expect(service.speak('Test text')).rejects.toThrow();
     });
+
+    it('should log detailed error information when speech fails', async () => {
+      // Spy on console.error
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      // Mock error response
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error('Network error'),
+      );
+
+      await expect(service.speak('Test error logging')).rejects.toThrow();
+
+      // Verify detailed logging occurred
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[AIVoiceService]'),
+        expect.objectContaining({
+          error: expect.any(String),
+          totalTimeMs: expect.any(Number),
+          hasApiKey: expect.any(Boolean),
+          hasProxyUrl: expect.any(Boolean),
+        }),
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should log when API key or proxy is not configured', async () => {
+      // Spy on console.warn
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      // Create service without proxy
+      const noConfigService = new AIVoiceService('');
+
+      await expect(noConfigService.speak('Test')).rejects.toThrow();
+
+      // Verify warning was logged
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[AIVoiceService]'),
+        expect.objectContaining({
+          hasApiKey: false,
+          hasProxyUrl: false,
+        }),
+      );
+
+      consoleWarnSpy.mockRestore();
+      await noConfigService.destroy();
+    });
   });
 
   describe('stopSpeaking', () => {
