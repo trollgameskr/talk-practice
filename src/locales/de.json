@@ -82,7 +82,8 @@
       "stopListening": "⏹️ Stoppen",
       "endConversation": "Übung Beenden",
       "sampleAnswers": "Beispielantworten",
-      "hideSamples": "Beispiele Ausblenden"
+      "hideSamples": "Beispiele Ausblenden",
+      "copyLogs": "📋 Copy Logs"
     },
     "status": {
       "listening": "🎤 Höre zu...",
@@ -122,6 +123,11 @@
       "voicePermission": "Mikrofonberechtigung ist erforderlich, um diese Funktion zu verwenden.",
       "listeningError": "Hörfehler",
       "speakingError": "Sprechfehler"
+    },
+    "copyLogs": {
+      "success": "Logs copied to clipboard!",
+      "error": "Failed to copy logs",
+      "noLogs": "No logs available to copy"
     }
   },
   "progress": {

@@ -82,7 +82,8 @@
       "stopListening": "⏹️ 停止",
       "endConversation": "结束练习",
       "sampleAnswers": "示例答案",
-      "hideSamples": "隐藏示例"
+      "hideSamples": "隐藏示例",
+      "copyLogs": "📋 Copy Logs"
     },
     "status": {
       "listening": "🎤 正在聆听...",
@@ -122,6 +123,11 @@
       "voicePermission": "使用此功能需要麦克风权限。",
       "listeningError": "聆听错误",
       "speakingError": "说话错误"
+    },
+    "copyLogs": {
+      "success": "Logs copied to clipboard!",
+      "error": "Failed to copy logs",
+      "noLogs": "No logs available to copy"
     }
   },
   "progress": {

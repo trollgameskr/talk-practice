@@ -82,7 +82,8 @@
       "stopListening": "⏹️ 정지",
       "endConversation": "연습 종료",
       "sampleAnswers": "샘플 답변",
-      "hideSamples": "샘플 숨기기"
+      "hideSamples": "샘플 숨기기",
+      "copyLogs": "📋 로그 복사"
     },
     "status": {
       "listening": "🎤 듣는 중...",
@@ -134,6 +135,11 @@
         "message": "AI가 응답을 생성했지만 음성 재생이 시작되지 않았습니다.\n\n가능한 원인:\n• TTS 서비스 응답 지연\n• 네트워크 연결 느림\n• 브라우저 오디오 재생 차단\n\n💡 텍스트 응답을 읽을 수 있으며 대화를 계속할 수 있습니다.\n\n자세한 내용은 브라우저 콘솔 로그를 확인하세요.",
         "continue": "계속"
       }
+    },
+    "copyLogs": {
+      "success": "로그가 클립보드에 복사되었습니다!",
+      "error": "로그 복사 실패",
+      "noLogs": "복사할 로그가 없습니다"
     }
   },
   "progress": {
