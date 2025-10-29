@@ -188,6 +188,11 @@ export class AIVoiceService {
 
         this.currentAudio = new AudioConstructor(audioSrc);
 
+        // Wait for audio to be ready before playing to prevent cutting off the beginning
+        this.currentAudio.oncanplay = () => {
+          this.currentAudio.play().catch(reject);
+        };
+
         this.currentAudio.onended = () => {
           this.isSpeaking = false;
           this.currentAudio = null;
@@ -198,11 +203,6 @@ export class AIVoiceService {
           this.isSpeaking = false;
           this.currentAudio = null;
           reject(error);
-        };
-
-        // Wait for audio to be ready before playing to prevent cutting off the beginning
-        this.currentAudio.oncanplay = () => {
-          this.currentAudio.play().catch(reject);
         };
 
         // Trigger loading

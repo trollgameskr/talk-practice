@@ -294,7 +294,7 @@ export const DEFAULT_TTS_CONFIG: TTSConfig = {
   voiceName: 'en-US-Neural2-A',
   languageCode: 'en-US',
   ssmlGender: 'FEMALE',
-  speakingRate: 0.95,
+  speakingRate: 1.0,
   pitch: 0.0,
   volumeGainDb: 0.0,
   useCustomVoice: false,
