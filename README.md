@@ -119,6 +119,10 @@ npm run proxy
 프록시 서버는 http://localhost:4000 에서 실행되며, Google Cloud TTS API에 안전하게 접근합니다.  
 자세한 내용은 [LOCAL_PROXY.md](./docs/LOCAL_PROXY.md)를 참조하세요.
 
+**프록시 서버 설정 (Proxy Server Configuration):**  
+네트워크 프록시를 통해 Google Cloud TTS에 접근해야 하는 경우, 프록시 서버 설정이 가능합니다.  
+자세한 설정 방법은 [PROXY_CONFIGURATION.md](./PROXY_CONFIGURATION.md)를 참조하세요.
+
 ### 📱 모바일 앱 (Mobile App)
 
 #### 필수 요구사항 (Prerequisites)
@@ -237,6 +241,9 @@ talk-practice/
 - [사용 가이드](./docs/README.md#usage-guide)
 - [API 통합](./docs/README.md#api-integration)
 - [개발 가이드](./docs/README.md#development)
+- [프록시 서버 설정](./PROXY_CONFIGURATION.md) - Google Cloud TTS 프록시 구성
+- [로컬 프록시 가이드](./docs/LOCAL_PROXY.md) - 로컬 개발 프록시 설정
+- [TTS 프록시 테스트](./TESTING_TTS_PROXY.md) - TTS 프록시 테스트 가이드
 - [문제 해결](./TROUBLESHOOTING.md) - 404 에러, 서비스 워커 등 일반적인 문제 해결
 
 ### 🔧 일반적인 문제 해결
