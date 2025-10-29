@@ -29,12 +29,8 @@ export class AIVoiceService {
     // In production (GitHub Pages), don't default to localhost as it won't work
     if (proxyUrl) {
       this.proxyUrl = proxyUrl;
-    } else if (
-      typeof globalThis !== 'undefined' &&
-      (globalThis as any).location &&
-      (globalThis as any).location.hostname === 'localhost'
-    ) {
-      // Only use localhost in local development
+    } else if (__DEV__) {
+      // Use localhost proxy in development mode
       this.proxyUrl = 'http://localhost:4000';
     } else {
       // Production: no proxy available, TTS will be disabled
