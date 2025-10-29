@@ -21,11 +21,12 @@ export class AIVoiceService {
   private isInitialized: boolean = false;
   private isSpeaking: boolean = false;
   private currentAudio: any = null; // HTMLAudioElement in browser
-  private apiKey: string = '';
   private ttsConfig: TTSConfig = DEFAULT_TTS_CONFIG;
+  private proxyUrl: string = '';
 
-  constructor(apiKey?: string) {
-    this.apiKey = apiKey || '';
+  constructor(proxyUrl?: string) {
+    // Accept proxy URL instead of API key for security
+    this.proxyUrl = proxyUrl || 'http://localhost:4000';
     this.initialize();
   }
 
@@ -107,18 +108,11 @@ export class AIVoiceService {
   }
 
   /**
-   * Generate AI voice using Google Cloud Text-to-Speech API
-   * Note: This requires a valid API key and proper CORS setup
+   * Generate AI voice using Google Cloud Text-to-Speech API via proxy server
+   * This ensures API keys are not exposed in client-side code
    */
   private async generateAIVoice(text: string): Promise<string | null> {
-    // Skip Google Cloud TTS if no API key is configured
-    if (!this.apiKey) {
-      throw new Error('API key is required for voice generation');
-    }
-
     try {
-      const url = `${this.ttsConfig.endpoint}/v1/text:synthesize?key=${this.apiKey}`;
-
       // Use custom voice if enabled, otherwise use selected voice
       const voiceName = this.ttsConfig.useCustomVoice && this.ttsConfig.customVoiceName
         ? this.ttsConfig.customVoiceName
@@ -133,22 +127,21 @@ export class AIVoiceService {
         : this.ttsConfig.ssmlGender;
 
       const requestBody = {
-        input: {
-          text: text,
-        },
+        text: text,
         voice: {
           languageCode: languageCode,
           name: voiceName,
           ssmlGender: gender,
         },
         audioConfig: {
-          audioEncoding: 'MP3',
           speakingRate: this.ttsConfig.speakingRate,
           pitch: this.ttsConfig.pitch,
           volumeGainDb: this.ttsConfig.volumeGainDb,
         },
       };
 
+      // Call the proxy server instead of Google TTS API directly
+      const url = `${this.proxyUrl}/api/synthesize`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -158,7 +151,8 @@ export class AIVoiceService {
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`API request failed: ${response.status} - ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
@@ -240,10 +234,10 @@ export class AIVoiceService {
   }
 
   /**
-   * Set API key for AI voice generation
+   * Set proxy URL for TTS API calls
    */
-  setApiKey(apiKey: string) {
-    this.apiKey = apiKey;
+  setProxyUrl(proxyUrl: string) {
+    this.proxyUrl = proxyUrl;
   }
 
   /**

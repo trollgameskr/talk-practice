@@ -311,8 +311,10 @@ const ConversationScreen = ({route, navigation}: any) => {
       });
 
       // Initialize Voice service (only if not in text-only mode)
+      // Note: VoiceService uses the TTS proxy server instead of direct API calls
+      // The proxy URL defaults to http://localhost:4000
       if (!loadedTextOnlyMode) {
-        voiceService.current = new VoiceService(apiKey);
+        voiceService.current = new VoiceService();
       }
 
       // Only start a new conversation if not resuming
