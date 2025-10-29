@@ -45,8 +45,7 @@ const SettingsScreen = ({navigation}: any) => {
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isGuestMode, setIsGuestMode] = useState(false);
-  const [sentenceLength, setSentenceLength] =
-    useState<SentenceLength>('short');
+  const [sentenceLength, setSentenceLength] = useState<SentenceLength>('short');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
   const [selectedTargetLanguage, setSelectedTargetLanguage] =
     useState<string>('en');

@@ -31,9 +31,7 @@ describe('FeedbackScreen Feedback Submission', () => {
 
     const subject = encodeURIComponent('GeminiTalk Feedback');
     const emailBody = encodeURIComponent(
-      `Name: ${name}\n` +
-        `Email: ${email}\n\n` +
-        `Message:\n${message}`,
+      `Name: ${name}\n` + `Email: ${email}\n\n` + `Message:\n${message}`,
     );
 
     const mailtoUrl = `mailto:${FEEDBACK_CONFIG.OPERATOR_EMAIL}?subject=${subject}&body=${emailBody}`;

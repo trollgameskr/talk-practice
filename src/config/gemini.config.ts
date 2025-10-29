@@ -72,8 +72,6 @@ export const SENTENCE_LENGTH_CONFIG = {
   },
 };
 
-
-
 // Gemini 1.5 Pro pricing (as of 2024)
 // See: https://ai.google.dev/pricing
 export const GEMINI_PRICING = {
