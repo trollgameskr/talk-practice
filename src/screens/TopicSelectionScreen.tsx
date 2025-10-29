@@ -67,8 +67,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
           <Text style={[styles.title, {color: theme.colors.text}]}>
             {t('topicSelection.title')}
           </Text>
-          <Text
-            style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
+          <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
             {t('topicSelection.subtitle')}
           </Text>
         </View>
@@ -77,10 +76,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
           {topics.map(({topic, name, description}) => (
             <TouchableOpacity
               key={topic}
-              style={[
-                styles.topicCard,
-                {backgroundColor: theme.colors.card},
-              ]}
+              style={[styles.topicCard, {backgroundColor: theme.colors.card}]}
               onPress={() => handleTopicSelect(topic)}>
               <View
                 style={[
@@ -101,8 +97,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
                   {description}
                 </Text>
               </View>
-              <Text
-                style={[styles.arrow, {color: theme.colors.textTertiary}]}>
+              <Text style={[styles.arrow, {color: theme.colors.textTertiary}]}>
                 →
               </Text>
             </TouchableOpacity>
@@ -117,14 +112,9 @@ const TopicSelectionScreen = ({navigation}: any) => {
               borderLeftColor: theme.colors.warning,
             },
           ]}>
-          <Text style={styles.tipIcon}>
-            {t('topicSelection.tip.icon')}
-          </Text>
+          <Text style={styles.tipIcon}>{t('topicSelection.tip.icon')}</Text>
           <Text
-            style={[
-              styles.tipText,
-              {color: isDark ? '#fbbf24' : '#78350f'},
-            ]}>
+            style={[styles.tipText, {color: isDark ? '#fbbf24' : '#78350f'}]}>
             {t('topicSelection.tip.text')}
           </Text>
         </View>

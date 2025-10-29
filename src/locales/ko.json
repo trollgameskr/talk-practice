@@ -230,14 +230,6 @@
         "textOnlyMode": {
           "label": "텍스트 전용 모드",
           "description": "음성 입력/출력을 비활성화하고 텍스트만으로 대화합니다"
-        },
-        "aiVoiceAccent": {
-          "label": "AI 음성 억양",
-          "description": "AI 음성 응답의 억양을 선택하세요"
-        },
-        "responseVoiceAccent": {
-          "label": "응답 옵션 음성 억양",
-          "description": "응답 옵션을 읽을 때의 억양을 선택하세요"
         }
       },
       "language": {

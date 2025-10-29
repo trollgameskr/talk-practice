@@ -28,7 +28,7 @@ import GeminiService from '../services/GeminiService';
 import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
 import {generateId, formatDuration} from '../utils/helpers';
-import {STORAGE_KEYS, VoicePersonality} from '../config/gemini.config';
+import {STORAGE_KEYS} from '../config/gemini.config';
 import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
 
 const storageService = new StorageService();
@@ -98,16 +98,6 @@ const ConversationScreen = ({route, navigation}: any) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  /**
-   * Helper function to safely parse VoicePersonality from storage
-   */
-  const parseVoicePersonality = (
-    value: string | null,
-    defaultValue: VoicePersonality = 'cheerful_female',
-  ): VoicePersonality => {
-    return (value as VoicePersonality) || defaultValue;
-  };
 
   /**
    * Auto-save session state periodically
@@ -299,20 +289,6 @@ const ConversationScreen = ({route, navigation}: any) => {
         textOnlyModePref !== null ? textOnlyModePref === 'true' : false; // Default to false
       setTextOnlyMode(loadedTextOnlyMode);
 
-      // Load voice accent preferences
-      const aiVoiceAccentPref = await AsyncStorage.getItem(
-        STORAGE_KEYS.AI_VOICE_ACCENT,
-      );
-      const aiVoiceAccent = aiVoiceAccentPref || 'en-US';
-
-      // Load voice personality preferences
-      const aiVoicePersonalityPref = await AsyncStorage.getItem(
-        STORAGE_KEYS.AI_VOICE_PERSONALITY,
-      );
-      const aiVoicePersonality = parseVoicePersonality(aiVoicePersonalityPref);
-
-      // Response voice accent and personality will be loaded when needed (handleUseSample)
-
       // Load language preferences
       const targetLanguage = await getTargetLanguage();
       const nativeLanguage = getCurrentLanguage();
@@ -334,13 +310,9 @@ const ConversationScreen = ({route, navigation}: any) => {
         }
       });
 
-      // Initialize Voice service with accent and personality (only if not in text-only mode)
+      // Initialize Voice service (only if not in text-only mode)
       if (!loadedTextOnlyMode) {
-        voiceService.current = new VoiceService(
-          undefined,
-          aiVoiceAccent,
-          aiVoicePersonality,
-        );
+        voiceService.current = new VoiceService(undefined);
       }
 
       // Only start a new conversation if not resuming
@@ -754,31 +726,16 @@ const ConversationScreen = ({route, navigation}: any) => {
     const sample = sampleObj.text;
     setShowSamples(false);
 
-    // If auto-read is enabled and not in text-only mode, temporarily switch to response voice accent and personality
+    // If auto-read is enabled and not in text-only mode, read the sample
     if (autoReadResponse && !textOnlyMode && voiceService.current) {
       try {
-        const responseVoiceAccentPref = await AsyncStorage.getItem(
-          STORAGE_KEYS.RESPONSE_VOICE_ACCENT,
-        );
-        const responseVoiceAccent = responseVoiceAccentPref || 'en-US';
-
-        const responseVoicePersonalityPref = await AsyncStorage.getItem(
-          STORAGE_KEYS.RESPONSE_VOICE_PERSONALITY,
-        );
-        const responseVoicePersonality = parseVoicePersonality(
-          responseVoicePersonalityPref,
-        );
-
-        voiceService.current.setVoiceAccent(responseVoiceAccent);
-        voiceService.current.setVoicePersonality(responseVoicePersonality);
-
         // Show the text with translation and pronunciation in large modal while playing voice
         setVoiceDisplayText(sample);
         setVoiceDisplayTranslation(sampleObj.translation || '');
         setVoiceDisplayPronunciation(sampleObj.pronunciation || '');
         setShowVoiceDisplayModal(true);
 
-        // Speak the selected sample using response voice
+        // Speak the selected sample
         setIsSpeaking(true);
         await voiceService.current.speak(sample);
 
@@ -792,24 +749,8 @@ const ConversationScreen = ({route, navigation}: any) => {
         setShowVoiceDisplayModal(false);
 
         await handleUserMessage(sample, autoReadResponse);
-
-        // Restore AI voice accent and personality
-        const aiVoiceAccentPref = await AsyncStorage.getItem(
-          STORAGE_KEYS.AI_VOICE_ACCENT,
-        );
-        const aiVoiceAccent = aiVoiceAccentPref || 'en-US';
-
-        const aiVoicePersonalityPref = await AsyncStorage.getItem(
-          STORAGE_KEYS.AI_VOICE_PERSONALITY,
-        );
-        const aiVoicePersonality = parseVoicePersonality(
-          aiVoicePersonalityPref,
-        );
-
-        voiceService.current.setVoiceAccent(aiVoiceAccent);
-        voiceService.current.setVoicePersonality(aiVoicePersonality);
       } catch (error) {
-        console.error('Error switching voice accent/personality:', error);
+        console.error('Error reading sample:', error);
         setShowVoiceDisplayModal(false);
         await handleUserMessage(sample, autoReadResponse);
       }

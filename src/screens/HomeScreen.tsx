@@ -58,10 +58,7 @@ const HomeScreen = ({navigation}: any) => {
 
   return (
     <SafeAreaView
-      style={[
-        styles.container,
-        {backgroundColor: theme.colors.background},
-      ]}>
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <ScrollView style={styles.scrollView}>
         <View
           style={[
@@ -74,8 +71,7 @@ const HomeScreen = ({navigation}: any) => {
           <Text style={[styles.title, {color: theme.colors.text}]}>
             {t('home.title')}
           </Text>
-          <Text
-            style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
+          <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
             {t('home.subtitle')}
           </Text>
         </View>
@@ -84,12 +80,8 @@ const HomeScreen = ({navigation}: any) => {
           <>
             <View style={styles.statsContainer}>
               <View
-                style={[
-                  styles.statCard,
-                  {backgroundColor: theme.colors.card},
-                ]}>
-                <Text
-                  style={[styles.statValue, {color: theme.colors.primary}]}>
+                style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
+                <Text style={[styles.statValue, {color: theme.colors.primary}]}>
                   {progress.totalSessions}
                 </Text>
                 <Text
@@ -101,12 +93,8 @@ const HomeScreen = ({navigation}: any) => {
                 </Text>
               </View>
               <View
-                style={[
-                  styles.statCard,
-                  {backgroundColor: theme.colors.card},
-                ]}>
-                <Text
-                  style={[styles.statValue, {color: theme.colors.primary}]}>
+                style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
+                <Text style={[styles.statValue, {color: theme.colors.primary}]}>
                   {formatDuration(progress.totalDuration)}
                 </Text>
                 <Text
@@ -118,12 +106,8 @@ const HomeScreen = ({navigation}: any) => {
                 </Text>
               </View>
               <View
-                style={[
-                  styles.statCard,
-                  {backgroundColor: theme.colors.card},
-                ]}>
-                <Text
-                  style={[styles.statValue, {color: theme.colors.primary}]}>
+                style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
+                <Text style={[styles.statValue, {color: theme.colors.primary}]}>
                   {progress.overallScore.toFixed(0)}
                 </Text>
                 <Text
@@ -209,8 +193,7 @@ const HomeScreen = ({navigation}: any) => {
           <Text style={[styles.infoTitle, {color: theme.colors.text}]}>
             {t('home.howItWorks.title')}
           </Text>
-          <Text
-            style={[styles.infoText, {color: theme.colors.textSecondary}]}>
+          <Text style={[styles.infoText, {color: theme.colors.textSecondary}]}>
             {t('home.howItWorks.step1')}
             {'\n'}
             {t('home.howItWorks.step2')}
@@ -241,9 +224,7 @@ const HomeScreen = ({navigation}: any) => {
                     styles.achievementCard,
                     {backgroundColor: theme.colors.backgroundTertiary},
                   ]}>
-                  <Text style={styles.achievementIcon}>
-                    {achievement.icon}
-                  </Text>
+                  <Text style={styles.achievementIcon}>{achievement.icon}</Text>
                   <View style={styles.achievementInfo}>
                     <Text
                       style={[

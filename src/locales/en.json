@@ -230,14 +230,6 @@
         "textOnlyMode": {
           "label": "Text-Only Mode",
           "description": "Disable voice input/output and use text-based conversation only"
-        },
-        "aiVoiceAccent": {
-          "label": "AI voice accent",
-          "description": "Choose the accent for AI voice responses"
-        },
-        "responseVoiceAccent": {
-          "label": "Response option voice accent",
-          "description": "Choose the accent when reading response options"
         }
       },
       "language": {

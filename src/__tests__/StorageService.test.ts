@@ -250,7 +250,7 @@ describe('StorageService', () => {
 
       await service.updateTokenUsage(tokenUsage1);
       await service.updateTokenUsage(tokenUsage2);
-      
+
       const progress = await service.getUserProgress();
 
       expect(progress.totalTokens).toBe(450);
