@@ -321,6 +321,8 @@ const ConversationScreen = ({route, navigation}: any) => {
       // The proxy URL defaults to http://localhost:4000
       if (!loadedTextOnlyMode) {
         voiceService.current = new VoiceService();
+        // Set the target language for TTS
+        await voiceService.current.setLanguage(targetLanguage);
       }
 
       // Only start a new conversation if not resuming
@@ -360,7 +362,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             console.log(
               '[ConversationScreen] Starting AI speech for starter message',
             );
-            await voiceService.current.speak(starterMessage);
+            await voiceService.current.speak(starterMessage, 'ai');
             // Get the voice method that was used
             const method = voiceService.current.getVoiceMethod();
             setVoiceMethod(method);
@@ -626,7 +628,7 @@ const ConversationScreen = ({route, navigation}: any) => {
         setIsSpeaking(true);
         try {
           console.log('[ConversationScreen] Starting AI speech for response');
-          await voiceService.current.speak(response);
+          await voiceService.current.speak(response, 'ai');
           // Get the voice method that was used
           const method = voiceService.current.getVoiceMethod();
           setVoiceMethod(method);
@@ -859,14 +861,14 @@ const ConversationScreen = ({route, navigation}: any) => {
 
         try {
           console.log(
-            '[ConversationScreen] Starting AI speech for sample response',
+            '[ConversationScreen] Starting user speech for sample response',
           );
-          await voiceService.current.speak(sample);
+          await voiceService.current.speak(sample, 'user');
 
           // Get the voice method that was used
           const method = voiceService.current.getVoiceMethod();
           setVoiceMethod(method);
-          console.log('[ConversationScreen] AI speech for sample completed');
+          console.log('[ConversationScreen] User speech for sample completed');
         } catch (speechError) {
           console.error(
             '[ConversationScreen] Failed to speak sample response',

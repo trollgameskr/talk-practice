@@ -13,15 +13,19 @@ import {useTheme} from '../contexts/ThemeContext';
 import CustomPicker from './CustomPicker';
 import {
   TTSConfig,
+  VoiceConfig,
+  LanguageTTSConfigs,
   DEFAULT_TTS_CONFIG,
   DEFAULT_VOICES,
   SPEAKING_RATE_OPTIONS,
   TTS_DOCUMENTATION_URL,
   findVoiceByName,
   getLanguageGroupIndexByTargetLanguage,
+  getDefaultTTSConfigForLanguage,
 } from '../config/tts.config';
 import {STORAGE_KEYS} from '../config/gemini.config';
 import {openURL} from '../utils/helpers';
+import {migrateOldTTSConfig} from '../utils/ttsMigration';
 
 interface TTSSettingsProps {
   targetLanguage: string;
@@ -34,65 +38,59 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
   const isInitialMount = useRef(true);
 
   useEffect(() => {
-    loadTTSConfig();
-  }, []);
-
-  // Auto-select language group and voice when target language changes
-  useEffect(() => {
-    // Skip the initial mount to avoid overwriting loaded config
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      // Set the initial language group
-      const initialGroupIndex =
-        getLanguageGroupIndexByTargetLanguage(targetLanguage);
-      setSelectedLanguageGroup(initialGroupIndex);
-      return;
-    }
-
-    const newLanguageGroupIndex =
-      getLanguageGroupIndexByTargetLanguage(targetLanguage);
-    setSelectedLanguageGroup(newLanguageGroupIndex);
-
-    // Auto-select first voice for the language group
-    const voices = DEFAULT_VOICES[newLanguageGroupIndex]?.voices || [];
-    if (voices.length > 0) {
-      const firstVoice = voices[0];
-      const newConfig = {
-        ...config,
-        voiceName: firstVoice.name,
-        languageCode: firstVoice.languageCode,
-        ssmlGender: firstVoice.gender,
-      };
-      // Update config silently without showing success alert
-      setConfig(newConfig);
-      // Save to storage with error handling
-      AsyncStorage.setItem(STORAGE_KEYS.TTS_CONFIG, JSON.stringify(newConfig))
-        .catch(error => {
-          console.error('Error saving TTS config on language change:', error);
-        });
-    }
-    // Note: config is intentionally excluded from dependencies to prevent infinite loops
-    // This effect should only run when targetLanguage changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadTTSConfigForLanguage(targetLanguage);
   }, [targetLanguage]);
 
-  const loadTTSConfig = async () => {
+  const loadTTSConfigForLanguage = async (langCode: string) => {
     try {
-      const savedConfig = await AsyncStorage.getItem(STORAGE_KEYS.TTS_CONFIG);
-      if (savedConfig) {
-        setConfig(JSON.parse(savedConfig));
+      // Try migration first (will only migrate once)
+      await migrateOldTTSConfig();
+
+      // Load language-specific configs
+      const savedConfigsStr = await AsyncStorage.getItem(
+        STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
+      );
+      let savedConfigs: LanguageTTSConfigs = {};
+      
+      if (savedConfigsStr) {
+        savedConfigs = JSON.parse(savedConfigsStr);
       }
+
+      // Get config for current language or use default
+      const langConfig = savedConfigs[langCode] || getDefaultTTSConfigForLanguage(langCode);
+      setConfig(langConfig);
+
+      // Set the language group
+      const groupIndex = getLanguageGroupIndexByTargetLanguage(langCode);
+      setSelectedLanguageGroup(groupIndex);
     } catch (error) {
-      console.error('Error loading TTS config:', error);
+      console.error('Error loading TTS config for language:', error);
+      const defaultConfig = getDefaultTTSConfigForLanguage(langCode);
+      setConfig(defaultConfig);
     }
   };
 
-  const saveTTSConfig = async (newConfig: TTSConfig) => {
+  const saveTTSConfigForLanguage = async (newConfig: TTSConfig) => {
     try {
-      await AsyncStorage.setItem(
-        STORAGE_KEYS.TTS_CONFIG,
-        JSON.stringify(newConfig),
+      // Load existing configs
+      const savedConfigsStr = await AsyncStorage.getItem(
+        STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
       );
+      let savedConfigs: LanguageTTSConfigs = {};
+      
+      if (savedConfigsStr) {
+        savedConfigs = JSON.parse(savedConfigsStr);
+      }
+
+      // Update config for current language
+      savedConfigs[targetLanguage] = newConfig;
+
+      // Save back to storage
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
+        JSON.stringify(savedConfigs),
+      );
+      
       setConfig(newConfig);
       Alert.alert('성공', 'TTS 설정이 저장되었습니다.');
     } catch (error) {
@@ -101,25 +99,64 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
     }
   };
 
-  const handleVoiceChange = (voiceName: string) => {
+  const handleAIVoiceChange = (voiceName: string) => {
     const voice = findVoiceByName(voiceName);
     if (voice) {
       const newConfig = {
         ...config,
-        voiceName: voice.name,
-        languageCode: voice.languageCode,
-        ssmlGender: voice.gender,
+        aiVoice: {
+          ...config.aiVoice,
+          voiceName: voice.name,
+          languageCode: voice.languageCode,
+          ssmlGender: voice.gender,
+        },
       };
-      saveTTSConfig(newConfig);
+      saveTTSConfigForLanguage(newConfig);
     }
   };
 
-  const handleSpeakingRateChange = (rate: number) => {
-    saveTTSConfig({...config, speakingRate: rate});
+  const handleUserVoiceChange = (voiceName: string) => {
+    const voice = findVoiceByName(voiceName);
+    if (voice) {
+      const newConfig = {
+        ...config,
+        userVoice: {
+          ...config.userVoice,
+          voiceName: voice.name,
+          languageCode: voice.languageCode,
+          ssmlGender: voice.gender,
+        },
+      };
+      saveTTSConfigForLanguage(newConfig);
+    }
   };
 
-  const handleCustomVoiceToggle = (value: boolean) => {
-    saveTTSConfig({...config, useCustomVoice: value});
+  const handleAISpeakingRateChange = (rate: number) => {
+    saveTTSConfigForLanguage({
+      ...config,
+      aiVoice: {...config.aiVoice, speakingRate: rate},
+    });
+  };
+
+  const handleUserSpeakingRateChange = (rate: number) => {
+    saveTTSConfigForLanguage({
+      ...config,
+      userVoice: {...config.userVoice, speakingRate: rate},
+    });
+  };
+
+  const handleAICustomVoiceToggle = (value: boolean) => {
+    saveTTSConfigForLanguage({
+      ...config,
+      aiVoice: {...config.aiVoice, useCustomVoice: value},
+    });
+  };
+
+  const handleUserCustomVoiceToggle = (value: boolean) => {
+    saveTTSConfigForLanguage({
+      ...config,
+      userVoice: {...config.userVoice, useCustomVoice: value},
+    });
   };
 
   const handleOpenDocumentation = async () => {
@@ -127,6 +164,170 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
   };
 
   const currentVoices = DEFAULT_VOICES[selectedLanguageGroup]?.voices || [];
+
+  // Helper function to render voice configuration section
+  const renderVoiceConfigSection = (
+    title: string,
+    description: string,
+    voiceConfig: VoiceConfig,
+    onVoiceChange: (voiceName: string) => void,
+    onSpeakingRateChange: (rate: number) => void,
+    onCustomVoiceToggle: (value: boolean) => void,
+    onConfigChange: (updatedConfig: Partial<VoiceConfig>) => void,
+  ) => (
+    <>
+      <View style={styles.voiceSectionHeader}>
+        <Text style={[styles.voiceSectionTitle, {color: theme.colors.primary}]}>
+          {title}
+        </Text>
+        <Text style={[styles.voiceSectionDescription, {color: theme.colors.textSecondary}]}>
+          {description}
+        </Text>
+      </View>
+
+      {/* Voice Selection */}
+      <View style={styles.optionGroup}>
+        <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+          음성 선택
+        </Text>
+        <CustomPicker
+          selectedValue={voiceConfig.voiceName}
+          onValueChange={onVoiceChange}
+          items={currentVoices.map(voice => ({
+            label: voice.displayName,
+            value: voice.name,
+          }))}
+          placeholder="음성을 선택하세요"
+          theme={theme}
+          style={styles.pickerContainer}
+        />
+      </View>
+
+      {/* Speaking Rate */}
+      <View style={styles.optionGroup}>
+        <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+          말하기 속도
+        </Text>
+        <CustomPicker
+          selectedValue={voiceConfig.speakingRate.toString()}
+          onValueChange={(value: string) =>
+            onSpeakingRateChange(parseFloat(value))
+          }
+          items={SPEAKING_RATE_OPTIONS.map(option => ({
+            label: option.label,
+            value: option.value.toString(),
+          }))}
+          placeholder="말하기 속도를 선택하세요"
+          theme={theme}
+          style={styles.pickerContainer}
+        />
+      </View>
+
+      {/* Custom Voice Toggle */}
+      <View style={styles.optionGroup}>
+        <View style={styles.themeRow}>
+          <View style={styles.themeInfo}>
+            <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+              커스텀 음성 사용
+            </Text>
+            <Text
+              style={[
+                styles.themeDescription,
+                {color: theme.colors.textSecondary},
+              ]}>
+              직접 음성 이름을 입력하여 사용
+            </Text>
+          </View>
+          <Switch
+            value={voiceConfig.useCustomVoice}
+            onValueChange={onCustomVoiceToggle}
+            trackColor={{
+              false: theme.colors.border,
+              true: theme.colors.primary,
+            }}
+            thumbColor={
+              voiceConfig.useCustomVoice
+                ? theme.colors.buttonPrimaryText
+                : theme.colors.inputBackground
+            }
+          />
+        </View>
+      </View>
+
+      {/* Custom Voice Inputs */}
+      {voiceConfig.useCustomVoice && (
+        <>
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+              커스텀 음성 이름
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.colors.inputBackground,
+                  borderColor: theme.colors.inputBorder,
+                  color: theme.colors.text,
+                },
+              ]}
+              value={voiceConfig.customVoiceName || ''}
+              onChangeText={text =>
+                onConfigChange({customVoiceName: text})
+              }
+              placeholder="예: en-US-Standard-B"
+              placeholderTextColor={theme.colors.textTertiary}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+              커스텀 언어 코드
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.colors.inputBackground,
+                  borderColor: theme.colors.inputBorder,
+                  color: theme.colors.text,
+                },
+              ]}
+              value={voiceConfig.customLanguageCode || ''}
+              onChangeText={text =>
+                onConfigChange({customLanguageCode: text})
+              }
+              placeholder="예: en-US"
+              placeholderTextColor={theme.colors.textTertiary}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              커스텀 성별
+            </Text>
+            <CustomPicker
+              selectedValue={voiceConfig.customGender || 'FEMALE'}
+              onValueChange={(value: string) =>
+                onConfigChange({
+                  customGender: value as 'MALE' | 'FEMALE' | 'NEUTRAL',
+                })
+              }
+              items={[
+                {label: '여성 (FEMALE)', value: 'FEMALE'},
+                {label: '남성 (MALE)', value: 'MALE'},
+                {label: '중성 (NEUTRAL)', value: 'NEUTRAL'},
+              ]}
+              placeholder="성별을 선택하세요"
+              theme={theme}
+              style={styles.pickerContainer}
+            />
+          </View>
+        </>
+      )}
+    </>
+  );
 
   return (
     <View
@@ -148,57 +349,8 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
         Google Cloud Text-to-Speech 음성 설정을 커스터마이징하세요
       </Text>
 
-      {/* Voice Selection - moved to be first after description */}
-      <View style={styles.optionGroup}>
-        <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-          음성 선택
-        </Text>
-        <CustomPicker
-          selectedValue={config.voiceName}
-          onValueChange={handleVoiceChange}
-          items={currentVoices.map(voice => ({
-            label: voice.displayName,
-            value: voice.name,
-          }))}
-          placeholder="음성을 선택하세요"
-          theme={theme}
-          style={styles.pickerContainer}
-        />
-      </View>
-
-      {/* Custom Voice Toggle - moved below voice selection */}
-      <View style={styles.optionGroup}>
-        <View style={styles.themeRow}>
-          <View style={styles.themeInfo}>
-            <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
-              커스텀 음성 사용
-            </Text>
-            <Text
-              style={[
-                styles.themeDescription,
-                {color: theme.colors.textSecondary},
-              ]}>
-              직접 음성 이름을 입력하여 사용
-            </Text>
-          </View>
-          <Switch
-            value={config.useCustomVoice}
-            onValueChange={handleCustomVoiceToggle}
-            trackColor={{
-              false: theme.colors.border,
-              true: theme.colors.primary,
-            }}
-            thumbColor={
-              config.useCustomVoice
-                ? theme.colors.buttonPrimaryText
-                : theme.colors.inputBackground
-            }
-          />
-        </View>
-      </View>
-
-      {/* Documentation Link - only shown when custom voice is enabled */}
-      {config.useCustomVoice && (
+      {/* Documentation Link */}
+      {(config.aiVoice.useCustomVoice || config.userVoice.useCustomVoice) && (
         <TouchableOpacity
           style={[
             styles.linkButton,
@@ -218,114 +370,58 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
         </TouchableOpacity>
       )}
 
-      {/* Speaking Rate */}
-      <View style={styles.optionGroup}>
-        <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-          말하기 속도
-        </Text>
-        <CustomPicker
-          selectedValue={config.speakingRate.toString()}
-          onValueChange={(value: string) =>
-            handleSpeakingRateChange(parseFloat(value))
-          }
-          items={SPEAKING_RATE_OPTIONS.map(option => ({
-            label: option.label,
-            value: option.value.toString(),
-          }))}
-          placeholder="말하기 속도를 선택하세요"
-          theme={theme}
-          style={styles.pickerContainer}
-        />
-      </View>
-
-      {/* Custom Voice Inputs */}
-      {config.useCustomVoice && (
-        <>
-          <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
-              커스텀 음성 이름
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: theme.colors.inputBackground,
-                  borderColor: theme.colors.inputBorder,
-                  color: theme.colors.text,
-                },
-              ]}
-              value={config.customVoiceName || ''}
-              onChangeText={text =>
-                setConfig({...config, customVoiceName: text})
-              }
-              placeholder="예: en-US-Standard-B"
-              placeholderTextColor={theme.colors.textTertiary}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
-              커스텀 언어 코드
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: theme.colors.inputBackground,
-                  borderColor: theme.colors.inputBorder,
-                  color: theme.colors.text,
-                },
-              ]}
-              value={config.customLanguageCode || ''}
-              onChangeText={text =>
-                setConfig({...config, customLanguageCode: text})
-              }
-              placeholder="예: en-US"
-              placeholderTextColor={theme.colors.textTertiary}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.optionGroup}>
-            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-              커스텀 성별
-            </Text>
-            <CustomPicker
-              selectedValue={config.customGender || 'FEMALE'}
-              onValueChange={(value: string) =>
-                setConfig({
-                  ...config,
-                  customGender: value as 'MALE' | 'FEMALE' | 'NEUTRAL',
-                })
-              }
-              items={[
-                {label: '여성 (FEMALE)', value: 'FEMALE'},
-                {label: '남성 (MALE)', value: 'MALE'},
-                {label: '중성 (NEUTRAL)', value: 'NEUTRAL'},
-              ]}
-              placeholder="성별을 선택하세요"
-              theme={theme}
-              style={styles.pickerContainer}
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              {backgroundColor: theme.colors.buttonPrimary},
-            ]}
-            onPress={() => saveTTSConfig(config)}>
-            <Text
-              style={[
-                styles.saveButtonText,
-                {color: theme.colors.buttonPrimaryText},
-              ]}>
-              커스텀 설정 저장
-            </Text>
-          </TouchableOpacity>
-        </>
+      {/* AI Response Voice Configuration */}
+      {renderVoiceConfigSection(
+        '🤖 AI 응답 음성',
+        'AI가 응답할 때 사용하는 음성',
+        config.aiVoice,
+        handleAIVoiceChange,
+        handleAISpeakingRateChange,
+        handleAICustomVoiceToggle,
+        (updates) => {
+          const newConfig = {
+            ...config,
+            aiVoice: {...config.aiVoice, ...updates},
+          };
+          setConfig(newConfig);
+        },
       )}
+
+      {/* Separator */}
+      <View style={styles.separator} />
+
+      {/* User Response Voice Configuration */}
+      {renderVoiceConfigSection(
+        '👤 사용자 응답 음성',
+        '선택지를 클릭했을 때 읽어주는 음성',
+        config.userVoice,
+        handleUserVoiceChange,
+        handleUserSpeakingRateChange,
+        handleUserCustomVoiceToggle,
+        (updates) => {
+          const newConfig = {
+            ...config,
+            userVoice: {...config.userVoice, ...updates},
+          };
+          setConfig(newConfig);
+        },
+      )}
+
+      {/* Save Button */}
+      <TouchableOpacity
+        style={[
+          styles.saveButton,
+          {backgroundColor: theme.colors.buttonPrimary},
+        ]}
+        onPress={() => saveTTSConfigForLanguage(config)}>
+        <Text
+          style={[
+            styles.saveButtonText,
+            {color: theme.colors.buttonPrimaryText},
+          ]}>
+          설정 저장
+        </Text>
+      </TouchableOpacity>
 
       {/* Info Box */}
       <View
@@ -347,6 +443,14 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
             {marginTop: 8},
           ]}>
           🌏 서버 리전: {config.region} (한국과 가까운 아시아 리전)
+        </Text>
+        <Text
+          style={[
+            styles.infoText,
+            {color: theme.colors.primaryDark},
+            {marginTop: 8},
+          ]}>
+          🗣️ 현재 언어: {DEFAULT_VOICES[selectedLanguageGroup]?.language || '영어'}
         </Text>
       </View>
     </View>
@@ -372,6 +476,24 @@ const styles = StyleSheet.create({
   sectionDescription: {
     fontSize: 14,
     marginBottom: 16,
+  },
+  voiceSectionHeader: {
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  voiceSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  voiceSectionDescription: {
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 20,
   },
   optionGroup: {
     marginBottom: 16,

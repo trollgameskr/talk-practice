@@ -4,6 +4,13 @@
 
 import AIVoiceService from '../services/AIVoiceService';
 
+// Mock AsyncStorage
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn(() => Promise.resolve(null)),
+  setItem: jest.fn(() => Promise.resolve()),
+  removeItem: jest.fn(() => Promise.resolve()),
+}));
+
 // Mock fetch globally
 global.fetch = jest.fn();
 
@@ -46,18 +53,24 @@ describe('AIVoiceService', () => {
     it('should return current TTS config', () => {
       const config = service.getTTSConfig();
       expect(config).toBeDefined();
-      expect(config.voiceName).toBe('en-US-Standard-B');
-      expect(config.languageCode).toBe('en-US');
+      expect(config.aiVoice).toBeDefined();
+      expect(config.userVoice).toBeDefined();
+      expect(config.aiVoice.voiceName).toBe('en-US-Neural2-A');
+      expect(config.aiVoice.languageCode).toBe('en-US');
     });
 
     it('should update TTS config', async () => {
+      const currentConfig = service.getTTSConfig();
       await service.updateTTSConfig({
-        voiceName: 'en-US-Standard-C',
-        speakingRate: 1.5,
+        aiVoice: {
+          ...currentConfig.aiVoice,
+          voiceName: 'en-US-Neural2-B',
+          speakingRate: 1.5,
+        },
       });
       const config = service.getTTSConfig();
-      expect(config.voiceName).toBe('en-US-Standard-C');
-      expect(config.speakingRate).toBe(1.5);
+      expect(config.aiVoice.voiceName).toBe('en-US-Neural2-B');
+      expect(config.aiVoice.speakingRate).toBe(1.5);
     });
   });
 
@@ -67,17 +80,19 @@ describe('AIVoiceService', () => {
       expect(method).toBe('Google Cloud TTS (Proxy - AI 음성)');
     });
 
-    it('should return voice method for direct API', () => {
-      // Mock process.env to have API key
-      const originalEnv = process.env;
-      process.env = {...originalEnv, GOOGLE_TTS_API_KEY: 'test-api-key'};
+    it('should return voice method for direct API', async () => {
+      // Mock AsyncStorage to return API key
+      const AsyncStorage = require('@react-native-async-storage/async-storage');
+      AsyncStorage.getItem.mockResolvedValueOnce('test-api-key');
       
       const directService = new AIVoiceService();
+      // Wait for initialization to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const method = directService.getVoiceMethod();
       expect(method).toBe('Google Cloud TTS (Direct API - AI 음성)');
       
-      // Restore original env
-      process.env = originalEnv;
+      await directService.destroy();
     });
 
     it('should return not available when no proxy or API key', () => {
@@ -139,7 +154,7 @@ describe('AIVoiceService', () => {
         return this;
       });
 
-      // Start speaking and wait for completion
+      // Start speaking and wait for completion (default is 'ai' voice type)
       await service.speak('Hello, world!');
 
       // Verify fetch was called with correct URL and body
@@ -161,13 +176,70 @@ describe('AIVoiceService', () => {
       expect(requestBody.audioConfig).toBeDefined();
     });
 
+    it('should use different voice configs for ai and user voice types', async () => {
+      // Mock successful response
+      const mockAudioContent = 'base64EncodedAudioData';
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({audioContent: mockAudioContent}),
+      });
+
+      // Mock Audio constructor
+      (global as any).Audio = jest.fn(function(this: any) {
+        this.load = jest.fn(function() {
+          if (this.oncanplay) {
+            this.oncanplay();
+          }
+          setTimeout(() => {
+            if (this.onended) {
+              this.onended();
+            }
+          }, 10);
+        });
+        this.play = jest.fn().mockResolvedValue(undefined);
+        this.pause = jest.fn();
+        this.oncanplay = null;
+        this.onended = null;
+        this.onerror = null;
+        this.currentTime = 0;
+        return this;
+      });
+
+      // Set different configs for ai and user voices
+      const config = service.getTTSConfig();
+      await service.updateTTSConfig({
+        aiVoice: {
+          ...config.aiVoice,
+          voiceName: 'en-US-Neural2-A',
+        },
+        userVoice: {
+          ...config.userVoice,
+          voiceName: 'en-US-Neural2-B',
+        },
+      });
+
+      // Call speak with 'ai' voice type
+      await service.speak('AI test', 'ai');
+      const aiCall = (global.fetch as jest.Mock).mock.calls[0];
+      const aiBody = JSON.parse(aiCall[1].body);
+      expect(aiBody.voice.name).toBe('en-US-Neural2-A');
+
+      // Call speak with 'user' voice type
+      await service.speak('User test', 'user');
+      const userCall = (global.fetch as jest.Mock).mock.calls[1];
+      const userBody = JSON.parse(userCall[1].body);
+      expect(userBody.voice.name).toBe('en-US-Neural2-B');
+    });
+
     it('should call Google TTS API directly when API key is available', async () => {
-      // Mock process.env to have API key
-      const originalEnv = process.env;
-      process.env = {...originalEnv, GOOGLE_TTS_API_KEY: 'test-api-key-123'};
+      // Mock AsyncStorage to return API key
+      const AsyncStorage = require('@react-native-async-storage/async-storage');
+      AsyncStorage.getItem.mockResolvedValueOnce('test-api-key-123');
 
       // Create service with API key
       const directService = new AIVoiceService();
+      // Wait for initialization to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Mock successful response
       const mockAudioContent = 'base64EncodedAudioData';
@@ -221,8 +293,6 @@ describe('AIVoiceService', () => {
       expect(requestBody.audioConfig).toBeDefined();
       expect(requestBody.audioConfig.audioEncoding).toBe('MP3');
 
-      // Restore original env
-      process.env = originalEnv;
       await directService.destroy();
     });
 
@@ -234,7 +304,10 @@ describe('AIVoiceService', () => {
         json: async () => ({error: 'Server error'}),
       });
 
-      await expect(service.speak('Test text')).rejects.toThrow();
+      // The speak method should reject when the API returns an error
+      await expect(service.speak('Test text')).rejects.toThrow(
+        'API request failed: 500',
+      );
     });
 
     it('should log detailed error information when speech fails', async () => {

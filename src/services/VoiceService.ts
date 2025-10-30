@@ -90,17 +90,20 @@ export class VoiceService {
   /**
    * Speak text using AI voice generation
    * Propagates errors to allow callers to handle speech failures
+   * @param text Text to speak
+   * @param voiceType Type of voice to use: 'ai' for AI responses, 'user' for user response samples
    */
-  async speak(text: string): Promise<void> {
+  async speak(text: string, voiceType: 'ai' | 'user' = 'ai'): Promise<void> {
     const startTime = Date.now();
     console.log('[VoiceService] Speech request received', {
       textLength: text.length,
       textPreview: text.substring(0, 50),
+      voiceType,
       timestamp: new Date().toISOString(),
     });
 
     try {
-      await this.aiVoiceService.speak(text);
+      await this.aiVoiceService.speak(text, voiceType);
       const duration = Date.now() - startTime;
       console.log('[VoiceService] Speech completed successfully', {
         durationMs: duration,
@@ -117,6 +120,13 @@ export class VoiceService {
       // Propagate error to allow caller to handle it
       throw error;
     }
+  }
+
+  /**
+   * Set language for TTS
+   */
+  async setLanguage(languageCode: string) {
+    await this.aiVoiceService.setLanguage(languageCode);
   }
 
   /**

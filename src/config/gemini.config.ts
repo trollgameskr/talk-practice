@@ -89,4 +89,5 @@ export const STORAGE_KEYS = {
   SHOW_GRAMMAR_HIGHLIGHTS: '@show_grammar_highlights',
   TEXT_ONLY_MODE: '@text_only_mode',
   TTS_CONFIG: '@tts_config',
+  TTS_CONFIGS_BY_LANGUAGE: '@tts_configs_by_language',
 } as const;
