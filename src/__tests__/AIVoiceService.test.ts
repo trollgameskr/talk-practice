@@ -46,17 +46,17 @@ describe('AIVoiceService', () => {
     it('should return current TTS config', () => {
       const config = service.getTTSConfig();
       expect(config).toBeDefined();
-      expect(config.voiceName).toBe('en-US-Neural2-A');
+      expect(config.voiceName).toBe('en-US-Standard-B');
       expect(config.languageCode).toBe('en-US');
     });
 
     it('should update TTS config', async () => {
       await service.updateTTSConfig({
-        voiceName: 'en-US-Neural2-B',
+        voiceName: 'en-US-Standard-C',
         speakingRate: 1.5,
       });
       const config = service.getTTSConfig();
-      expect(config.voiceName).toBe('en-US-Neural2-B');
+      expect(config.voiceName).toBe('en-US-Standard-C');
       expect(config.speakingRate).toBe(1.5);
     });
   });

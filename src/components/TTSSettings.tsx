@@ -258,7 +258,7 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
               onChangeText={text =>
                 setConfig({...config, customVoiceName: text})
               }
-              placeholder="예: en-US-Neural2-F"
+              placeholder="예: en-US-Standard-B"
               placeholderTextColor={theme.colors.textTertiary}
               autoCapitalize="none"
             />
