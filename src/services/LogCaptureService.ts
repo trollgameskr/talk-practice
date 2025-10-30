@@ -93,7 +93,7 @@ export class LogCaptureService {
    */
   getLogs(): string {
     if (this.logs.length === 0) {
-      return 'No AI Voice Service logs captured yet.';
+      return 'No voice service logs captured yet.';
     }
     return this.logs.join('\n');
   }

@@ -104,7 +104,7 @@ describe('LogCaptureService', () => {
     logCaptureService.startCapture();
 
     const logs = logCaptureService.getLogs();
-    expect(logs).toBe('No AI Voice Service logs captured yet.');
+    expect(logs).toBe('No voice service logs captured yet.');
   });
 
   it('should clear logs', () => {
