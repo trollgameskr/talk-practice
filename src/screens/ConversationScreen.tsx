@@ -1194,10 +1194,16 @@ const ConversationScreen = ({route, navigation}: any) => {
         <View style={styles.headerButtons}>
           <TouchableOpacity
             onPress={handleCopyLogs}
-            style={styles.copyLogsButton}>
+            style={styles.copyLogsButton}
+            accessibilityLabel={t('conversation.buttons.copyLogs')}
+            accessibilityRole="button">
             <Text style={styles.copyLogsButtonText}>📋</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleEndSession} style={styles.endButton}>
+          <TouchableOpacity
+            onPress={handleEndSession}
+            style={styles.endButton}
+            accessibilityLabel="End Session"
+            accessibilityRole="button">
             <Text style={styles.endButtonText}>🚪</Text>
           </TouchableOpacity>
         </View>
@@ -1206,7 +1212,9 @@ const ConversationScreen = ({route, navigation}: any) => {
       {/* Voice Method Toast Notification */}
       {showVoiceMethodToast && (
         <View style={styles.voiceMethodToast}>
-          <Text style={styles.voiceMethodToastLabel}>🎙️ 음성 재생:</Text>
+          <Text style={styles.voiceMethodToastLabel}>
+            {t('conversation.voiceMethod.label', {defaultValue: '🎙️ 음성 재생:'})}
+          </Text>
           <Text style={styles.voiceMethodToastText}>{voiceMethod}</Text>
         </View>
       )}

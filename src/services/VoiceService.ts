@@ -20,8 +20,17 @@ export class VoiceService {
   private resultProcessingTimeout: NodeJS.Timeout | null = null;
   private isProcessingFinalResult: boolean = false;
 
-  // Debounce delay for speech result processing (in milliseconds)
-  // Increased to 500ms to better handle mobile voice recognition
+  /**
+   * Debounce delay for speech result processing (in milliseconds)
+   * 
+   * Increased to 500ms (from 100ms) to better handle mobile voice recognition issues:
+   * - Mobile devices often fire multiple intermediate results during speech
+   * - The longer delay prevents processing partial/intermediate results
+   * - Works together with onSpeechPartialResults handler to ignore incomplete sentences
+   * - Value chosen based on mobile testing to balance responsiveness vs accuracy
+   * 
+   * Note: If users on slower devices experience delays, this can be reduced to 300ms
+   */
   private static readonly RESULT_DEBOUNCE_DELAY = 500;
 
   constructor(proxyUrl?: string) {
