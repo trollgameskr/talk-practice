@@ -6,13 +6,17 @@
 
 import {Platform} from 'react-native';
 
-// Import based on platform
+// Import based on platform - using require() for conditional imports
+// This is necessary because we need runtime platform detection
+// Dynamic imports would require async initialization which complicates the service
 let Tts: any;
 if (Platform.OS === 'web') {
   // Use web shim for web platform
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   Tts = require('./web/TTSShim.web.js').default;
 } else {
   // Use react-native-tts for native platforms
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   Tts = require('react-native-tts').default;
 }
 

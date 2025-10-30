@@ -7,6 +7,13 @@
 
 /* eslint-env browser */
 
+// Helper function to trigger event listeners
+const triggerListeners = (listeners, event) => {
+  if (listeners[event]) {
+    listeners[event].forEach(callback => callback());
+  }
+};
+
 /**
  * Select the best AI voice from available voices
  */
@@ -43,8 +50,12 @@ const selectBestVoice = () => {
   return voices[0];
 };
 
+// Initialize Tts object with proper structure
 const Tts = {
-  listeners: {},
+  listeners: new Map(),
+  defaultLanguage: 'en-US',
+  defaultRate: 0.95, // Slightly slower for clarity
+  defaultPitch: 1.0,
   
   getInitStatus: async () => {
     return 'speechSynthesis' in window ? 'success' : 'error';
@@ -75,16 +86,12 @@ const Tts = {
 
       utterance.onstart = () => {
         // Call event listeners
-        if (Tts.listeners['tts-start']) {
-          Tts.listeners['tts-start'].forEach(callback => callback());
-        }
+        triggerListeners(Tts.listeners, 'tts-start');
       };
 
       utterance.onend = () => {
         // Call event listeners
-        if (Tts.listeners['tts-finish']) {
-          Tts.listeners['tts-finish'].forEach(callback => callback());
-        }
+        triggerListeners(Tts.listeners, 'tts-finish');
         resolve();
       };
       
@@ -100,9 +107,7 @@ const Tts = {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       // Call cancel event listeners
-      if (Tts.listeners['tts-cancel']) {
-        Tts.listeners['tts-cancel'].forEach(callback => callback());
-      }
+      triggerListeners(Tts.listeners, 'tts-cancel');
     }
     return Promise.resolve();
   },
@@ -149,30 +154,26 @@ const Tts = {
   },
 
   addEventListener: (event, callback) => {
-    if (!Tts.listeners[event]) {
-      Tts.listeners[event] = [];
+    if (!Tts.listeners.has(event)) {
+      Tts.listeners.set(event, []);
     }
-    Tts.listeners[event].push(callback);
+    Tts.listeners.get(event).push(callback);
   },
   
   removeEventListener: (event, callback) => {
-    if (Tts.listeners[event]) {
-      Tts.listeners[event] = Tts.listeners[event].filter(cb => cb !== callback);
+    if (Tts.listeners.has(event)) {
+      const callbacks = Tts.listeners.get(event).filter(cb => cb !== callback);
+      Tts.listeners.set(event, callbacks);
     }
   },
   
   removeAllListeners: (event) => {
     if (event) {
-      Tts.listeners[event] = [];
+      Tts.listeners.set(event, []);
     } else {
-      Tts.listeners = {};
+      Tts.listeners.clear();
     }
   },
 };
-
-// Defaults optimized for natural AI-like speech
-Tts.defaultLanguage = 'en-US';
-Tts.defaultRate = 0.95; // Slightly slower for clarity
-Tts.defaultPitch = 1.0;
 
 export default Tts;
