@@ -248,20 +248,23 @@ export class VoiceService {
     // Process the latest recognized text when speech ends
     // This ensures we only process the final result after the user stops speaking
     // preventing multiple incremental results from being processed on mobile
-    if (this.latestRecognizedText && this.onResultCallback) {
+    if (this.latestRecognizedText !== '' && this.onResultCallback) {
       const finalText = this.latestRecognizedText;
 
       // Check if this result has already been processed
       if (finalText !== this.lastProcessedResult) {
         console.log('Processing final speech result on speech end:', finalText);
         this.lastProcessedResult = finalText;
-        this.latestRecognizedText = ''; // Clear after processing
 
         // Call the callback with the final result
         this.onResultCallback(finalText);
       } else {
         console.log('Skipping duplicate result on speech end:', finalText);
       }
+
+      // Clear after attempting to process to prevent reprocessing
+      // even if onSpeechEnd is called multiple times
+      this.latestRecognizedText = '';
     }
 
     // Don't automatically set isListening to false here
