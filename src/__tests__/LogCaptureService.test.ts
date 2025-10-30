@@ -48,6 +48,15 @@ describe('LogCaptureService', () => {
     expect(logs).toContain('[VoiceService] Test log message');
   });
 
+  it('should capture DeviceTTSService logs', () => {
+    logCaptureService.startCapture();
+
+    console.log('[DeviceTTSService] Test log message');
+
+    const logs = logCaptureService.getLogs();
+    expect(logs).toContain('[DeviceTTSService] Test log message');
+  });
+
   it('should not capture logs from other services', () => {
     logCaptureService.startCapture();
 
@@ -95,7 +104,7 @@ describe('LogCaptureService', () => {
     logCaptureService.startCapture();
 
     const logs = logCaptureService.getLogs();
-    expect(logs).toBe('No AI Voice Service logs captured yet.');
+    expect(logs).toBe('No voice service logs captured yet.');
   });
 
   it('should clear logs', () => {

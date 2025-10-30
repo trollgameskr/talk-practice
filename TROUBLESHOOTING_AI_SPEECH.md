@@ -14,7 +14,11 @@ When AI speech fails to play, you'll see an error alert with detailed informatio
 
 ## Understanding the Logs
 
-All AI speech-related logs are prefixed with `[AIVoiceService]` or `[VoiceService]` for easy filtering.
+All AI speech-related logs are prefixed with `[AIVoiceService]`, `[VoiceService]`, or `[DeviceTTSService]` for easy filtering.
+
+- `[AIVoiceService]`: Logs related to Google Cloud TTS (AI voices)
+- `[VoiceService]`: General voice service logs
+- `[DeviceTTSService]`: Logs related to Device TTS (native system voices)
 
 ### Successful Speech Flow
 
@@ -145,7 +149,7 @@ This tells us:
 
 If you can't resolve the issue:
 
-1. Copy the relevant console logs (especially `[AIVoiceService]` and `[VoiceService]` entries)
+1. Copy the relevant console logs (especially `[AIVoiceService]`, `[VoiceService]`, and `[DeviceTTSService]` entries)
 2. Note what you were doing when the issue occurred
 3. Check if the issue is consistent or intermittent
 4. Report the issue with the logs on GitHub

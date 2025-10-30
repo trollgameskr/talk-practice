@@ -1,7 +1,7 @@
 /**
  * Log Capture Service
  * Captures console logs for debugging purposes, specifically targeting
- * logs from AIVoiceService and VoiceService
+ * logs from AIVoiceService, VoiceService, and DeviceTTSService
  */
 
 export class LogCaptureService {
@@ -60,10 +60,11 @@ export class LogCaptureService {
         })
         .join(' ');
 
-      // Check if this is a log we want to capture (AIVoiceService or VoiceService)
+      // Check if this is a log we want to capture (AIVoiceService, VoiceService, or DeviceTTSService)
       if (
         message.includes('[AIVoiceService]') ||
-        message.includes('[VoiceService]')
+        message.includes('[VoiceService]') ||
+        message.includes('[DeviceTTSService]')
       ) {
         const logEntry = `[${timestamp}] ${level}: ${message}`;
         this.logs.push(logEntry);
@@ -92,7 +93,7 @@ export class LogCaptureService {
    */
   getLogs(): string {
     if (this.logs.length === 0) {
-      return 'No AI Voice Service logs captured yet.';
+      return 'No voice service logs captured yet.';
     }
     return this.logs.join('\n');
   }
