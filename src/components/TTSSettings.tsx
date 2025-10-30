@@ -50,6 +50,66 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
       
       if (savedConfigsStr) {
         savedConfigs = JSON.parse(savedConfigsStr);
+      } else {
+        // Try to migrate old single TTS config to new per-language format
+        const oldConfigStr = await AsyncStorage.getItem(STORAGE_KEYS.TTS_CONFIG);
+        if (oldConfigStr) {
+          try {
+            const oldConfig = JSON.parse(oldConfigStr);
+            // Check if it's the old format (has voiceName instead of aiVoice/userVoice)
+            if (oldConfig.voiceName && !oldConfig.aiVoice && !oldConfig.userVoice) {
+              console.log('Migrating old TTS config to new format');
+              // Convert old format to new format
+              const migratedConfig: TTSConfig = {
+                aiVoice: {
+                  voiceName: oldConfig.voiceName,
+                  languageCode: oldConfig.languageCode,
+                  ssmlGender: oldConfig.ssmlGender,
+                  speakingRate: oldConfig.speakingRate,
+                  pitch: oldConfig.pitch,
+                  volumeGainDb: oldConfig.volumeGainDb,
+                  useCustomVoice: oldConfig.useCustomVoice,
+                  customVoiceName: oldConfig.customVoiceName,
+                  customLanguageCode: oldConfig.customLanguageCode,
+                  customGender: oldConfig.customGender,
+                },
+                userVoice: {
+                  voiceName: oldConfig.voiceName,
+                  languageCode: oldConfig.languageCode,
+                  ssmlGender: oldConfig.ssmlGender,
+                  speakingRate: oldConfig.speakingRate,
+                  pitch: oldConfig.pitch,
+                  volumeGainDb: oldConfig.volumeGainDb,
+                  useCustomVoice: oldConfig.useCustomVoice,
+                  customVoiceName: oldConfig.customVoiceName,
+                  customLanguageCode: oldConfig.customLanguageCode,
+                  customGender: oldConfig.customGender,
+                },
+                region: oldConfig.region || 'asia-northeast1',
+                endpoint: oldConfig.endpoint || 'https://texttospeech.googleapis.com',
+              };
+              // Save migrated config for all common languages
+              savedConfigs = {
+                en: migratedConfig,
+                ko: migratedConfig,
+                ja: migratedConfig,
+                zh: migratedConfig,
+                es: migratedConfig,
+                fr: migratedConfig,
+                de: migratedConfig,
+              };
+              // Save to new storage location
+              await AsyncStorage.setItem(
+                STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
+                JSON.stringify(savedConfigs),
+              );
+              // Remove old config
+              await AsyncStorage.removeItem(STORAGE_KEYS.TTS_CONFIG);
+            }
+          } catch (migrationError) {
+            console.error('Error migrating old TTS config:', migrationError);
+          }
+        }
       }
 
       // Get config for current language or use default

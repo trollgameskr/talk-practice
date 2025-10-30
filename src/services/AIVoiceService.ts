@@ -95,10 +95,75 @@ export class AIVoiceService {
       const savedConfigsStr = await AsyncStorage.getItem(
         STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
       );
+      
       if (savedConfigsStr) {
         this.ttsConfigsByLanguage = JSON.parse(savedConfigsStr);
       } else {
-        this.ttsConfigsByLanguage = {};
+        // Try to migrate old single TTS config to new per-language format
+        const oldConfigStr = await AsyncStorage.getItem(STORAGE_KEYS.TTS_CONFIG);
+        if (oldConfigStr) {
+          try {
+            const oldConfig = JSON.parse(oldConfigStr);
+            // Check if it's the old format (has voiceName instead of aiVoice/userVoice)
+            if (oldConfig.voiceName && !oldConfig.aiVoice && !oldConfig.userVoice) {
+              console.log('[AIVoiceService] Migrating old TTS config to new format');
+              // Convert old format to new format
+              const migratedConfig: TTSConfig = {
+                aiVoice: {
+                  voiceName: oldConfig.voiceName,
+                  languageCode: oldConfig.languageCode,
+                  ssmlGender: oldConfig.ssmlGender,
+                  speakingRate: oldConfig.speakingRate || 1.0,
+                  pitch: oldConfig.pitch || 0.0,
+                  volumeGainDb: oldConfig.volumeGainDb || 0.0,
+                  useCustomVoice: oldConfig.useCustomVoice || false,
+                  customVoiceName: oldConfig.customVoiceName,
+                  customLanguageCode: oldConfig.customLanguageCode,
+                  customGender: oldConfig.customGender,
+                },
+                userVoice: {
+                  voiceName: oldConfig.voiceName,
+                  languageCode: oldConfig.languageCode,
+                  ssmlGender: oldConfig.ssmlGender,
+                  speakingRate: oldConfig.speakingRate || 1.0,
+                  pitch: oldConfig.pitch || 0.0,
+                  volumeGainDb: oldConfig.volumeGainDb || 0.0,
+                  useCustomVoice: oldConfig.useCustomVoice || false,
+                  customVoiceName: oldConfig.customVoiceName,
+                  customLanguageCode: oldConfig.customLanguageCode,
+                  customGender: oldConfig.customGender,
+                },
+                region: oldConfig.region || 'asia-northeast1',
+                endpoint: oldConfig.endpoint || 'https://texttospeech.googleapis.com',
+              };
+              // Save migrated config for common languages
+              this.ttsConfigsByLanguage = {
+                en: migratedConfig,
+                ko: migratedConfig,
+                ja: migratedConfig,
+                zh: migratedConfig,
+                es: migratedConfig,
+                fr: migratedConfig,
+                de: migratedConfig,
+              };
+              // Save to new storage location
+              await AsyncStorage.setItem(
+                STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
+                JSON.stringify(this.ttsConfigsByLanguage),
+              );
+              // Remove old config
+              await AsyncStorage.removeItem(STORAGE_KEYS.TTS_CONFIG);
+              console.log('[AIVoiceService] Migration completed');
+            }
+          } catch (migrationError) {
+            console.error('[AIVoiceService] Error migrating old TTS config:', migrationError);
+          }
+        }
+        
+        // If still no configs, set to empty
+        if (!this.ttsConfigsByLanguage || Object.keys(this.ttsConfigsByLanguage).length === 0) {
+          this.ttsConfigsByLanguage = {};
+        }
       }
     } catch (error) {
       console.error('Error loading TTS configs:', error);
