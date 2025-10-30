@@ -26,19 +26,8 @@ export class AIVoiceService {
   private apiKey: string = '';
 
   constructor(proxyUrl?: string) {
-    // Check if GOOGLE_TTS_API_KEY is available in environment (for development/GitHub Pages)
-    // This allows direct API calls without a proxy server
-    const envApiKey =
-      typeof process !== 'undefined' &&
-      process.env &&
-      process.env.GOOGLE_TTS_API_KEY;
-    if (envApiKey) {
-      this.apiKey = envApiKey;
-      console.log('AI Voice Service: Using direct API key from environment');
-    }
-
-    // Accept proxy URL instead of API key for security
-    // In production (GitHub Pages), don't default to localhost as it won't work
+    // Accept proxy URL for backward compatibility (local development)
+    // In production (GitHub Pages), users will provide their own TTS API key
     if (proxyUrl) {
       this.proxyUrl = proxyUrl;
     } else if (
@@ -46,15 +35,11 @@ export class AIVoiceService {
       (globalThis as any).location &&
       (globalThis as any).location.hostname === 'localhost'
     ) {
-      // Only use localhost in local development if no API key is available
-      if (!this.apiKey) {
-        this.proxyUrl = 'http://localhost:4000';
-      }
+      // Only use localhost proxy in local development
+      this.proxyUrl = 'http://localhost:4000';
     } else {
-      // Production: check if API key is available, otherwise TTS will be disabled
-      if (!this.apiKey) {
-        this.proxyUrl = '';
-      }
+      // Production: TTS API key will be loaded from user storage in initialize()
+      this.proxyUrl = '';
     }
     this.initialize();
   }
@@ -64,6 +49,13 @@ export class AIVoiceService {
    */
   private async initialize() {
     try {
+      // Load TTS API key from storage (user-provided)
+      const storedApiKey = await AsyncStorage.getItem(STORAGE_KEYS.TTS_API_KEY);
+      if (storedApiKey) {
+        this.apiKey = storedApiKey;
+        console.log('AI Voice Service: Using TTS API key from user storage');
+      }
+
       // Load TTS configuration from storage
       await this.loadTTSConfig();
       this.isInitialized = true;
@@ -453,6 +445,20 @@ export class AIVoiceService {
    */
   getIsSpeaking(): boolean {
     return this.isSpeaking;
+  }
+
+  /**
+   * Set TTS API key
+   */
+  async setApiKey(apiKey: string) {
+    this.apiKey = apiKey;
+    if (apiKey) {
+      await AsyncStorage.setItem(STORAGE_KEYS.TTS_API_KEY, apiKey);
+      console.log('AI Voice Service: TTS API key updated');
+    } else {
+      await AsyncStorage.removeItem(STORAGE_KEYS.TTS_API_KEY);
+      console.log('AI Voice Service: TTS API key removed');
+    }
   }
 
   /**

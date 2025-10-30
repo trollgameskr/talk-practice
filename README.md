@@ -110,22 +110,17 @@ npm run web
 자세한 사용법은 [WEB_SETUP.md](./WEB_SETUP.md)를 참조하세요.
 
 **AI 음성 합성(TTS) 사용하기:**  
-로컬 환경에서는 두 가지 방법으로 TTS를 사용할 수 있습니다:
+AI 음성 합성을 사용하려면 Settings에서 본인의 Google Cloud TTS API Key를 입력하세요:
 
-**방법 1: 프록시 서버 사용 (권장)**
+1. [Google AI Studio](https://makersuite.google.com/app/apikey)에서 무료 API 키 발급
+2. 앱의 Settings → TTS API Configuration에서 키 입력
+3. Gemini API Key와 동일한 키를 사용할 수 있습니다
+
+**로컬 개발자를 위한 선택사항:**  
+개발 환경에서는 프록시 서버를 사용할 수도 있습니다:
 ```bash
 # 별도 터미널에서 프록시 서버 실행
 npm run proxy
-```
-프록시 서버는 http://localhost:4000 에서 실행되며, Google Cloud TTS API에 안전하게 접근합니다.
-
-**방법 2: 직접 API 접근**
-```bash
-# 환경 변수에 API 키 설정
-export GOOGLE_TTS_API_KEY=your-api-key-here
-
-# 웹 버전 빌드 및 실행
-npm run build:web
 ```
 
 자세한 내용은 [Direct TTS API 문서](./docs/DIRECT_TTS_API.md)를 참조하세요.
@@ -160,6 +155,12 @@ npm run android # Android
 #### Gemini API 키
 1. [Google AI Studio](https://makersuite.google.com/app/apikey)에서 Gemini API 키 발급
 2. 앱 실행 후 설정(Settings) 화면에서 API 키 입력
+
+#### TTS API 키 (선택사항)
+AI 음성 합성 기능을 사용하려면:
+1. 위와 동일한 Gemini API 키를 사용하거나, 별도의 Google Cloud TTS API 키 사용
+2. 앱의 설정(Settings) 화면 → TTS API Configuration에서 키 입력
+3. TTS 키가 없어도 텍스트 기반 대화는 정상적으로 작동합니다
 
 #### Firebase 설정 (선택사항)
 Firebase를 사용하면 클라우드 저장 및 다중 기기 동기화가 가능합니다.

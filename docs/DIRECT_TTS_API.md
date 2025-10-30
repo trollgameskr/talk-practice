@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document explains how the application now supports direct Google Cloud Text-to-Speech API access for GitHub Pages deployment, enabling AI voice synthesis without requiring a proxy server.
+This document explains how the application supports direct Google Cloud Text-to-Speech API access using user-provided API keys, enabling AI voice synthesis without requiring a proxy server or build-time API key injection.
 
 ## Architecture Changes
 
@@ -29,13 +29,13 @@ This document explains how the application now supports direct Google Cloud Text
 └─────────────────┘
 ```
 
-### New Architecture (Direct API Access)
+### New Architecture (User-Provided API Keys)
 ```
 ┌─────────────────┐
 │  Web Browser    │
 │   (Client)      │
-│  - Has API Key  │
-│  (from build)   │
+│  - API Key from │
+│  User Settings  │
 └────────┬────────┘
          │ POST with API key
          │ ?key=AIxxx...
@@ -48,38 +48,53 @@ This document explains how the application now supports direct Google Cloud Text
 
 ## How It Works
 
-1. **Build Time Injection**: During the webpack build process, the `GOOGLE_TTS_API_KEY` environment variable is injected into the bundled JavaScript.
+1. **User Input**: Users enter their own Google Cloud TTS API key in the Settings screen.
 
-2. **Runtime Detection**: The `AIVoiceService` checks for the API key in `process.env.GOOGLE_TTS_API_KEY` at initialization.
+2. **Secure Storage**: The API key is stored in the browser's local storage (AsyncStorage/localStorage).
 
-3. **Automatic Fallback**: 
-   - If API key is available → Use direct API calls
-   - If proxy URL is provided → Use proxy server
-   - If neither → TTS is disabled
+3. **Runtime Usage**: The `AIVoiceService` loads the user-provided API key at initialization and uses it for direct API calls.
+
+4. **Automatic Fallback**: 
+   - If user API key is available → Use direct API calls
+   - If proxy URL is provided (local development) → Use proxy server
+   - If neither → TTS is disabled (text-only mode)
+
+## User Setup
+
+### Getting an API Key
+
+1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey) or [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Create a new API key or use an existing one
+3. Enable the "Cloud Text-to-Speech API" for your project
+4. (Recommended) Set up API key restrictions (see [Security Considerations](#security-considerations))
+
+### Configuring the App
+
+1. Open the app and go to Settings
+2. Scroll to the "TTS API Configuration" section
+3. Enter your Google Cloud TTS API key
+4. Click "Save TTS API Key"
+5. Start practicing with AI voice synthesis!
+
+**Note**: You can use the same API key for both Gemini and TTS features.
 
 ## Security Note
 
-⚠️ **Important**: This implementation embeds API keys in the client-side bundle. See [SECURITY_SUMMARY.md](../SECURITY_SUMMARY.md) for a comprehensive security analysis and mitigation strategies.
+✅ **Improved Security**: This implementation stores API keys securely in the user's browser local storage. Each user provides their own API key, which is never embedded in the application code or build artifacts.
 
 ## Configuration
 
-### GitHub Actions Setup
+### For End Users
 
-Add the `GOOGLE_TTS_API_KEY` secret to your GitHub repository:
+No special configuration is needed! Simply:
+1. Get your own API key from Google AI Studio or Google Cloud Console
+2. Enter it in the app's Settings screen
+3. Start using AI voice synthesis
 
-1. Go to your repository settings
-2. Navigate to "Secrets and variables" → "Actions"
-3. Click "New repository secret"
-4. Name: `GOOGLE_TTS_API_KEY`
-5. Value: Your Google Cloud API key (e.g., `AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`)
+### For Developers (Local Development)
 
-⚠️ **Critical**: After adding the secret, you MUST configure API key restrictions in Google Cloud Console. See [Security Considerations](#security-considerations) below.
+For local development, you can still use the proxy server:
 
-### Local Development
-
-For local development, you can either:
-
-**Option 1: Use the Proxy Server (Recommended for Development)**
 ```bash
 # Set up .env file
 cp .env.example .env
@@ -92,35 +107,26 @@ npm run proxy
 npm run web
 ```
 
-**Option 2: Use Direct API Access**
-```bash
-# Set environment variable
-export GOOGLE_TTS_API_KEY=AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# Build and run
-npm run build:web
-# Serve the web-build directory
-```
+Or, enter your API key directly in the Settings screen after starting the app.
 
 ## Security Considerations
 
-⚠️ **Important Security Notes**
+✅ **Enhanced Security Model**
 
-### API Key Exposure
-When using direct API access, the Google Cloud TTS API key is embedded in the client-side JavaScript bundle. This means:
+This implementation provides better security compared to build-time API key injection:
 
-1. **The API key is visible** to anyone who views the source code or network traffic
-2. **The API key can be extracted** and potentially misused
-3. **API quotas and billing** could be affected if the key is misused
+1. **No API Key in Code**: API keys are never embedded in the application's source code or build artifacts
+2. **User-Controlled**: Each user manages their own API key and quota
+3. **Local Storage Only**: API keys are stored in the browser's local storage, not transmitted to any server (except Google's API)
 
-### Mitigation Strategies
+### Best Practices for Users
 
 1. **API Key Restrictions** (Highly Recommended)
    - Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
    - Edit your API key
    - Add restrictions:
      - **Application restrictions**: HTTP referrers (websites)
-       - Add your GitHub Pages domain: `https://yourusername.github.io/talk-practice/*`
+       - Add domains you trust (e.g., `https://trollgameskr.github.io/talk-practice/*`)
        - For local testing: `http://localhost:3000/*`
      - **API restrictions**: Restrict key to "Cloud Text-to-Speech API" only
 
@@ -129,40 +135,13 @@ When using direct API access, the Google Cloud TTS API key is embedded in the cl
    - Monitor usage regularly
    - Set up billing alerts
 
-3. **Usage Monitoring**
-   - Enable [Cloud Logging](https://console.cloud.google.com/logs) to track API usage
-   - Set up alerts for unusual activity
-   - Review logs periodically
+3. **Key Rotation**
+   - Rotate your API key periodically for better security
+   - If you suspect your key has been compromised, delete it and create a new one
 
-### Production Deployment Recommendations
+### For Developers
 
-For production deployments with sensitive use cases, consider:
-
-1. **Use a Backend Server**: Deploy a proxy server to a cloud platform:
-   - Google Cloud Run
-   - AWS Lambda
-   - Heroku
-   - Vercel Serverless Functions
-
-2. **Implement Rate Limiting**: Add rate limiting on your proxy server to prevent abuse
-
-3. **User Authentication**: Require user authentication before allowing TTS access
-
-## Development vs Production
-
-### Development Mode (this implementation)
-- ✅ Easy to set up and deploy
-- ✅ No server infrastructure required
-- ✅ Works on static hosting (GitHub Pages)
-- ⚠️ API key is exposed in client code
-- ⚠️ Relies on Google's API restrictions for security
-
-### Production Mode (with proxy)
-- ✅ API key remains secure on the server
-- ✅ Full control over rate limiting and access
-- ✅ Better security posture
-- ❌ Requires server infrastructure
-- ❌ More complex deployment
+No special security configuration needed for deployment! The app works entirely with user-provided keys.
 
 ## Testing
 
@@ -218,15 +197,30 @@ Content-Type: application/json
 
 ### TTS Not Working
 
-1. **Check API Key**: Verify the `GOOGLE_TTS_API_KEY` secret is set in GitHub repository settings
-2. **Check API Restrictions**: Ensure the API key allows requests from your GitHub Pages domain
+1. **Check API Key**: Verify you've entered a valid API key in Settings
+2. **Check API Restrictions**: Ensure the API key allows requests from the domain you're using
 3. **Check API Quota**: Verify you haven't exceeded your Google Cloud TTS quota
 4. **Check Browser Console**: Look for error messages in the browser's developer console
+5. **Verify API is Enabled**: Make sure the Cloud Text-to-Speech API is enabled in your Google Cloud project
+
+### Common Issues
+
+**"TTS API key or proxy not configured"**
+- You haven't entered a TTS API key in Settings yet
+- Go to Settings → TTS API Configuration and enter your key
+
+**"API request failed: 403"**
+- Your API key has restrictions that prevent it from working with the current domain
+- Check your API key restrictions in Google Cloud Console
+- Make sure the domain is allowed in the HTTP referrers list
+
+**"API request failed: 429"**
+- You've exceeded your quota
+- Wait for the quota to reset or increase your quota in Google Cloud Console
 
 ### Build Errors
 
-1. **Verify Environment Variable**: Check that `GOOGLE_TTS_API_KEY` is available during build
-2. **Check Webpack Config**: Ensure `webpack.config.js` includes `GOOGLE_TTS_API_KEY` in DefinePlugin
+No special build configuration needed! The app works entirely with runtime user-provided keys.
 
 ### API Errors
 
