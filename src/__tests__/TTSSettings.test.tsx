@@ -16,6 +16,32 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 // Mock fetch globally
 global.fetch = jest.fn();
 
+// Shared test constants
+const SAMPLE_TEXTS: {[key: string]: string} = {
+  en: 'Hello! This is a preview of the selected voice. You can adjust the speed and other settings.',
+  ko: '안녕하세요! 선택하신 음성의 미리듣기입니다. 속도와 다른 설정을 조정할 수 있습니다.',
+  ja: 'こんにちは！選択した音声のプレビューです。速度やその他の設定を調整できます。',
+};
+
+const createTestVoiceConfig = (voiceName: string, languageCode: string, gender: 'MALE' | 'FEMALE', speakingRate = 1.0) => ({
+  voiceName,
+  languageCode,
+  ssmlGender: gender as const,
+  speakingRate,
+  pitch: 0.0,
+  volumeGainDb: 0.0,
+  useCustomVoice: false,
+});
+
+const createTestTTSConfig = (langCode: string) => ({
+  [langCode]: {
+    aiVoice: createTestVoiceConfig('en-US-Standard-B', 'en-US', 'MALE', 1.5),
+    userVoice: createTestVoiceConfig('en-US-Standard-C', 'en-US', 'FEMALE', 1.0),
+    region: 'asia-northeast1',
+    endpoint: 'https://texttospeech.googleapis.com',
+  },
+});
+
 describe('TTSSettings Preview Functionality', () => {
   let service: AIVoiceService;
 
@@ -32,39 +58,18 @@ describe('TTSSettings Preview Functionality', () => {
   });
 
   describe('getSampleTextForLanguage', () => {
+    const getSampleText = (langCode: string) => SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
+
     it('should return English sample text for "en" language code', () => {
-      const sampleTexts: {[key: string]: string} = {
-        en: 'Hello! This is a preview of the selected voice. You can adjust the speed and other settings.',
-        ko: '안녕하세요! 선택하신 음성의 미리듣기입니다. 속도와 다른 설정을 조정할 수 있습니다.',
-        ja: 'こんにちは！選択した音声のプレビューです。速度やその他の設定を調整できます。',
-      };
-      
-      const getSampleText = (langCode: string) => sampleTexts[langCode] || sampleTexts.en;
-      
-      expect(getSampleText('en')).toBe('Hello! This is a preview of the selected voice. You can adjust the speed and other settings.');
+      expect(getSampleText('en')).toBe(SAMPLE_TEXTS.en);
     });
 
     it('should return Korean sample text for "ko" language code', () => {
-      const sampleTexts: {[key: string]: string} = {
-        en: 'Hello! This is a preview of the selected voice. You can adjust the speed and other settings.',
-        ko: '안녕하세요! 선택하신 음성의 미리듣기입니다. 속도와 다른 설정을 조정할 수 있습니다.',
-        ja: 'こんにちは！選択した音声のプレビューです。速度やその他の設定を調整できます。',
-      };
-      
-      const getSampleText = (langCode: string) => sampleTexts[langCode] || sampleTexts.en;
-      
-      expect(getSampleText('ko')).toBe('안녕하세요! 선택하신 음성의 미리듣기입니다. 속도와 다른 설정을 조정할 수 있습니다.');
+      expect(getSampleText('ko')).toBe(SAMPLE_TEXTS.ko);
     });
 
     it('should return default English text for unknown language code', () => {
-      const sampleTexts: {[key: string]: string} = {
-        en: 'Hello! This is a preview of the selected voice. You can adjust the speed and other settings.',
-        ko: '안녕하세요! 선택하신 음성의 미리듣기입니다. 속도와 다른 설정을 조정할 수 있습니다.',
-      };
-      
-      const getSampleText = (langCode: string) => sampleTexts[langCode] || sampleTexts.en;
-      
-      expect(getSampleText('unknown')).toBe('Hello! This is a preview of the selected voice. You can adjust the speed and other settings.');
+      expect(getSampleText('unknown')).toBe(SAMPLE_TEXTS.en);
     });
   });
 
@@ -92,24 +97,8 @@ describe('TTSSettings Preview Functionality', () => {
       mockUpdateConfig.mockResolvedValue();
 
       const testConfig = {
-        aiVoice: {
-          voiceName: 'en-US-Standard-B',
-          languageCode: 'en-US',
-          ssmlGender: 'MALE' as const,
-          speakingRate: 1.5,
-          pitch: 0.0,
-          volumeGainDb: 0.0,
-          useCustomVoice: false,
-        },
-        userVoice: {
-          voiceName: 'en-US-Standard-C',
-          languageCode: 'en-US',
-          ssmlGender: 'FEMALE' as const,
-          speakingRate: 1.0,
-          pitch: 0.0,
-          volumeGainDb: 0.0,
-          useCustomVoice: false,
-        },
+        aiVoice: createTestVoiceConfig('en-US-Standard-B', 'en-US', 'MALE', 1.5),
+        userVoice: createTestVoiceConfig('en-US-Standard-C', 'en-US', 'FEMALE'),
         region: 'asia-northeast1',
         endpoint: 'https://texttospeech.googleapis.com',
       };
@@ -134,30 +123,7 @@ describe('TTSSettings Preview Functionality', () => {
       const mockSetItem = jest.spyOn(AsyncStorage, 'setItem');
       mockSetItem.mockResolvedValue();
 
-      const testConfig = {
-        en: {
-          aiVoice: {
-            voiceName: 'en-US-Standard-B',
-            languageCode: 'en-US',
-            ssmlGender: 'MALE' as const,
-            speakingRate: 1.5,
-            pitch: 0.0,
-            volumeGainDb: 0.0,
-            useCustomVoice: false,
-          },
-          userVoice: {
-            voiceName: 'en-US-Standard-C',
-            languageCode: 'en-US',
-            ssmlGender: 'FEMALE' as const,
-            speakingRate: 1.0,
-            pitch: 0.0,
-            volumeGainDb: 0.0,
-            useCustomVoice: false,
-          },
-          region: 'asia-northeast1',
-          endpoint: 'https://texttospeech.googleapis.com',
-        },
-      };
+      const testConfig = createTestTTSConfig('en');
 
       await AsyncStorage.setItem(
         STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
@@ -174,15 +140,7 @@ describe('TTSSettings Preview Functionality', () => {
       const mockGetItem = jest.spyOn(AsyncStorage, 'getItem');
       const testConfig = {
         en: {
-          aiVoice: {
-            voiceName: 'en-US-Standard-B',
-            languageCode: 'en-US',
-            ssmlGender: 'MALE',
-            speakingRate: 1.5,
-            pitch: 0.0,
-            volumeGainDb: 0.0,
-            useCustomVoice: false,
-          },
+          aiVoice: createTestVoiceConfig('en-US-Standard-B', 'en-US', 'MALE', 1.5),
         },
       };
       
