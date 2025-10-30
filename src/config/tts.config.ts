@@ -95,35 +95,29 @@ export const DEFAULT_VOICES: LanguageVoiceGroup[] = [
     languageCode: 'ja-JP',
     voices: [
       {
-        name: 'ja-JP-Neural2-A',
-        displayName: 'ja-JP-Neural2-A (여성)',
+        name: 'ja-JP-Standard-B',
+        displayName: 'ja-JP-Standard-B (여성)',
         gender: 'FEMALE',
         languageCode: 'ja-JP',
       },
       {
-        name: 'ja-JP-Neural2-B',
-        displayName: 'ja-JP-Neural2-B (남성)',
+        name: 'ja-JP-Standard-C',
+        displayName: 'ja-JP-Standard-C (남성)',
         gender: 'MALE',
+        languageCode: 'ja-JP',
+      },
+      {
+        name: 'ja-JP-Wavenet-B',
+        displayName: 'ja-JP-Wavenet-B (여성)',
+        gender: 'FEMALE',
         languageCode: 'ja-JP',
       },
       {
         name: 'ja-JP-Wavenet-C',
-        displayName: 'ja-JP-Wavenet-C (여성)',
-        gender: 'FEMALE',
-        languageCode: 'ja-JP',
-      },
-      {
-        name: 'ja-JP-Wavenet-D',
-        displayName: 'ja-JP-Wavenet-D (남성)',
+        displayName: 'ja-JP-Wavenet-C (남성)',
         gender: 'MALE',
         languageCode: 'ja-JP',
-      },
-      {
-        name: 'ja-JP-Standard-A',
-        displayName: 'ja-JP-Standard-A (여성)',
-        gender: 'FEMALE',
-        languageCode: 'ja-JP',
-      },
+      }
     ],
   },
   {
