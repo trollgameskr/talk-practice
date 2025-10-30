@@ -79,6 +79,8 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [voiceMethod, setVoiceMethod] = useState<string>('Web Speech API');
   const [textOnlyMode, setTextOnlyMode] = useState(false);
   const [userInputText, setUserInputText] = useState('');
+  const [initializationStatus, setInitializationStatus] = useState<string>('');
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -90,6 +92,7 @@ const ConversationScreen = ({route, navigation}: any) => {
   const sessionIdRef = useRef(generateId());
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isResumingRef = useRef(false);
+  const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Initialize log capture service
@@ -298,10 +301,60 @@ const ConversationScreen = ({route, navigation}: any) => {
   const initializeServices = async (isResuming: boolean = false) => {
     try {
       setIsLoading(true);
+      setIsInitializing(true);
+      setInitializationStatus(
+        t('conversation.initialization.checkingApiKey', {
+          defaultValue: 'Checking API key...',
+        }),
+      );
+      console.log('[ConversationScreen] Starting service initialization');
+
+      // Set up initialization timeout (20 seconds)
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
+      initTimeoutRef.current = setTimeout(() => {
+        console.error(
+          '[ConversationScreen] Initialization timeout after 20 seconds',
+        );
+        setIsLoading(false);
+        setIsInitializing(false);
+        Alert.alert(
+          t('conversation.errors.initTimeout.title', {
+            defaultValue: 'Initialization Timeout',
+          }),
+          t('conversation.errors.initTimeout.message', {
+            defaultValue:
+              'The conversation failed to start within 20 seconds. This may be due to a slow network connection or API issues. Please check the logs and try again.',
+          }),
+          [
+            {
+              text: t('conversation.buttons.copyLogs', {defaultValue: 'Copy Logs'}),
+              onPress: handleCopyLogs,
+            },
+            {
+              text: t('conversation.errors.initTimeout.goBack', {
+                defaultValue: 'Go Back',
+              }),
+              onPress: () => navigation.goBack(),
+              style: 'cancel',
+            },
+            {
+              text: t('conversation.errors.initTimeout.retry', {
+                defaultValue: 'Retry',
+              }),
+              onPress: () => initializeServices(isResuming),
+            },
+          ],
+        );
+      }, 20000); // 20 second timeout
 
       // Load API key from storage
       const apiKey = await AsyncStorage.getItem(STORAGE_KEYS.API_KEY);
       if (!apiKey) {
+        if (initTimeoutRef.current) {
+          clearTimeout(initTimeoutRef.current);
+        }
         Alert.alert(
           'API Key Required',
           'You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nGo to Settings to configure your API key.',
@@ -314,8 +367,16 @@ const ConversationScreen = ({route, navigation}: any) => {
           ],
         );
         setIsLoading(false);
+        setIsInitializing(false);
         return;
       }
+
+      setInitializationStatus(
+        t('conversation.initialization.loadingPreferences', {
+          defaultValue: 'Loading preferences...',
+        }),
+      );
+      console.log('[ConversationScreen] Loading user preferences');
 
       // Load sentence length preference from storage
       const sentenceLengthPref = await AsyncStorage.getItem(
@@ -365,6 +426,13 @@ const ConversationScreen = ({route, navigation}: any) => {
         textOnlyModePref !== null ? textOnlyModePref === 'true' : false; // Default to false
       setTextOnlyMode(loadedTextOnlyMode);
 
+      setInitializationStatus(
+        t('conversation.initialization.initializingAI', {
+          defaultValue: 'Initializing AI service...',
+        }),
+      );
+      console.log('[ConversationScreen] Initializing Gemini service');
+
       // Load language preferences
       const targetLanguage = await getTargetLanguage();
       const nativeLanguage = getCurrentLanguage();
@@ -390,6 +458,12 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Note: VoiceService uses the TTS proxy server instead of direct API calls
       // The proxy URL defaults to http://localhost:4000
       if (!loadedTextOnlyMode) {
+        setInitializationStatus(
+          t('conversation.initialization.initializingVoice', {
+            defaultValue: 'Initializing voice service...',
+          }),
+        );
+        console.log('[ConversationScreen] Initializing voice service');
         voiceService.current = new VoiceService();
         // Set the target language for TTS
         await voiceService.current.setLanguage(targetLanguage);
@@ -397,7 +471,11 @@ const ConversationScreen = ({route, navigation}: any) => {
 
       // Only start a new conversation if not resuming
       if (!isResuming) {
-        // Start conversation
+        setInitializationStatus(
+          t('conversation.initialization.startingConversation', {
+            defaultValue: 'Starting conversation...',
+          }),
+        );
         console.log(
           '[ConversationScreen] Starting new conversation with topic:',
           topic,
@@ -434,6 +512,11 @@ const ConversationScreen = ({route, navigation}: any) => {
 
         // Enrich message with translation, pronunciation, and grammar highlights
         // Pass loaded values directly to avoid relying on state (Feature 1 fix)
+        setInitializationStatus(
+          t('conversation.initialization.enrichingMessage', {
+            defaultValue: 'Preparing message...',
+          }),
+        );
         console.log('[ConversationScreen] Enriching assistant message');
         assistantMessage = await enrichAssistantMessage(assistantMessage, {
           translation: loadedShowTranslation,
@@ -449,6 +532,11 @@ const ConversationScreen = ({route, navigation}: any) => {
 
         // Generate 2 sample answer options for the user
         // Pass loaded values directly to avoid relying on state (Bug 2 fix)
+        setInitializationStatus(
+          t('conversation.initialization.generatingSamples', {
+            defaultValue: 'Generating sample responses...',
+          }),
+        );
         console.log('[ConversationScreen] Generating sample answers');
         await generateSampleAnswers(starterMessage, {
           translation: loadedShowTranslation,
@@ -459,6 +547,11 @@ const ConversationScreen = ({route, navigation}: any) => {
         // Speak the starter message (only if not in text-only mode)
         if (!loadedTextOnlyMode && voiceService.current) {
           try {
+            setInitializationStatus(
+              t('conversation.initialization.playingVoice', {
+                defaultValue: 'Playing AI voice...',
+              }),
+            );
             console.log(
               '[ConversationScreen] Starting AI speech for starter message',
             );
@@ -501,6 +594,11 @@ const ConversationScreen = ({route, navigation}: any) => {
           '[ConversationScreen] Conversation initialization complete',
         );
       } else {
+        setInitializationStatus(
+          t('conversation.initialization.restoringContext', {
+            defaultValue: 'Restoring conversation context...',
+          }),
+        );
         // When resuming, we need to restore the conversation context in Gemini
         // by replaying all the messages
         await geminiService.current.startConversation(topic);
@@ -515,14 +613,44 @@ const ConversationScreen = ({route, navigation}: any) => {
         }
       }
 
+      // Clear timeout on successful initialization
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+        initTimeoutRef.current = null;
+      }
+
+      setInitializationStatus('');
       setIsLoading(false);
+      setIsInitializing(false);
+      console.log('[ConversationScreen] Initialization completed successfully');
     } catch (error) {
-      console.error('Error initializing services:', error);
+      console.error('[ConversationScreen] Error initializing services:', error);
+      
+      // Clear timeout on error
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+        initTimeoutRef.current = null;
+      }
+
+      setInitializationStatus('');
+      setIsLoading(false);
+      setIsInitializing(false);
+
       Alert.alert(
         'Error',
-        'Failed to initialize conversation. Please check your API key in Settings.',
+        'Failed to initialize conversation. Please check your API key in Settings and review the logs for details.',
+        [
+          {
+            text: t('conversation.buttons.copyLogs', {defaultValue: 'Copy Logs'}),
+            onPress: handleCopyLogs,
+          },
+          {
+            text: 'Go to Settings',
+            onPress: () => navigation.navigate('Settings'),
+          },
+          {text: 'OK', style: 'cancel'},
+        ],
       );
-      setIsLoading(false);
     }
   };
 
@@ -543,6 +671,10 @@ const ConversationScreen = ({route, navigation}: any) => {
 
     if (autoSaveTimerRef.current) {
       clearInterval(autoSaveTimerRef.current);
+    }
+
+    if (initTimeoutRef.current) {
+      clearTimeout(initTimeoutRef.current);
     }
 
     if (geminiService.current) {
@@ -1233,6 +1365,11 @@ const ConversationScreen = ({route, navigation}: any) => {
         {isLoading && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color="#3b82f6" />
+            {isInitializing && initializationStatus && (
+              <Text style={styles.initializationStatusText}>
+                {initializationStatus}
+              </Text>
+            )}
           </View>
         )}
       </ScrollView>
@@ -1566,6 +1703,13 @@ const styles = StyleSheet.create({
   loadingContainer: {
     padding: 20,
     alignItems: 'center',
+  },
+  initializationStatusText: {
+    fontSize: 14,
+    color: '#3b82f6',
+    marginTop: 12,
+    textAlign: 'center',
+    fontWeight: '500',
   },
   controls: {
     padding: 16,
