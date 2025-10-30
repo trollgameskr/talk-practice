@@ -59,7 +59,7 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage, ttsApiKey}) =>
   // Feature 2: Update AIVoiceService when TTS API key changes
   useEffect(() => {
     const updateApiKey = async () => {
-      if (aiVoiceServiceRef.current && ttsApiKey !== undefined) {
+      if (aiVoiceServiceRef.current && ttsApiKey && ttsApiKey.trim()) {
         try {
           await aiVoiceServiceRef.current.setApiKey(ttsApiKey);
           console.log('[TTSSettings] API key updated in AIVoiceService');

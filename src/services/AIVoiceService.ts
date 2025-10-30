@@ -645,19 +645,6 @@ export class AIVoiceService {
     this.audioCache.clear();
     console.log(`[AIVoiceService] Cleared ${cacheSize} cached audio items`);
   }
-
-  /**
-   * Feature 1: Play cached audio directly
-   */
-  async playCachedAudio(text: string, voiceType: VoiceType): Promise<boolean> {
-    const cachedAudio = this.getCachedAudio(text, voiceType);
-    if (cachedAudio) {
-      console.log('[AIVoiceService] Playing cached audio');
-      await this.playAudio(cachedAudio);
-      return true;
-    }
-    return false;
-  }
 }
 
 export default AIVoiceService;
