@@ -82,7 +82,8 @@
       "stopListening": "⏹️ 停止",
       "endConversation": "練習を終了",
       "sampleAnswers": "サンプル回答",
-      "hideSamples": "サンプルを非表示"
+      "hideSamples": "サンプルを非表示",
+      "copyLogs": "📋 Copy Logs"
     },
     "status": {
       "listening": "🎤 聞いています...",
@@ -122,6 +123,11 @@
       "voicePermission": "この機能を使用するにはマイクの許可が必要です。",
       "listeningError": "リスニングエラー",
       "speakingError": "スピーキングエラー"
+    },
+    "copyLogs": {
+      "success": "Logs copied to clipboard!",
+      "error": "Failed to copy logs",
+      "noLogs": "No logs available to copy"
     }
   },
   "progress": {

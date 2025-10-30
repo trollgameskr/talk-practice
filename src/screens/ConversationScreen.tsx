@@ -27,6 +27,7 @@ import {
 import GeminiService from '../services/GeminiService';
 import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
+import LogCaptureService from '../services/LogCaptureService';
 import {generateId, formatDuration} from '../utils/helpers';
 import {STORAGE_KEYS} from '../config/gemini.config';
 import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
@@ -81,6 +82,7 @@ const ConversationScreen = ({route, navigation}: any) => {
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
+  const logCaptureService = useRef<LogCaptureService | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const sessionSavedRef = useRef(false);
@@ -90,6 +92,10 @@ const ConversationScreen = ({route, navigation}: any) => {
   const isResumingRef = useRef(false);
 
   useEffect(() => {
+    // Initialize log capture service
+    logCaptureService.current = new LogCaptureService();
+    logCaptureService.current.startCapture();
+
     checkForSavedSession();
     startTimer();
 
@@ -442,6 +448,10 @@ const ConversationScreen = ({route, navigation}: any) => {
       await voiceService.current.destroy();
     }
 
+    if (logCaptureService.current) {
+      logCaptureService.current.stopCapture();
+    }
+
     // Save session only if not already saved
     if (messages.length > 0 && !sessionSavedRef.current) {
       await saveSession();
@@ -678,6 +688,51 @@ const ConversationScreen = ({route, navigation}: any) => {
         },
       ],
     );
+  };
+
+  const handleCopyLogs = async () => {
+    try {
+      if (!logCaptureService.current) {
+        Alert.alert(
+          t('conversation.copyLogs.error'),
+          t('conversation.copyLogs.noLogs'),
+        );
+        return;
+      }
+
+      const logs = logCaptureService.current.getLogs();
+
+      // Copy to clipboard - using a cross-platform approach
+      // Type assertion for web APIs
+      const nav = typeof navigator !== 'undefined' ? (navigator as any) : null;
+      if (nav && nav.clipboard) {
+        // Modern browsers
+        await nav.clipboard.writeText(logs);
+        Alert.alert(t('conversation.copyLogs.success'));
+      } else if (
+        typeof globalThis !== 'undefined' &&
+        (globalThis as any).document
+      ) {
+        // Fallback for older browsers or environments without clipboard API
+        // Create a temporary textarea element
+        const doc = (globalThis as any).document;
+        const textarea = doc.createElement('textarea');
+        textarea.value = logs;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        doc.body.appendChild(textarea);
+        textarea.select();
+        doc.execCommand('copy');
+        doc.body.removeChild(textarea);
+        Alert.alert(t('conversation.copyLogs.success'));
+      } else {
+        // No clipboard API available
+        Alert.alert(t('conversation.copyLogs.error'));
+      }
+    } catch (error) {
+      console.error('Error copying logs:', error);
+      Alert.alert(t('conversation.copyLogs.error'));
+    }
   };
 
   const generateSampleAnswers = async (
@@ -1034,9 +1089,18 @@ const ConversationScreen = ({route, navigation}: any) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.timerText}>{formatDuration(elapsedTime)}</Text>
-        <TouchableOpacity onPress={handleEndSession} style={styles.endButton}>
-          <Text style={styles.endButtonText}>End Session</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            onPress={handleCopyLogs}
+            style={styles.copyLogsButton}>
+            <Text style={styles.copyLogsButtonText}>
+              {t('conversation.buttons.copyLogs')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleEndSession} style={styles.endButton}>
+            <Text style={styles.endButtonText}>End Session</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -1339,6 +1403,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#1f2937',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  copyLogsButton: {
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  copyLogsButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 12,
   },
   endButton: {
     backgroundColor: '#ef4444',

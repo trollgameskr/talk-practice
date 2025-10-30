@@ -82,7 +82,8 @@
       "stopListening": "⏹️ Detener",
       "endConversation": "Finalizar Práctica",
       "sampleAnswers": "Respuestas de Ejemplo",
-      "hideSamples": "Ocultar Ejemplos"
+      "hideSamples": "Ocultar Ejemplos",
+      "copyLogs": "📋 Copy Logs"
     },
     "status": {
       "listening": "🎤 Escuchando...",
@@ -122,6 +123,11 @@
       "voicePermission": "Se requiere permiso de micrófono para usar esta función.",
       "listeningError": "Error al escuchar",
       "speakingError": "Error al hablar"
+    },
+    "copyLogs": {
+      "success": "Logs copied to clipboard!",
+      "error": "Failed to copy logs",
+      "noLogs": "No logs available to copy"
     }
   },
   "progress": {

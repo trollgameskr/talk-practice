@@ -82,7 +82,8 @@
       "stopListening": "⏹️ Stop",
       "endConversation": "End Practice",
       "sampleAnswers": "Sample Answers",
-      "hideSamples": "Hide Samples"
+      "hideSamples": "Hide Samples",
+      "copyLogs": "📋 Copy Logs"
     },
     "status": {
       "listening": "🎤 Listening...",
@@ -134,6 +135,11 @@
         "message": "The AI generated a response but speech playback didn't start.\n\nPossible causes:\n• TTS service response delay\n• Slow network connection\n• Browser audio playback blocked\n\n💡 You can read the text response and continue the conversation.\n\nCheck the browser console logs for detailed information.",
         "continue": "Continue"
       }
+    },
+    "copyLogs": {
+      "success": "Logs copied to clipboard!",
+      "error": "Failed to copy logs",
+      "noLogs": "No logs available to copy"
     }
   },
   "progress": {
