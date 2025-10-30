@@ -94,6 +94,15 @@ const ConversationScreen = ({route, navigation}: any) => {
   const sessionIdRef = useRef(generateId());
   const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Calculate progress percentage
+  const progressPercentage = Math.round(
+    (elapsedTime / CONVERSATION_CONFIG.maxDuration) * 100,
+  );
+  const isTimeUp = elapsedTime >= CONVERSATION_CONFIG.maxDuration;
+  const remainingTimeText = isTimeUp
+    ? 'Time limit reached'
+    : `${formatDuration(CONVERSATION_CONFIG.maxDuration - elapsedTime)} remaining`;
+
   useEffect(() => {
     // Initialize log capture service
     logCaptureService.current = new LogCaptureService();
@@ -1207,23 +1216,14 @@ const ConversationScreen = ({route, navigation}: any) => {
                 style={[
                   styles.progressBarFill,
                   {
-                    width: `${Math.min(
-                      (elapsedTime / CONVERSATION_CONFIG.maxDuration) * 100,
-                      100,
-                    )}%`,
-                    backgroundColor:
-                      elapsedTime >= CONVERSATION_CONFIG.maxDuration
-                        ? '#ef4444'
-                        : '#3b82f6',
+                    width: `${Math.min(progressPercentage, 100)}%`,
+                    backgroundColor: isTimeUp ? '#ef4444' : '#3b82f6',
                   },
                 ]}
               />
             </View>
             <Text style={styles.progressText}>
-              {Math.round(
-                (elapsedTime / CONVERSATION_CONFIG.maxDuration) * 100,
-              )}
-              % • {elapsedTime >= CONVERSATION_CONFIG.maxDuration ? 'Time limit reached' : `${formatDuration(CONVERSATION_CONFIG.maxDuration - elapsedTime)} remaining`}
+              {progressPercentage}% • {remainingTimeText}
             </Text>
           </View>
         </View>
@@ -1252,7 +1252,8 @@ const ConversationScreen = ({route, navigation}: any) => {
         contentContainerStyle={styles.messagesContent}>
         {messages.map((message, index) => {
           const isLastMessage = index === messages.length - 1;
-          const isLastAIMessage = message.role === 'assistant' && isLastMessage;
+          // Find the last AI message - check if this is the last message and it's from assistant
+          const isLastAIMessage = isLastMessage && message.role === 'assistant';
           
           return (
             <View
