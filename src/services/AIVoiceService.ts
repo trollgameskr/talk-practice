@@ -346,8 +346,27 @@ export class AIVoiceService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        
+        // Check for 403 SERVICE_DISABLED error specifically
+        if (response.status === 403 && errorData.error) {
+          const error = errorData.error;
+          const isServiceDisabled = 
+            error.status === 'PERMISSION_DENIED' &&
+            (error.message?.includes('Cloud Text-to-Speech API has not been used') ||
+             error.message?.includes('it is disabled'));
+          
+          if (isServiceDisabled) {
+            // Create a detailed error for 403 SERVICE_DISABLED
+            const detailedError = new Error('TTS_API_NOT_ENABLED');
+            (detailedError as any).status = 403;
+            (detailedError as any).errorData = errorData;
+            (detailedError as any).isServiceDisabled = true;
+            throw detailedError;
+          }
+        }
+        
         const errorMsg = `API request failed: ${response.status} - ${
-          errorData.error || 'Unknown error'
+          errorData.error?.message || errorData.error || 'Unknown error'
         }`;
         console.error('[AIVoiceService] TTS API request failed', {
           status: response.status,
@@ -355,7 +374,10 @@ export class AIVoiceService {
           url: apiMethod === 'direct' ? 'Google Cloud TTS API' : url,
           fetchTimeMs: fetchTime,
         });
-        throw new Error(errorMsg);
+        const error = new Error(errorMsg);
+        (error as any).status = response.status;
+        (error as any).errorData = errorData;
+        throw error;
       }
 
       const data = await response.json();

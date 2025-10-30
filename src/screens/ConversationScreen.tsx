@@ -28,7 +28,7 @@ import GeminiService from '../services/GeminiService';
 import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
 import LogCaptureService from '../services/LogCaptureService';
-import {generateId, formatDuration} from '../utils/helpers';
+import {generateId, formatDuration, openURL} from '../utils/helpers';
 import {STORAGE_KEYS} from '../config/gemini.config';
 import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
 
@@ -225,6 +225,75 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
+  /**
+   * Helper function to handle TTS errors consistently
+   */
+  const handleTTSError = (speechError: any) => {
+    // Check if this is a TTS_API_NOT_ENABLED error (Feature 3)
+    const error = speechError as any;
+    if (error.message === 'TTS_API_NOT_ENABLED' && error.isServiceDisabled) {
+      // Extract project ID from error data if available
+      let projectId = '';
+      let activationUrl = '';
+      
+      if (error.errorData?.error?.details) {
+        const details = error.errorData.error.details.find(
+          (d: any) => d['@type']?.includes('ErrorInfo')
+        );
+        if (details?.metadata?.consumer) {
+          projectId = details.metadata.consumer.replace('projects/', '');
+        }
+        if (details?.metadata?.activationUrl) {
+          activationUrl = details.metadata.activationUrl;
+        }
+      }
+      
+      // Build console URL
+      const consoleUrl = activationUrl || 
+        `https://console.developers.google.com/apis/api/texttospeech.googleapis.com/overview?project=${projectId}`;
+      
+      // Show specific error for TTS API not enabled
+      Alert.alert(
+        t('conversation.errors.ttsApiNotEnabled.title'),
+        t('conversation.errors.ttsApiNotEnabled.message'),
+        [
+          {
+            text: t('conversation.errors.ttsApiNotEnabled.continue'),
+            style: 'cancel',
+          },
+          {
+            text: t('conversation.errors.ttsApiNotEnabled.openConsole'),
+            onPress: async () => {
+              if (consoleUrl) {
+                await openURL(consoleUrl);
+              }
+            },
+          },
+          {
+            text: t('conversation.errors.ttsApiNotEnabled.usDeviceTTS'),
+            onPress: () => navigation.navigate('Settings'),
+          },
+        ],
+      );
+    } else {
+      // Show generic error message for other errors
+      Alert.alert(
+        t('conversation.errors.aiSpeechFailed.title'),
+        t('conversation.errors.aiSpeechFailed.message'),
+        [
+          {
+            text: t('conversation.errors.aiSpeechFailed.continue'),
+            style: 'cancel',
+          },
+          {
+            text: t('conversation.errors.aiSpeechFailed.goToSettings'),
+            onPress: () => navigation.navigate('Settings'),
+          },
+        ],
+      );
+    }
+  };
+
   const initializeServices = async (isResuming: boolean = false) => {
     try {
       setIsLoading(true);
@@ -380,21 +449,9 @@ const ConversationScreen = ({route, navigation}: any) => {
                 starterMessageLength: starterMessage.length,
               },
             );
-            // Show user-friendly error message
-            Alert.alert(
-              t('conversation.errors.aiSpeechFailed.title'),
-              t('conversation.errors.aiSpeechFailed.message'),
-              [
-                {
-                  text: t('conversation.errors.aiSpeechFailed.continue'),
-                  style: 'cancel',
-                },
-                {
-                  text: t('conversation.errors.aiSpeechFailed.goToSettings'),
-                  onPress: () => navigation.navigate('Settings'),
-                },
-              ],
-            );
+            
+            // Use helper function to handle TTS error
+            handleTTSError(speechError);
           }
         }
       } else {
@@ -641,21 +698,8 @@ const ConversationScreen = ({route, navigation}: any) => {
                 : String(speechError),
             responseLength: response.length,
           });
-          // Show user-friendly error message
-          Alert.alert(
-            t('conversation.errors.aiSpeechFailed.title'),
-            t('conversation.errors.aiSpeechFailed.message'),
-            [
-              {
-                text: t('conversation.errors.aiSpeechFailed.continue'),
-                style: 'cancel',
-              },
-              {
-                text: t('conversation.errors.aiSpeechFailed.goToSettings'),
-                onPress: () => navigation.navigate('Settings'),
-              },
-            ],
-          );
+          // Use helper function to handle TTS error
+          handleTTSError(speechError);
         } finally {
           setIsSpeaking(false);
         }
@@ -880,17 +924,8 @@ const ConversationScreen = ({route, navigation}: any) => {
               sampleLength: sample.length,
             },
           );
-          // Show user-friendly error message
-          Alert.alert(
-            t('conversation.errors.aiSpeechFailed.title'),
-            t('conversation.errors.aiSpeechFailed.message'),
-            [
-              {
-                text: t('conversation.errors.aiSpeechFailed.continue'),
-                style: 'cancel',
-              },
-            ],
-          );
+          // Use helper function to handle TTS error
+          handleTTSError(speechError);
         } finally {
           setIsSpeaking(false);
           // Hide the modal after voice playback attempt

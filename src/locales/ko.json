@@ -123,6 +123,13 @@
       "voicePermission": "이 기능을 사용하려면 마이크 권한이 필요합니다.",
       "listeningError": "듣기 오류",
       "speakingError": "말하기 오류",
+      "ttsApiNotEnabled": {
+        "title": "Google Cloud TTS API 활성화 필요",
+        "message": "Google Cloud Text-to-Speech API가 프로젝트에서 활성화되지 않았습니다.\n\n해결 방법:\n1. 아래 링크를 클릭하여 Google Cloud Console로 이동\n2. 'API 사용 설정' 버튼 클릭\n3. 몇 분 후 다시 시도\n\n💡 API를 활성화한 직후에는 시스템에 반영되는 데 몇 분이 걸릴 수 있습니다.",
+        "openConsole": "Google Cloud Console 열기",
+        "usDeviceTTS": "기기 음성 사용",
+        "continue": "계속"
+      },
       "aiSpeechFailed": {
         "title": "AI 음성 재생 실패",
         "message": "AI가 응답을 말하는 데 실패했습니다.\n\n가능한 원인:\n• TTS API 키 또는 프록시가 구성되지 않았습니다\n• 네트워크 연결 문제\n• TTS 서비스 일시적 오류\n\n💡 텍스트 응답을 읽을 수 있으며 대화를 계속할 수 있습니다.\n\n자세한 내용은 브라우저 콘솔 로그를 확인하세요.",
@@ -208,6 +215,19 @@
           "invalid": "API 키 형식이 잘못된 것 같습니다. 확인하고 다시 시도하세요."
         },
         "success": "API 키가 성공적으로 저장되었습니다!"
+      },
+      "tts": {
+        "title": "🎤 TTS 설정",
+        "description": "음성 합성 방법을 선택하세요",
+        "provider": {
+          "label": "TTS 제공자",
+          "googleCloud": "Google Cloud TTS (AI 음성)",
+          "device": "기기 TTS (기본 음성)",
+          "description": "Google Cloud TTS는 자연스러운 AI 음성을 제공하지만 API 키가 필요합니다. 기기 TTS는 기본 제공되는 음성을 사용합니다."
+        },
+        "apiKeyInfo": "💡 Google Cloud TTS를 사용하려면 TTS API 키를 설정해야 합니다. Gemini API 키와 동일한 키를 사용할 수 있습니다.",
+        "firstTimeInfo": "ℹ️ 첫 실행 시 Google Cloud TTS가 기본으로 선택됩니다. API 키를 설정하지 않은 경우 위의 TTS API 구성 섹션에서 설정하세요.",
+        "success": "TTS 제공자가 저장되었습니다!"
       },
       "conversation": {
         "title": "🗣️ 대화 설정",

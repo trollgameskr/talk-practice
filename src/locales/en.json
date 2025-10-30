@@ -123,6 +123,13 @@
       "voicePermission": "Microphone permission is required to use this feature.",
       "listeningError": "Error listening",
       "speakingError": "Error speaking",
+      "ttsApiNotEnabled": {
+        "title": "Google Cloud TTS API Not Enabled",
+        "message": "The Cloud Text-to-Speech API has not been enabled in your project.\n\nHow to fix:\n1. Click the link below to open Google Cloud Console\n2. Click 'Enable API' button\n3. Wait a few minutes and try again\n\n💡 After enabling the API, it may take a few minutes for the changes to propagate.",
+        "openConsole": "Open Google Cloud Console",
+        "usDeviceTTS": "Use Device TTS",
+        "continue": "Continue"
+      },
       "aiSpeechFailed": {
         "title": "AI Speech Failed",
         "message": "The AI failed to speak the response.\n\nPossible causes:\n• TTS API key or proxy not configured\n• Network connection issues\n• TTS service temporary error\n\n💡 You can read the text response and continue the conversation.\n\nCheck the browser console logs for detailed error information.",
@@ -208,6 +215,19 @@
           "invalid": "The API key format appears to be invalid. Please check and try again."
         },
         "success": "API key saved successfully!"
+      },
+      "tts": {
+        "title": "🎤 TTS Settings",
+        "description": "Choose your text-to-speech provider",
+        "provider": {
+          "label": "TTS Provider",
+          "googleCloud": "Google Cloud TTS (AI Voice)",
+          "device": "Device TTS (Native Voice)",
+          "description": "Google Cloud TTS provides natural AI voices but requires an API key. Device TTS uses your system's built-in voices."
+        },
+        "apiKeyInfo": "💡 To use Google Cloud TTS, you need to set up a TTS API key. You can use the same key as your Gemini API key.",
+        "firstTimeInfo": "ℹ️ On first run, Google Cloud TTS is selected by default. If you haven't set up an API key, please configure it in the TTS API Configuration section above.",
+        "success": "TTS provider saved!"
       },
       "conversation": {
         "title": "🗣️ Conversation Settings",
