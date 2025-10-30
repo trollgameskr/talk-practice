@@ -2,6 +2,20 @@
  * Tests for SessionInfoModal component
  */
 
+// Helper functions from SessionInfoModal component
+const formatTokens = (tokens: number): string => {
+  if (tokens >= 1000000) {
+    return `${(tokens / 1000000).toFixed(1)}M`;
+  } else if (tokens >= 1000) {
+    return `${(tokens / 1000).toFixed(1)}K`;
+  }
+  return tokens.toString();
+};
+
+const formatCost = (cost: number): string => {
+  return `$${cost.toFixed(4)}`;
+};
+
 describe('SessionInfoModal', () => {
   describe('Modal visibility and props', () => {
     it('should accept all required props', () => {
@@ -48,44 +62,17 @@ describe('SessionInfoModal', () => {
 
   describe('Token formatting', () => {
     it('should format small token numbers correctly', () => {
-      const formatTokens = (tokens: number): string => {
-        if (tokens >= 1000000) {
-          return `${(tokens / 1000000).toFixed(1)}M`;
-        } else if (tokens >= 1000) {
-          return `${(tokens / 1000).toFixed(1)}K`;
-        }
-        return tokens.toString();
-      };
-
       expect(formatTokens(100)).toBe('100');
       expect(formatTokens(500)).toBe('500');
     });
 
     it('should format thousands correctly', () => {
-      const formatTokens = (tokens: number): string => {
-        if (tokens >= 1000000) {
-          return `${(tokens / 1000000).toFixed(1)}M`;
-        } else if (tokens >= 1000) {
-          return `${(tokens / 1000).toFixed(1)}K`;
-        }
-        return tokens.toString();
-      };
-
       expect(formatTokens(1000)).toBe('1.0K');
       expect(formatTokens(1500)).toBe('1.5K');
       expect(formatTokens(2500)).toBe('2.5K');
     });
 
     it('should format millions correctly', () => {
-      const formatTokens = (tokens: number): string => {
-        if (tokens >= 1000000) {
-          return `${(tokens / 1000000).toFixed(1)}M`;
-        } else if (tokens >= 1000) {
-          return `${(tokens / 1000).toFixed(1)}K`;
-        }
-        return tokens.toString();
-      };
-
       expect(formatTokens(1000000)).toBe('1.0M');
       expect(formatTokens(1500000)).toBe('1.5M');
       expect(formatTokens(2500000)).toBe('2.5M');
@@ -94,10 +81,6 @@ describe('SessionInfoModal', () => {
 
   describe('Cost formatting', () => {
     it('should format cost correctly', () => {
-      const formatCost = (cost: number): string => {
-        return `$${cost.toFixed(4)}`;
-      };
-
       expect(formatCost(0.0015)).toBe('$0.0015');
       expect(formatCost(0.02)).toBe('$0.0200');
       expect(formatCost(1.2345)).toBe('$1.2345');
@@ -142,4 +125,5 @@ describe('SessionInfoModal', () => {
     });
   });
 });
+
 
