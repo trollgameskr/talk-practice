@@ -34,6 +34,8 @@ export class AIVoiceService {
   private currentLanguage: string = 'en';
   private proxyUrl: string = '';
   private apiKey: string = '';
+  // Feature 1: Audio cache for replay
+  private audioCache: Map<string, string> = new Map(); // Map of text hash to base64 audio
 
   constructor(proxyUrl?: string) {
     // Accept proxy URL for backward compatibility (local development)
@@ -159,13 +161,15 @@ export class AIVoiceService {
    * Uses Google Cloud TTS API
    * @param text Text to speak
    * @param voiceType Type of voice to use: 'ai' for AI responses, 'user' for user response samples
+   * @param useCache Whether to use cached audio (Feature 1)
    */
-  async speak(text: string, voiceType: VoiceType = 'ai'): Promise<void> {
+  async speak(text: string, voiceType: VoiceType = 'ai', useCache: boolean = true): Promise<void> {
     const startTime = Date.now();
     console.log('[AIVoiceService] Starting speech synthesis', {
       textLength: text.length,
       textPreview: text.substring(0, 50),
       voiceType,
+      useCache,
       hasApiKey: !!this.apiKey,
       hasProxyUrl: !!this.proxyUrl,
       timestamp: new Date().toISOString(),
@@ -178,6 +182,20 @@ export class AIVoiceService {
     }
 
     try {
+      // Feature 1: Check cache first if enabled
+      if (useCache) {
+        const cachedAudio = this.getCachedAudio(text, voiceType);
+        if (cachedAudio) {
+          console.log('[AIVoiceService] Using cached audio');
+          await this.playAudio(cachedAudio);
+          const totalTime = Date.now() - startTime;
+          console.log('[AIVoiceService] Cached speech playback completed', {
+            totalTimeMs: totalTime,
+          });
+          return;
+        }
+      }
+
       // Use Google Cloud TTS API for AI voice generation
       const audioContent = await this.generateAIVoice(text, voiceType);
       const generationTime = Date.now() - startTime;
@@ -187,6 +205,12 @@ export class AIVoiceService {
           generationTimeMs: generationTime,
           audioContentLength: audioContent.length,
         });
+        
+        // Feature 1: Cache the generated audio
+        if (useCache) {
+          this.cacheAudio(text, voiceType, audioContent);
+        }
+        
         await this.playAudio(audioContent);
         const totalTime = Date.now() - startTime;
         console.log('[AIVoiceService] Speech synthesis completed', {
@@ -575,6 +599,64 @@ export class AIVoiceService {
   async destroy() {
     await this.stopSpeaking();
     this.isInitialized = false;
+    // Feature 1: Clear audio cache on destroy
+    this.clearAudioCache();
+  }
+
+  /**
+   * Feature 1: Create a cache key from text and voice config
+   */
+  private getCacheKey(text: string, voiceType: VoiceType): string {
+    const ttsConfig = this.getTTSConfigForLanguage(this.currentLanguage);
+    const voiceConfig: VoiceConfig =
+      voiceType === 'ai' ? ttsConfig.aiVoice : ttsConfig.userVoice;
+    
+    const voiceName =
+      voiceConfig.useCustomVoice && voiceConfig.customVoiceName
+        ? voiceConfig.customVoiceName
+        : voiceConfig.voiceName;
+    
+    // Create a unique key based on text, voice, and language
+    return `${text}|${voiceName}|${this.currentLanguage}|${voiceConfig.speakingRate}`;
+  }
+
+  /**
+   * Feature 1: Get cached audio data
+   */
+  getCachedAudio(text: string, voiceType: VoiceType): string | null {
+    const key = this.getCacheKey(text, voiceType);
+    return this.audioCache.get(key) || null;
+  }
+
+  /**
+   * Feature 1: Cache audio data
+   */
+  private cacheAudio(text: string, voiceType: VoiceType, audioData: string): void {
+    const key = this.getCacheKey(text, voiceType);
+    this.audioCache.set(key, audioData);
+    console.log(`[AIVoiceService] Cached audio for key: ${key.substring(0, 50)}...`);
+  }
+
+  /**
+   * Feature 1: Clear all cached audio
+   */
+  clearAudioCache(): void {
+    const cacheSize = this.audioCache.size;
+    this.audioCache.clear();
+    console.log(`[AIVoiceService] Cleared ${cacheSize} cached audio items`);
+  }
+
+  /**
+   * Feature 1: Play cached audio directly
+   */
+  async playCachedAudio(text: string, voiceType: VoiceType): Promise<boolean> {
+    const cachedAudio = this.getCachedAudio(text, voiceType);
+    if (cachedAudio) {
+      console.log('[AIVoiceService] Playing cached audio');
+      await this.playAudio(cachedAudio);
+      return true;
+    }
+    return false;
   }
 }
 
