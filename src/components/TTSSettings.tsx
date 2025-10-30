@@ -7,6 +7,7 @@ import {
   TextInput,
   Alert,
   Switch,
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTheme} from '../contexts/ThemeContext';
@@ -26,6 +27,7 @@ import {
 import {STORAGE_KEYS} from '../config/gemini.config';
 import {openURL} from '../utils/helpers';
 import {migrateOldTTSConfig} from '../utils/ttsMigration';
+import AIVoiceService, {VoiceType} from '../services/AIVoiceService';
 
 interface TTSSettingsProps {
   targetLanguage: string;
@@ -35,10 +37,22 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
   const {theme} = useTheme();
   const [config, setConfig] = useState<TTSConfig>(DEFAULT_TTS_CONFIG);
   const [selectedLanguageGroup, setSelectedLanguageGroup] = useState(0);
-  const isInitialMount = useRef(true);
+  const [isPlayingAIPreview, setIsPlayingAIPreview] = useState(false);
+  const [isPlayingUserPreview, setIsPlayingUserPreview] = useState(false);
+  const aiVoiceServiceRef = useRef<AIVoiceService | null>(null);
 
   useEffect(() => {
     loadTTSConfigForLanguage(targetLanguage);
+    // Initialize AIVoiceService
+    if (!aiVoiceServiceRef.current) {
+      aiVoiceServiceRef.current = new AIVoiceService();
+    }
+    // Cleanup on unmount
+    return () => {
+      if (aiVoiceServiceRef.current) {
+        aiVoiceServiceRef.current.destroy();
+      }
+    };
   }, [targetLanguage]);
 
   const loadTTSConfigForLanguage = async (langCode: string) => {
@@ -51,13 +65,14 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
         STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
       );
       let savedConfigs: LanguageTTSConfigs = {};
-      
+
       if (savedConfigsStr) {
         savedConfigs = JSON.parse(savedConfigsStr);
       }
 
       // Get config for current language or use default
-      const langConfig = savedConfigs[langCode] || getDefaultTTSConfigForLanguage(langCode);
+      const langConfig =
+        savedConfigs[langCode] || getDefaultTTSConfigForLanguage(langCode);
       setConfig(langConfig);
 
       // Set the language group
@@ -77,7 +92,7 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
         STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
       );
       let savedConfigs: LanguageTTSConfigs = {};
-      
+
       if (savedConfigsStr) {
         savedConfigs = JSON.parse(savedConfigsStr);
       }
@@ -90,8 +105,15 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
         STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
         JSON.stringify(savedConfigs),
       );
-      
+
       setConfig(newConfig);
+
+      // Update AIVoiceService with new config
+      if (aiVoiceServiceRef.current) {
+        await aiVoiceServiceRef.current.setLanguage(targetLanguage);
+        await aiVoiceServiceRef.current.updateTTSConfig(newConfig);
+      }
+
       Alert.alert('성공', 'TTS 설정이 저장되었습니다.');
     } catch (error) {
       console.error('Error saving TTS config:', error);
@@ -163,6 +185,84 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
     await openURL(TTS_DOCUMENTATION_URL);
   };
 
+  const getSampleTextForLanguage = (langCode: string): string => {
+    const sampleTexts: {[key: string]: string} = {
+      en: 'Hello! This is a preview of the selected voice. You can adjust the speed and other settings.',
+      ko: '안녕하세요! 선택하신 음성의 미리듣기입니다. 속도와 다른 설정을 조정할 수 있습니다.',
+      ja: 'こんにちは！選択した音声のプレビューです。速度やその他の設定を調整できます。',
+      zh: '你好！这是所选语音的预览。您可以调整速度和其他设置。',
+      es: '¡Hola! Esta es una vista previa de la voz seleccionada. Puede ajustar la velocidad y otras configuraciones.',
+      fr: "Bonjour! Ceci est un aperçu de la voix sélectionnée. Vous pouvez ajuster la vitesse et d'autres paramètres.",
+      de: 'Hallo! Dies ist eine Vorschau der ausgewählten Stimme. Sie können die Geschwindigkeit und andere Einstellungen anpassen.',
+    };
+    return sampleTexts[langCode] || sampleTexts.en;
+  };
+
+  const handlePreview = async (voiceType: VoiceType) => {
+    if (!aiVoiceServiceRef.current) {
+      Alert.alert('오류', 'TTS 서비스를 초기화할 수 없습니다.');
+      return;
+    }
+
+    // Check if already playing
+    if (voiceType === 'ai' && isPlayingAIPreview) {
+      return;
+    }
+    if (voiceType === 'user' && isPlayingUserPreview) {
+      return;
+    }
+
+    try {
+      // Set loading state
+      if (voiceType === 'ai') {
+        setIsPlayingAIPreview(true);
+      } else {
+        setIsPlayingUserPreview(true);
+      }
+
+      // Update AIVoiceService with current config before playing
+      await aiVoiceServiceRef.current.setLanguage(targetLanguage);
+      await aiVoiceServiceRef.current.updateTTSConfig(config);
+
+      // Get sample text for the current language
+      const sampleText = getSampleTextForLanguage(targetLanguage);
+
+      // Play the preview
+      await aiVoiceServiceRef.current.speak(sampleText, voiceType);
+    } catch (error) {
+      console.error('Preview playback error:', error);
+
+      // Check for specific error types
+      if (error instanceof Error) {
+        if (error.message === 'TTS_API_NOT_ENABLED') {
+          Alert.alert(
+            'TTS API 활성화 필요',
+            'Google Cloud Text-to-Speech API가 활성화되어 있지 않습니다. Google Cloud Console에서 API를 활성화해주세요.',
+          );
+        } else if (error.message.includes('API key or proxy not configured')) {
+          Alert.alert(
+            '설정 필요',
+            'TTS API 키가 설정되지 않았습니다. 설정 화면에서 TTS API 키를 입력해주세요.',
+          );
+        } else {
+          Alert.alert(
+            '재생 오류',
+            `미리듣기 재생 중 오류가 발생했습니다: ${error.message}`,
+          );
+        }
+      } else {
+        Alert.alert('재생 오류', '미리듣기 재생 중 오류가 발생했습니다.');
+      }
+    } finally {
+      // Clear loading state
+      if (voiceType === 'ai') {
+        setIsPlayingAIPreview(false);
+      } else {
+        setIsPlayingUserPreview(false);
+      }
+    }
+  };
+
   const currentVoices = DEFAULT_VOICES[selectedLanguageGroup]?.voices || [];
 
   // Helper function to render voice configuration section
@@ -174,13 +274,19 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
     onSpeakingRateChange: (rate: number) => void,
     onCustomVoiceToggle: (value: boolean) => void,
     onConfigChange: (updatedConfig: Partial<VoiceConfig>) => void,
+    voiceType: VoiceType,
+    isPlayingPreview: boolean,
   ) => (
     <>
       <View style={styles.voiceSectionHeader}>
         <Text style={[styles.voiceSectionTitle, {color: theme.colors.primary}]}>
           {title}
         </Text>
-        <Text style={[styles.voiceSectionDescription, {color: theme.colors.textSecondary}]}>
+        <Text
+          style={[
+            styles.voiceSectionDescription,
+            {color: theme.colors.textSecondary},
+          ]}>
           {description}
         </Text>
       </View>
@@ -221,6 +327,44 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
           theme={theme}
           style={styles.pickerContainer}
         />
+      </View>
+
+      {/* Preview Button */}
+      <View style={styles.optionGroup}>
+        <TouchableOpacity
+          style={[
+            styles.previewButton,
+            {
+              backgroundColor: theme.colors.buttonPrimary,
+              opacity: isPlayingPreview ? 0.6 : 1,
+            },
+          ]}
+          onPress={() => handlePreview(voiceType)}
+          disabled={isPlayingPreview}>
+          {isPlayingPreview ? (
+            <View style={styles.previewButtonContent}>
+              <ActivityIndicator
+                size="small"
+                color={theme.colors.buttonPrimaryText}
+              />
+              <Text
+                style={[
+                  styles.previewButtonText,
+                  {color: theme.colors.buttonPrimaryText, marginLeft: 8},
+                ]}>
+                재생 중...
+              </Text>
+            </View>
+          ) : (
+            <Text
+              style={[
+                styles.previewButtonText,
+                {color: theme.colors.buttonPrimaryText},
+              ]}>
+              🔊 미리듣기
+            </Text>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Custom Voice Toggle */}
@@ -271,9 +415,7 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
                 },
               ]}
               value={voiceConfig.customVoiceName || ''}
-              onChangeText={text =>
-                onConfigChange({customVoiceName: text})
-              }
+              onChangeText={text => onConfigChange({customVoiceName: text})}
               placeholder="예: en-US-Standard-B"
               placeholderTextColor={theme.colors.textTertiary}
               autoCapitalize="none"
@@ -294,9 +436,7 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
                 },
               ]}
               value={voiceConfig.customLanguageCode || ''}
-              onChangeText={text =>
-                onConfigChange({customLanguageCode: text})
-              }
+              onChangeText={text => onConfigChange({customLanguageCode: text})}
               placeholder="예: en-US"
               placeholderTextColor={theme.colors.textTertiary}
               autoCapitalize="none"
@@ -378,13 +518,15 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
         handleAIVoiceChange,
         handleAISpeakingRateChange,
         handleAICustomVoiceToggle,
-        (updates) => {
+        updates => {
           const newConfig = {
             ...config,
             aiVoice: {...config.aiVoice, ...updates},
           };
           setConfig(newConfig);
         },
+        'ai',
+        isPlayingAIPreview,
       )}
 
       {/* Separator */}
@@ -398,13 +540,15 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
         handleUserVoiceChange,
         handleUserSpeakingRateChange,
         handleUserCustomVoiceToggle,
-        (updates) => {
+        updates => {
           const newConfig = {
             ...config,
             userVoice: {...config.userVoice, ...updates},
           };
           setConfig(newConfig);
         },
+        'user',
+        isPlayingUserPreview,
       )}
 
       {/* Save Button */}
@@ -450,7 +594,8 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
             {color: theme.colors.primaryDark},
             {marginTop: 8},
           ]}>
-          🗣️ 현재 언어: {DEFAULT_VOICES[selectedLanguageGroup]?.language || '영어'}
+          🗣️ 현재 언어:{' '}
+          {DEFAULT_VOICES[selectedLanguageGroup]?.language || '영어'}
         </Text>
       </View>
     </View>
@@ -567,6 +712,21 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 13,
     lineHeight: 18,
+  },
+  previewButton: {
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  previewButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  previewButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
