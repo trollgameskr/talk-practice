@@ -60,10 +60,11 @@ export class LogCaptureService {
         })
         .join(' ');
 
-      // Check if this is a log we want to capture (AIVoiceService or VoiceService)
+      // Check if this is a log we want to capture (AIVoiceService, VoiceService, or DeviceTTSService)
       if (
         message.includes('[AIVoiceService]') ||
-        message.includes('[VoiceService]')
+        message.includes('[VoiceService]') ||
+        message.includes('[DeviceTTSService]')
       ) {
         const logEntry = `[${timestamp}] ${level}: ${message}`;
         this.logs.push(logEntry);
