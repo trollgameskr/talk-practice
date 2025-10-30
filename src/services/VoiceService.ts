@@ -17,21 +17,7 @@ export class VoiceService {
   private deviceTTSService: DeviceTTSService;
   private ttsProvider: TTSProvider = 'google-cloud'; // Default to Google Cloud
   private lastProcessedResult: string = '';
-  private resultProcessingTimeout: NodeJS.Timeout | null = null;
-  private isProcessingFinalResult: boolean = false;
-
-  /**
-   * Debounce delay for speech result processing (in milliseconds)
-   * 
-   * Increased to 500ms (from 100ms) to better handle mobile voice recognition issues:
-   * - Mobile devices often fire multiple intermediate results during speech
-   * - The longer delay prevents processing partial/intermediate results
-   * - Works together with onSpeechPartialResults handler to ignore incomplete sentences
-   * - Value chosen based on mobile testing to balance responsiveness vs accuracy
-   * 
-   * Note: If users on slower devices experience delays, this can be reduced to 300ms
-   */
-  private static readonly RESULT_DEBOUNCE_DELAY = 500;
+  private latestRecognizedText: string = ''; // Store latest result from onSpeechResults
 
   constructor(proxyUrl?: string) {
     this.initializeVoice();
@@ -56,7 +42,9 @@ export class VoiceService {
    */
   private async loadTTSProvider() {
     try {
-      const savedProvider = await AsyncStorage.getItem(STORAGE_KEYS.TTS_PROVIDER);
+      const savedProvider = await AsyncStorage.getItem(
+        STORAGE_KEYS.TTS_PROVIDER,
+      );
       if (savedProvider) {
         this.ttsProvider = savedProvider as TTSProvider;
         console.log('VoiceService: Loaded TTS provider:', this.ttsProvider);
@@ -124,13 +112,7 @@ export class VoiceService {
       // Clear the last processed result when stopping
       // so next session starts fresh
       this.lastProcessedResult = '';
-      this.isProcessingFinalResult = false;
-
-      // Clear any pending result processing
-      if (this.resultProcessingTimeout) {
-        clearTimeout(this.resultProcessingTimeout);
-        this.resultProcessingTimeout = null;
-      }
+      this.latestRecognizedText = '';
     } catch (error) {
       console.error('Error stopping voice recognition:', error);
     }
@@ -143,6 +125,8 @@ export class VoiceService {
     try {
       await Voice.cancel();
       this.isListening = false;
+      this.latestRecognizedText = '';
+      this.lastProcessedResult = '';
     } catch (error) {
       console.error('Error canceling voice recognition:', error);
     }
@@ -171,7 +155,7 @@ export class VoiceService {
       } else {
         await this.aiVoiceService.speak(text, voiceType);
       }
-      
+
       const duration = Date.now() - startTime;
       console.log('[VoiceService] Speech completed successfully', {
         durationMs: duration,
@@ -260,6 +244,29 @@ export class VoiceService {
 
   private onSpeechEnd(e: any) {
     console.log('Speech ended:', e);
+
+    // Process the latest recognized text when speech ends
+    // This ensures we only process the final result after the user stops speaking
+    // preventing multiple incremental results from being processed on mobile
+    if (this.latestRecognizedText !== '' && this.onResultCallback) {
+      const finalText = this.latestRecognizedText;
+
+      // Check if this result has already been processed
+      if (finalText !== this.lastProcessedResult) {
+        console.log('Processing final speech result on speech end:', finalText);
+        this.lastProcessedResult = finalText;
+
+        // Call the callback with the final result
+        this.onResultCallback(finalText);
+      } else {
+        console.log('Skipping duplicate result on speech end:', finalText);
+      }
+
+      // Clear after attempting to process to prevent reprocessing
+      // even if onSpeechEnd is called multiple times
+      this.latestRecognizedText = '';
+    }
+
     // Don't automatically set isListening to false here
     // The user controls when to stop listening via the toggle button
   }
@@ -274,49 +281,26 @@ export class VoiceService {
   }
 
   private onSpeechResults(e: any) {
-    console.log('Final speech results:', e);
-    
-    // Skip if we're already processing a final result
-    if (this.isProcessingFinalResult) {
-      console.log('Skipping result - already processing a final result');
-      return;
-    }
-    
-    if (e.value && e.value.length > 0 && this.onResultCallback) {
+    console.log('Speech results received:', e);
+
+    // On mobile, onSpeechResults can be called multiple times with incremental results
+    // like "I", "I really", "I really enjoyed", etc.
+    // Instead of processing immediately, we store the latest result
+    // and only process it when onSpeechEnd is called
+    if (e.value && e.value.length > 0) {
       const result = e.value[0];
-
-      // Prevent duplicate processing of the same result
-      // This can happen when the speech recognition API fires multiple events
-      // for the same final result in continuous mode
-      if (result === this.lastProcessedResult) {
-        console.log('Skipping duplicate result:', result);
-        return;
-      }
-
-      // Clear any pending result processing timeout
-      if (this.resultProcessingTimeout) {
-        clearTimeout(this.resultProcessingTimeout);
-      }
-
-      // Mark that we're processing a final result
-      this.isProcessingFinalResult = true;
-
-      // Debounce result processing to avoid rapid duplicates
-      // If another result comes within the debounce delay, the previous one will be cancelled
-      this.resultProcessingTimeout = setTimeout(() => {
-        this.lastProcessedResult = result;
-        // Use optional chaining to safely call the callback
-        this.onResultCallback?.(result);
-        this.resultProcessingTimeout = null;
-        this.isProcessingFinalResult = false;
-      }, VoiceService.RESULT_DEBOUNCE_DELAY);
+      console.log(
+        'Storing latest speech result (will process on speech end):',
+        result,
+      );
+      this.latestRecognizedText = result;
     }
   }
 
   private onSpeechError(e: any) {
     console.error('Speech error:', e);
     this.isListening = false;
-    this.isProcessingFinalResult = false;
+    this.latestRecognizedText = '';
     if (this.onErrorCallback) {
       this.onErrorCallback(e);
     }
@@ -327,12 +311,6 @@ export class VoiceService {
    */
   async destroy() {
     try {
-      // Clear any pending timeouts
-      if (this.resultProcessingTimeout) {
-        clearTimeout(this.resultProcessingTimeout);
-        this.resultProcessingTimeout = null;
-      }
-
       await Voice.destroy();
       await this.aiVoiceService.destroy();
       await this.deviceTTSService.destroy();
