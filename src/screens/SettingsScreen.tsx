@@ -1250,7 +1250,9 @@ const SettingsScreen = ({navigation}: any) => {
           </View>
         </View>
 
-        <TTSSettings targetLanguage={selectedTargetLanguage} />
+        {ttsProvider === 'google-cloud' && (
+          <TTSSettings targetLanguage={selectedTargetLanguage} />
+        )}
 
         <View
           style={[
