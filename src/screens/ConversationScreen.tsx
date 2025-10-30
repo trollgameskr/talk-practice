@@ -15,7 +15,6 @@ import {
   Modal,
   Pressable,
   TextInput,
-  Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
@@ -1212,6 +1211,10 @@ const ConversationScreen = ({route, navigation}: any) => {
                       (elapsedTime / CONVERSATION_CONFIG.maxDuration) * 100,
                       100,
                     )}%`,
+                    backgroundColor:
+                      elapsedTime >= CONVERSATION_CONFIG.maxDuration
+                        ? '#ef4444'
+                        : '#3b82f6',
                   },
                 ]}
               />
@@ -1220,8 +1223,7 @@ const ConversationScreen = ({route, navigation}: any) => {
               {Math.round(
                 (elapsedTime / CONVERSATION_CONFIG.maxDuration) * 100,
               )}
-              % • {formatDuration(CONVERSATION_CONFIG.maxDuration - elapsedTime)}{' '}
-              remaining
+              % • {elapsedTime >= CONVERSATION_CONFIG.maxDuration ? 'Time limit reached' : `${formatDuration(CONVERSATION_CONFIG.maxDuration - elapsedTime)} remaining`}
             </Text>
           </View>
         </View>
@@ -1614,7 +1616,6 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#3b82f6',
     borderRadius: 3,
   },
   progressText: {
