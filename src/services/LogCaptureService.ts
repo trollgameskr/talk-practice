@@ -1,7 +1,7 @@
 /**
  * Log Capture Service
  * Captures console logs for debugging purposes, specifically targeting
- * logs from AIVoiceService and VoiceService
+ * logs from AIVoiceService, VoiceService, and DeviceTTSService
  */
 
 export class LogCaptureService {
