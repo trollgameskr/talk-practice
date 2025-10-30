@@ -76,6 +76,7 @@ export class GeminiService {
    * Initialize a new conversation session
    */
   async startConversation(topic: ConversationTopic): Promise<string> {
+    console.log('[GeminiService] Starting conversation for topic:', topic);
     this.currentTopic = topic;
     const conversationPrompts = getConversationPrompts(
       this.targetLanguage,
@@ -86,7 +87,11 @@ export class GeminiService {
       SENTENCE_LENGTH_CONFIG[this.sentenceLength].guideline;
     const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
 
+    console.log('[GeminiService] Target language:', targetLangName);
+    console.log('[GeminiService] Sentence length:', this.sentenceLength);
+
     if (this.model && typeof this.model.startChat === 'function') {
+      console.log('[GeminiService] Initializing chat with model');
       this.chat = this.model.startChat({
         history: [
           {
@@ -108,6 +113,14 @@ export class GeminiService {
         ],
         generationConfig: GEMINI_CONFIG.generation,
       });
+      console.log('[GeminiService] Chat initialized successfully');
+    } else {
+      console.error(
+        '[GeminiService] Gemini model is not available. Please check your API key and network connection.',
+      );
+      throw new Error(
+        'Gemini model is not available. Please check your API key and network connection.',
+      );
     }
 
     // Generate the first message in the target language using AI
@@ -115,6 +128,7 @@ export class GeminiService {
       Math.random() * prompt.starterPrompts.length,
     );
     const englishPromptTemplate = prompt.starterPrompts[starterIndex];
+    console.log('[GeminiService] Selected starter prompt index:', starterIndex);
 
     // Extract the core question from the English template (remove language instruction)
     const coreQuestion = englishPromptTemplate
@@ -125,13 +139,17 @@ export class GeminiService {
       .replace(/\s*in [^.]+\./gi, '.')
       .trim();
 
+    console.log('[GeminiService] Core question:', coreQuestion);
+
     // Ask AI to translate and generate the starter message in target language
     try {
+      console.log('[GeminiService] Requesting AI-generated starter message');
       const result = await this.chat.sendMessage(
         `Please start our ${targetLangName} conversation practice about ${topic}. Ask me this question in natural ${targetLangName}: "${coreQuestion}". ${lengthGuideline}. IMPORTANT: Respond ONLY with the question in ${targetLangName}, nothing else.`,
       );
 
       if (!result || !result.response) {
+        console.warn('[GeminiService] No result from AI, using fallback');
         // Fallback to English prompt if AI call fails
         return englishPromptTemplate;
       }
@@ -146,10 +164,28 @@ export class GeminiService {
         this.updateTokenUsage(result.response.usageMetadata);
       }
 
-      return text.trim();
+      const starterMessage = text.trim();
+      console.log('[GeminiService] Generated starter message:', starterMessage);
+      console.log(
+        '[GeminiService] Starter message length:',
+        starterMessage.length,
+      );
+
+      if (!starterMessage) {
+        console.warn(
+          '[GeminiService] AI returned empty message, using fallback',
+        );
+        return englishPromptTemplate;
+      }
+
+      return starterMessage;
     } catch (error) {
-      console.error('Error generating starter message:', error);
+      console.error('[GeminiService] Error generating starter message:', error);
       // Fallback to English prompt if AI call fails
+      console.log(
+        '[GeminiService] Using fallback message:',
+        englishPromptTemplate,
+      );
       return englishPromptTemplate;
     }
   }

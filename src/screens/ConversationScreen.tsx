@@ -235,10 +235,10 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Extract project ID from error data if available
       let projectId = '';
       let activationUrl = '';
-      
+
       if (error.errorData?.error?.details) {
-        const details = error.errorData.error.details.find(
-          (d: any) => d['@type']?.includes('ErrorInfo')
+        const details = error.errorData.error.details.find((d: any) =>
+          d['@type']?.includes('ErrorInfo'),
         );
         if (details?.metadata?.consumer) {
           projectId = details.metadata.consumer.replace('projects/', '');
@@ -247,11 +247,12 @@ const ConversationScreen = ({route, navigation}: any) => {
           activationUrl = details.metadata.activationUrl;
         }
       }
-      
+
       // Build console URL
-      const consoleUrl = activationUrl || 
+      const consoleUrl =
+        activationUrl ||
         `https://console.developers.google.com/apis/api/texttospeech.googleapis.com/overview?project=${projectId}`;
-      
+
       // Show specific error for TTS API not enabled
       Alert.alert(
         t('conversation.errors.ttsApiNotEnabled.title'),
@@ -397,9 +398,27 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Only start a new conversation if not resuming
       if (!isResuming) {
         // Start conversation
+        console.log(
+          '[ConversationScreen] Starting new conversation with topic:',
+          topic,
+        );
         const starterMessage = await geminiService.current.startConversation(
           topic,
         );
+
+        console.log(
+          '[ConversationScreen] Received starter message:',
+          starterMessage,
+        );
+        console.log(
+          '[ConversationScreen] Starter message length:',
+          starterMessage?.length || 0,
+        );
+
+        if (!starterMessage) {
+          console.error('[ConversationScreen] Starter message is empty!');
+          throw new Error('Failed to generate starter message');
+        }
 
         let assistantMessage: Message = {
           id: generateId(),
@@ -408,28 +427,44 @@ const ConversationScreen = ({route, navigation}: any) => {
           timestamp: new Date(),
         };
 
+        console.log(
+          '[ConversationScreen] Created assistant message with ID:',
+          assistantMessage.id,
+        );
+
         // Enrich message with translation, pronunciation, and grammar highlights
         // Pass loaded values directly to avoid relying on state (Feature 1 fix)
+        console.log('[ConversationScreen] Enriching assistant message');
         assistantMessage = await enrichAssistantMessage(assistantMessage, {
           translation: loadedShowTranslation,
           pronunciation: loadedShowPronunciation,
           grammarHighlights: loadedShowGrammarHighlights,
         });
 
+        console.log(
+          '[ConversationScreen] Setting messages with starter message',
+        );
         setMessages([assistantMessage]);
+        console.log('[ConversationScreen] Messages state updated');
 
         // Generate 2 sample answer options for the user
         // Pass loaded values directly to avoid relying on state (Bug 2 fix)
+        console.log('[ConversationScreen] Generating sample answers');
         await generateSampleAnswers(starterMessage, {
           translation: loadedShowTranslation,
           pronunciation: loadedShowPronunciation,
         });
+        console.log('[ConversationScreen] Sample answers generated');
 
         // Speak the starter message (only if not in text-only mode)
         if (!loadedTextOnlyMode && voiceService.current) {
           try {
             console.log(
               '[ConversationScreen] Starting AI speech for starter message',
+            );
+            console.log(
+              '[ConversationScreen] Starter message to speak:',
+              starterMessage,
             );
             await voiceService.current.speak(starterMessage, 'ai');
             // Get the voice method that was used
@@ -449,11 +484,22 @@ const ConversationScreen = ({route, navigation}: any) => {
                 starterMessageLength: starterMessage.length,
               },
             );
-            
+
             // Use helper function to handle TTS error
             handleTTSError(speechError);
           }
+        } else {
+          console.log(
+            '[ConversationScreen] Skipping speech - text-only mode:',
+            loadedTextOnlyMode,
+            'voiceService:',
+            !!voiceService.current,
+          );
         }
+
+        console.log(
+          '[ConversationScreen] Conversation initialization complete',
+        );
       } else {
         // When resuming, we need to restore the conversation context in Gemini
         // by replaying all the messages
