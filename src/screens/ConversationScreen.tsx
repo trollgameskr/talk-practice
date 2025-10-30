@@ -28,6 +28,7 @@ import GeminiService from '../services/GeminiService';
 import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
 import LogCaptureService from '../services/LogCaptureService';
+import SessionInfoModal from '../components/SessionInfoModal';
 import {generateId, formatDuration, openURL} from '../utils/helpers';
 import {STORAGE_KEYS} from '../config/gemini.config';
 import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
@@ -77,11 +78,11 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [voiceDisplayPronunciation, setVoiceDisplayPronunciation] =
     useState('');
   const [voiceMethod, setVoiceMethod] = useState<string>('Web Speech API');
-  const [showVoiceMethodToast, setShowVoiceMethodToast] = useState(false);
   const [textOnlyMode, setTextOnlyMode] = useState(false);
   const [userInputText, setUserInputText] = useState('');
   const [initializationStatus, setInitializationStatus] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState(true);
+  const [showSessionInfoModal, setShowSessionInfoModal] = useState(false);
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -92,7 +93,6 @@ const ConversationScreen = ({route, navigation}: any) => {
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sessionIdRef = useRef(generateId());
   const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const voiceMethodToastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Initialize log capture service
@@ -442,7 +442,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             await voiceService.current.speak(starterMessage, 'ai');
             // Get the voice method that was used
             const method = voiceService.current.getVoiceMethod();
-            showVoiceMethodToastNotification(method);
+            updateVoiceMethod(method);
             console.log(
               '[ConversationScreen] AI speech completed successfully',
             );
@@ -532,10 +532,6 @@ const ConversationScreen = ({route, navigation}: any) => {
 
     if (initTimeoutRef.current) {
       clearTimeout(initTimeoutRef.current);
-    }
-
-    if (voiceMethodToastTimerRef.current) {
-      clearTimeout(voiceMethodToastTimerRef.current);
     }
 
     if (geminiService.current) {
@@ -682,21 +678,10 @@ const ConversationScreen = ({route, navigation}: any) => {
   };
 
   /**
-   * Show voice method toast notification
+   * Update voice method without showing toast notification
    */
-  const showVoiceMethodToastNotification = (method: string) => {
+  const updateVoiceMethod = (method: string) => {
     setVoiceMethod(method);
-    setShowVoiceMethodToast(true);
-    
-    // Clear any existing timer
-    if (voiceMethodToastTimerRef.current) {
-      clearTimeout(voiceMethodToastTimerRef.current);
-    }
-    
-    // Auto-hide after 3 seconds
-    voiceMethodToastTimerRef.current = setTimeout(() => {
-      setShowVoiceMethodToast(false);
-    }, 3000);
   };
 
   const handleUserMessage = async (
@@ -748,7 +733,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             .then(() => {
               // Get the voice method that was used
               const method = voiceService.current!.getVoiceMethod();
-              showVoiceMethodToastNotification(method);
+              updateVoiceMethod(method);
               console.log('[ConversationScreen] AI speech for response completed');
             })
             .catch((speechError) => {
@@ -977,7 +962,7 @@ const ConversationScreen = ({route, navigation}: any) => {
 
           // Get the voice method that was used
           const method = voiceService.current.getVoiceMethod();
-          showVoiceMethodToastNotification(method);
+          updateVoiceMethod(method);
           console.log('[ConversationScreen] User speech for sample completed');
         } catch (speechError) {
           console.error(
@@ -997,12 +982,14 @@ const ConversationScreen = ({route, navigation}: any) => {
           // Do NOT auto-close the modal - user must close it manually
         }
 
-        await handleUserMessage(sample, autoReadResponse);
+        // Feature 2: Do NOT start AI speech while modal is open
+        // Pass false to prevent AI from speaking until modal is closed
+        await handleUserMessage(sample, false);
       } catch (error) {
         console.error('[ConversationScreen] Error in handleUseSample:', error);
         setIsSpeaking(false);
         // Do NOT auto-close the modal on error - user must close it manually
-        await handleUserMessage(sample, autoReadResponse);
+        await handleUserMessage(sample, false);
       }
     } else {
       await handleUserMessage(sample, autoReadResponse);
@@ -1214,11 +1201,11 @@ const ConversationScreen = ({route, navigation}: any) => {
         <Text style={styles.timerText}>{formatDuration(elapsedTime)}</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
-            onPress={handleCopyLogs}
-            style={styles.copyLogsButton}
-            accessibilityLabel={t('conversation.buttons.copyLogs')}
+            onPress={() => setShowSessionInfoModal(true)}
+            style={styles.sessionInfoButton}
+            accessibilityLabel="Session Information"
             accessibilityRole="button">
-            <Text style={styles.copyLogsButtonText}>📋</Text>
+            <Text style={styles.sessionInfoButtonText}>📊</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleEndSession}
@@ -1229,16 +1216,6 @@ const ConversationScreen = ({route, navigation}: any) => {
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* Voice Method Toast Notification */}
-      {showVoiceMethodToast && (
-        <View style={styles.voiceMethodToast}>
-          <Text style={styles.voiceMethodToastLabel}>
-            {t('conversation.voiceDisplay.methodIndicatorLabel')}
-          </Text>
-          <Text style={styles.voiceMethodToastText}>{voiceMethod}</Text>
-        </View>
-      )}
 
       <ScrollView
         ref={scrollViewRef}
@@ -1539,6 +1516,18 @@ const ConversationScreen = ({route, navigation}: any) => {
           </View>
         </View>
       </Modal>
+
+      {/* Session Info Modal */}
+      <SessionInfoModal
+        visible={showSessionInfoModal}
+        onClose={() => setShowSessionInfoModal(false)}
+        onEndSession={handleEndSession}
+        onCopyLogs={handleCopyLogs}
+        sessionDuration={elapsedTime}
+        tokenUsage={geminiService.current?.getSessionTokenUsage()}
+        voiceModel={voiceMethod}
+        logs={logCaptureService.current?.getLogs() || ''}
+      />
     </SafeAreaView>
   );
 };
@@ -1566,7 +1555,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
-  copyLogsButton: {
+  sessionInfoButton: {
     backgroundColor: '#3b82f6',
     width: 36,
     height: 36,
@@ -1574,7 +1563,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  copyLogsButtonText: {
+  sessionInfoButtonText: {
     fontSize: 18,
   },
   endButton: {
@@ -1684,36 +1673,6 @@ const styles = StyleSheet.create({
   speakingText: {
     fontSize: 14,
     color: '#3b82f6',
-  },
-  voiceMethodToast: {
-    position: 'absolute',
-    top: 70,
-    left: 16,
-    right: 16,
-    backgroundColor: '#f0fdf4',
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#86efac',
-    zIndex: 1000,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  voiceMethodToastLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#15803d',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  voiceMethodToastText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#166534',
-    textAlign: 'center',
   },
   samplesContainer: {
     marginTop: 12,
