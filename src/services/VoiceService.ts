@@ -18,9 +18,11 @@ export class VoiceService {
   private ttsProvider: TTSProvider = 'google-cloud'; // Default to Google Cloud
   private lastProcessedResult: string = '';
   private resultProcessingTimeout: NodeJS.Timeout | null = null;
+  private isProcessingFinalResult: boolean = false;
 
   // Debounce delay for speech result processing (in milliseconds)
-  private static readonly RESULT_DEBOUNCE_DELAY = 100;
+  // Increased to 500ms to better handle mobile voice recognition
+  private static readonly RESULT_DEBOUNCE_DELAY = 500;
 
   constructor(proxyUrl?: string) {
     this.initializeVoice();
@@ -36,6 +38,7 @@ export class VoiceService {
     Voice.onSpeechStart = this.onSpeechStart.bind(this);
     Voice.onSpeechEnd = this.onSpeechEnd.bind(this);
     Voice.onSpeechResults = this.onSpeechResults.bind(this);
+    Voice.onSpeechPartialResults = this.onSpeechPartialResults.bind(this);
     Voice.onSpeechError = this.onSpeechError.bind(this);
   }
 
@@ -112,6 +115,7 @@ export class VoiceService {
       // Clear the last processed result when stopping
       // so next session starts fresh
       this.lastProcessedResult = '';
+      this.isProcessingFinalResult = false;
 
       // Clear any pending result processing
       if (this.resultProcessingTimeout) {
@@ -251,8 +255,24 @@ export class VoiceService {
     // The user controls when to stop listening via the toggle button
   }
 
+  /**
+   * Handle partial speech results - these are intermediate results while user is still speaking
+   * We ignore these to avoid processing incomplete sentences
+   */
+  private onSpeechPartialResults(e: any) {
+    console.log('Partial speech results (ignored):', e);
+    // Do not process partial results - only process final results
+  }
+
   private onSpeechResults(e: any) {
-    console.log('Speech results:', e);
+    console.log('Final speech results:', e);
+    
+    // Skip if we're already processing a final result
+    if (this.isProcessingFinalResult) {
+      console.log('Skipping result - already processing a final result');
+      return;
+    }
+    
     if (e.value && e.value.length > 0 && this.onResultCallback) {
       const result = e.value[0];
 
@@ -269,6 +289,9 @@ export class VoiceService {
         clearTimeout(this.resultProcessingTimeout);
       }
 
+      // Mark that we're processing a final result
+      this.isProcessingFinalResult = true;
+
       // Debounce result processing to avoid rapid duplicates
       // If another result comes within the debounce delay, the previous one will be cancelled
       this.resultProcessingTimeout = setTimeout(() => {
@@ -276,6 +299,7 @@ export class VoiceService {
         // Use optional chaining to safely call the callback
         this.onResultCallback?.(result);
         this.resultProcessingTimeout = null;
+        this.isProcessingFinalResult = false;
       }, VoiceService.RESULT_DEBOUNCE_DELAY);
     }
   }
@@ -283,6 +307,7 @@ export class VoiceService {
   private onSpeechError(e: any) {
     console.error('Speech error:', e);
     this.isListening = false;
+    this.isProcessingFinalResult = false;
     if (this.onErrorCallback) {
       this.onErrorCallback(e);
     }

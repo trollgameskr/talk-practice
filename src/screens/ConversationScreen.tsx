@@ -77,6 +77,7 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [voiceDisplayPronunciation, setVoiceDisplayPronunciation] =
     useState('');
   const [voiceMethod, setVoiceMethod] = useState<string>('Web Speech API');
+  const [showVoiceMethodToast, setShowVoiceMethodToast] = useState(false);
   const [textOnlyMode, setTextOnlyMode] = useState(false);
   const [userInputText, setUserInputText] = useState('');
   const [initializationStatus, setInitializationStatus] = useState<string>('');
@@ -90,16 +91,16 @@ const ConversationScreen = ({route, navigation}: any) => {
   const sessionSavedRef = useRef(false);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sessionIdRef = useRef(generateId());
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isResumingRef = useRef(false);
   const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const voiceMethodToastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Initialize log capture service
     logCaptureService.current = new LogCaptureService();
     logCaptureService.current.startCapture();
 
-    checkForSavedSession();
+    // Start new session directly without checking for saved session
+    initializeServices();
     startTimer();
 
     return () => {
@@ -107,126 +108,6 @@ const ConversationScreen = ({route, navigation}: any) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  /**
-   * Auto-save session state periodically
-   */
-  useEffect(() => {
-    // Only auto-save if we have messages and haven't saved the final session
-    if (messages.length > 0 && !sessionSavedRef.current) {
-      // Save current session state every 10 seconds
-      const saveCurrentState = async () => {
-        try {
-          const currentSession: Partial<ConversationSession> = {
-            id: sessionIdRef.current,
-            topic,
-            startTime: sessionStartTime,
-            messages,
-            duration: elapsedTime,
-          };
-          await storageService.saveCurrentSession(currentSession);
-        } catch (error) {
-          console.error('Error auto-saving session:', error);
-        }
-      };
-
-      saveCurrentState();
-
-      // Set up periodic auto-save
-      if (autoSaveTimerRef.current) {
-        clearInterval(autoSaveTimerRef.current);
-      }
-      autoSaveTimerRef.current = setInterval(saveCurrentState, 10000); // Save every 10 seconds
-
-      return () => {
-        if (autoSaveTimerRef.current) {
-          clearInterval(autoSaveTimerRef.current);
-        }
-      };
-    }
-  }, [messages, elapsedTime, topic, sessionStartTime]);
-
-  /**
-   * Check for saved session and prompt user to resume
-   */
-  const checkForSavedSession = async () => {
-    try {
-      const savedSession = await storageService.getCurrentSession();
-
-      if (
-        savedSession &&
-        savedSession.messages &&
-        savedSession.messages.length > 0
-      ) {
-        // Check if the saved session is for the same topic
-        if (savedSession.topic === topic) {
-          // Prompt user to resume
-          Alert.alert(
-            t('conversation.resumeSession.title'),
-            t('conversation.resumeSession.message'),
-            [
-              {
-                text: t('conversation.resumeSession.startNew'),
-                onPress: async () => {
-                  await storageService.clearCurrentSession();
-                  await initializeServices();
-                },
-                style: 'cancel',
-              },
-              {
-                text: t('conversation.resumeSession.resume'),
-                onPress: () => resumeSession(savedSession),
-              },
-            ],
-          );
-        } else {
-          // Different topic, clear saved session and start new
-          await storageService.clearCurrentSession();
-          await initializeServices();
-        }
-      } else {
-        // No saved session, start new
-        await initializeServices();
-      }
-    } catch (error) {
-      console.error('Error checking for saved session:', error);
-      await initializeServices();
-    }
-  };
-
-  /**
-   * Resume from saved session
-   */
-  const resumeSession = async (savedSession: Partial<ConversationSession>) => {
-    try {
-      isResumingRef.current = true;
-      setIsLoading(true);
-
-      // Restore session state
-      if (savedSession.id) {
-        sessionIdRef.current = savedSession.id;
-      }
-      if (savedSession.messages) {
-        setMessages(savedSession.messages);
-      }
-      if (savedSession.startTime) {
-        setSessionStartTime(new Date(savedSession.startTime));
-      }
-      if (savedSession.duration) {
-        setElapsedTime(savedSession.duration);
-      }
-
-      // Initialize services
-      await initializeServices(true); // Pass true to indicate resuming
-
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error resuming session:', error);
-      Alert.alert('Error', 'Failed to resume session. Starting new session.');
-      await storageService.clearCurrentSession();
-      await initializeServices();
-    }
-  };
 
   /**
    * Helper function to handle TTS errors consistently
@@ -298,7 +179,7 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
-  const initializeServices = async (isResuming: boolean = false) => {
+  const initializeServices = async () => {
     try {
       setIsLoading(true);
       setIsInitializing(true);
@@ -343,7 +224,7 @@ const ConversationScreen = ({route, navigation}: any) => {
               text: t('conversation.errors.initTimeout.retry', {
                 defaultValue: 'Retry',
               }),
-              onPress: () => initializeServices(isResuming),
+              onPress: () => initializeServices(),
             },
           ],
         );
@@ -469,82 +350,81 @@ const ConversationScreen = ({route, navigation}: any) => {
         await voiceService.current.setLanguage(targetLanguage);
       }
 
-      // Only start a new conversation if not resuming
-      if (!isResuming) {
-        setInitializationStatus(
-          t('conversation.initialization.startingConversation', {
-            defaultValue: 'Starting conversation...',
-          }),
-        );
-        console.log(
-          '[ConversationScreen] Starting new conversation with topic:',
-          topic,
-        );
-        const starterMessage = await geminiService.current.startConversation(
-          topic,
-        );
+      // Always start a new conversation
+      setInitializationStatus(
+        t('conversation.initialization.startingConversation', {
+          defaultValue: 'Starting conversation...',
+        }),
+      );
+      console.log(
+        '[ConversationScreen] Starting new conversation with topic:',
+        topic,
+      );
+      const starterMessage = await geminiService.current.startConversation(
+        topic,
+      );
 
-        console.log(
-          '[ConversationScreen] Received starter message:',
-          starterMessage,
-        );
-        console.log(
-          '[ConversationScreen] Starter message length:',
-          starterMessage?.length || 0,
-        );
+      console.log(
+        '[ConversationScreen] Received starter message:',
+        starterMessage,
+      );
+      console.log(
+        '[ConversationScreen] Starter message length:',
+        starterMessage?.length || 0,
+      );
 
-        if (!starterMessage) {
-          console.error('[ConversationScreen] Starter message is empty!');
-          throw new Error('Failed to generate starter message');
-        }
+      if (!starterMessage) {
+        console.error('[ConversationScreen] Starter message is empty!');
+        throw new Error('Failed to generate starter message');
+      }
 
-        let assistantMessage: Message = {
-          id: generateId(),
-          role: 'assistant',
-          content: starterMessage,
-          timestamp: new Date(),
-        };
+      let assistantMessage: Message = {
+        id: generateId(),
+        role: 'assistant',
+        content: starterMessage,
+        timestamp: new Date(),
+      };
 
-        console.log(
-          '[ConversationScreen] Created assistant message with ID:',
-          assistantMessage.id,
-        );
+      console.log(
+        '[ConversationScreen] Created assistant message with ID:',
+        assistantMessage.id,
+      );
 
-        // Enrich message with translation, pronunciation, and grammar highlights
-        // Pass loaded values directly to avoid relying on state (Feature 1 fix)
-        setInitializationStatus(
-          t('conversation.initialization.enrichingMessage', {
-            defaultValue: 'Preparing message...',
-          }),
-        );
-        console.log('[ConversationScreen] Enriching assistant message');
-        assistantMessage = await enrichAssistantMessage(assistantMessage, {
-          translation: loadedShowTranslation,
-          pronunciation: loadedShowPronunciation,
-          grammarHighlights: loadedShowGrammarHighlights,
-        });
+      // Enrich message with translation, pronunciation, and grammar highlights
+      // Pass loaded values directly to avoid relying on state (Feature 1 fix)
+      setInitializationStatus(
+        t('conversation.initialization.enrichingMessage', {
+          defaultValue: 'Preparing message...',
+        }),
+      );
+      console.log('[ConversationScreen] Enriching assistant message');
+      assistantMessage = await enrichAssistantMessage(assistantMessage, {
+        translation: loadedShowTranslation,
+        pronunciation: loadedShowPronunciation,
+        grammarHighlights: loadedShowGrammarHighlights,
+      });
 
-        console.log(
-          '[ConversationScreen] Setting messages with starter message',
-        );
-        setMessages([assistantMessage]);
-        console.log('[ConversationScreen] Messages state updated');
+      console.log(
+        '[ConversationScreen] Setting messages with starter message',
+      );
+      setMessages([assistantMessage]);
+      console.log('[ConversationScreen] Messages state updated');
 
-        // Generate 2 sample answer options for the user
-        // Pass loaded values directly to avoid relying on state (Bug 2 fix)
-        setInitializationStatus(
-          t('conversation.initialization.generatingSamples', {
-            defaultValue: 'Generating sample responses...',
-          }),
-        );
-        console.log('[ConversationScreen] Generating sample answers');
-        await generateSampleAnswers(starterMessage, {
-          translation: loadedShowTranslation,
-          pronunciation: loadedShowPronunciation,
-        });
-        console.log('[ConversationScreen] Sample answers generated');
+      // Generate 2 sample answer options for the user
+      // Pass loaded values directly to avoid relying on state (Bug 2 fix)
+      setInitializationStatus(
+        t('conversation.initialization.generatingSamples', {
+          defaultValue: 'Generating sample responses...',
+        }),
+      );
+      console.log('[ConversationScreen] Generating sample answers');
+      await generateSampleAnswers(starterMessage, {
+        translation: loadedShowTranslation,
+        pronunciation: loadedShowPronunciation,
+      });
+      console.log('[ConversationScreen] Sample answers generated');
 
-        // Speak the starter message (only if not in text-only mode)
+      // Speak the starter message (only if not in text-only mode)
         if (!loadedTextOnlyMode && voiceService.current) {
           try {
             setInitializationStatus(
@@ -562,7 +442,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             await voiceService.current.speak(starterMessage, 'ai');
             // Get the voice method that was used
             const method = voiceService.current.getVoiceMethod();
-            setVoiceMethod(method);
+            showVoiceMethodToastNotification(method);
             console.log(
               '[ConversationScreen] AI speech completed successfully',
             );
@@ -593,25 +473,6 @@ const ConversationScreen = ({route, navigation}: any) => {
         console.log(
           '[ConversationScreen] Conversation initialization complete',
         );
-      } else {
-        setInitializationStatus(
-          t('conversation.initialization.restoringContext', {
-            defaultValue: 'Restoring conversation context...',
-          }),
-        );
-        // When resuming, we need to restore the conversation context in Gemini
-        // by replaying all the messages
-        await geminiService.current.startConversation(topic);
-
-        // Replay the conversation history to restore context
-        for (let i = 0; i < messages.length; i++) {
-          const msg = messages[i];
-          if (msg.role === 'user') {
-            // Send user messages to rebuild context
-            await geminiService.current.sendMessage(msg.content);
-          }
-        }
-      }
 
       // Clear timeout on successful initialization
       if (initTimeoutRef.current) {
@@ -669,12 +530,12 @@ const ConversationScreen = ({route, navigation}: any) => {
       clearTimeout(silenceTimerRef.current);
     }
 
-    if (autoSaveTimerRef.current) {
-      clearInterval(autoSaveTimerRef.current);
-    }
-
     if (initTimeoutRef.current) {
       clearTimeout(initTimeoutRef.current);
+    }
+
+    if (voiceMethodToastTimerRef.current) {
+      clearTimeout(voiceMethodToastTimerRef.current);
     }
 
     if (geminiService.current) {
@@ -820,6 +681,24 @@ const ConversationScreen = ({route, navigation}: any) => {
     return enrichedMessage;
   };
 
+  /**
+   * Show voice method toast notification
+   */
+  const showVoiceMethodToastNotification = (method: string) => {
+    setVoiceMethod(method);
+    setShowVoiceMethodToast(true);
+    
+    // Clear any existing timer
+    if (voiceMethodToastTimerRef.current) {
+      clearTimeout(voiceMethodToastTimerRef.current);
+    }
+    
+    // Auto-hide after 3 seconds
+    voiceMethodToastTimerRef.current = setTimeout(() => {
+      setShowVoiceMethodToast(false);
+    }, 3000);
+  };
+
   const handleUserMessage = async (
     text: string,
     shouldSpeak: boolean = true,
@@ -855,33 +734,42 @@ const ConversationScreen = ({route, navigation}: any) => {
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Generate 2 sample answer options for user to practice with
-      await generateSampleAnswers(response);
-
-      // Speak the response only if shouldSpeak is true and not in text-only mode
+      // Run sample answer generation and AI speech in parallel to reduce wait time
+      const tasks = [];
+      
+      // Task 1: Generate 2 sample answer options for user to practice with
+      tasks.push(generateSampleAnswers(response));
+      
+      // Task 2: Speak the response only if shouldSpeak is true and not in text-only mode
       if (shouldSpeak && !textOnlyMode && voiceService.current) {
         setIsSpeaking(true);
-        try {
-          console.log('[ConversationScreen] Starting AI speech for response');
-          await voiceService.current.speak(response, 'ai');
-          // Get the voice method that was used
-          const method = voiceService.current.getVoiceMethod();
-          setVoiceMethod(method);
-          console.log('[ConversationScreen] AI speech for response completed');
-        } catch (speechError) {
-          console.error('[ConversationScreen] Failed to speak AI response', {
-            error:
-              speechError instanceof Error
-                ? speechError.message
-                : String(speechError),
-            responseLength: response.length,
-          });
-          // Use helper function to handle TTS error
-          handleTTSError(speechError);
-        } finally {
-          setIsSpeaking(false);
-        }
+        tasks.push(
+          voiceService.current.speak(response, 'ai')
+            .then(() => {
+              // Get the voice method that was used
+              const method = voiceService.current!.getVoiceMethod();
+              showVoiceMethodToastNotification(method);
+              console.log('[ConversationScreen] AI speech for response completed');
+            })
+            .catch((speechError) => {
+              console.error('[ConversationScreen] Failed to speak AI response', {
+                error:
+                  speechError instanceof Error
+                    ? speechError.message
+                    : String(speechError),
+                responseLength: response.length,
+              });
+              // Use helper function to handle TTS error
+              handleTTSError(speechError);
+            })
+            .finally(() => {
+              setIsSpeaking(false);
+            })
+        );
       }
+      
+      // Wait for all tasks to complete
+      await Promise.all(tasks);
 
       setIsLoading(false);
     } catch (error) {
@@ -1089,7 +977,7 @@ const ConversationScreen = ({route, navigation}: any) => {
 
           // Get the voice method that was used
           const method = voiceService.current.getVoiceMethod();
-          setVoiceMethod(method);
+          showVoiceMethodToastNotification(method);
           console.log('[ConversationScreen] User speech for sample completed');
         } catch (speechError) {
           console.error(
@@ -1106,15 +994,14 @@ const ConversationScreen = ({route, navigation}: any) => {
           handleTTSError(speechError);
         } finally {
           setIsSpeaking(false);
-          // Hide the modal after voice playback attempt
-          setShowVoiceDisplayModal(false);
+          // Do NOT auto-close the modal - user must close it manually
         }
 
         await handleUserMessage(sample, autoReadResponse);
       } catch (error) {
         console.error('[ConversationScreen] Error in handleUseSample:', error);
         setIsSpeaking(false);
-        setShowVoiceDisplayModal(false);
+        // Do NOT auto-close the modal on error - user must close it manually
         await handleUserMessage(sample, autoReadResponse);
       }
     } else {
@@ -1308,15 +1195,21 @@ const ConversationScreen = ({route, navigation}: any) => {
           <TouchableOpacity
             onPress={handleCopyLogs}
             style={styles.copyLogsButton}>
-            <Text style={styles.copyLogsButtonText}>
-              {t('conversation.buttons.copyLogs')}
-            </Text>
+            <Text style={styles.copyLogsButtonText}>📋</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleEndSession} style={styles.endButton}>
-            <Text style={styles.endButtonText}>End Session</Text>
+            <Text style={styles.endButtonText}>🚪</Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Voice Method Toast Notification */}
+      {showVoiceMethodToast && (
+        <View style={styles.voiceMethodToast}>
+          <Text style={styles.voiceMethodToastLabel}>🎙️ 음성 재생:</Text>
+          <Text style={styles.voiceMethodToastText}>{voiceMethod}</Text>
+        </View>
+      )}
 
       <ScrollView
         ref={scrollViewRef}
@@ -1418,14 +1311,6 @@ const ConversationScreen = ({route, navigation}: any) => {
         {isSpeaking && (
           <View style={styles.speakingIndicator}>
             <Text style={styles.speakingText}>🔊 AI Speaking...</Text>
-          </View>
-        )}
-
-        {/* Voice Method Indicator */}
-        {voiceMethod && (
-          <View style={styles.voiceMethodIndicator}>
-            <Text style={styles.voiceMethodIndicatorLabel}>🎙️ 음성 재생:</Text>
-            <Text style={styles.voiceMethodIndicatorText}>{voiceMethod}</Text>
           </View>
         )}
 
@@ -1630,25 +1515,25 @@ const styles = StyleSheet.create({
   },
   copyLogsButton: {
     backgroundColor: '#3b82f6',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    width: 36,
+    height: 36,
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   copyLogsButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 12,
+    fontSize: 18,
   },
   endButton: {
     backgroundColor: '#ef4444',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    width: 36,
+    height: 36,
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   endButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 14,
+    fontSize: 18,
   },
   messagesContainer: {
     flex: 1,
@@ -1747,24 +1632,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#3b82f6',
   },
-  voiceMethodIndicator: {
-    marginTop: 8,
-    padding: 10,
+  voiceMethodToast: {
+    position: 'absolute',
+    top: 70,
+    left: 16,
+    right: 16,
     backgroundColor: '#f0fdf4',
     borderRadius: 8,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#86efac',
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  voiceMethodIndicatorLabel: {
+  voiceMethodToastLabel: {
     fontSize: 12,
     fontWeight: '600',
     color: '#15803d',
     marginBottom: 4,
+    textAlign: 'center',
   },
-  voiceMethodIndicatorText: {
+  voiceMethodToastText: {
     fontSize: 13,
     fontWeight: '500',
     color: '#166534',
+    textAlign: 'center',
   },
   samplesContainer: {
     marginTop: 12,
