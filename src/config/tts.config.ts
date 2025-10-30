@@ -260,9 +260,9 @@ export interface LanguageTTSConfigs {
   [languageCode: string]: TTSConfig;
 }
 
-// Default voice configuration
+// Default voice configuration - Using premium Chirp3-HD model by default
 export const DEFAULT_VOICE_CONFIG: VoiceConfig = {
-  voiceName: 'en-US-Neural2-A',
+  voiceName: 'en-US-Chirp3-HD-Achird',
   languageCode: 'en-US',
   ssmlGender: 'MALE',
   speakingRate: 1.0,
@@ -320,17 +320,22 @@ export function getLanguageGroupIndexByTargetLanguage(
 }
 
 // Helper function to get default voice config for a specific language
+// Defaults to premium Chirp3-HD models (female voice) when available
 export function getDefaultVoiceConfigForLanguage(
   languageCode: string,
 ): VoiceConfig {
   const groupIndex = getLanguageGroupIndexByTargetLanguage(languageCode);
   const voices = DEFAULT_VOICES[groupIndex]?.voices || DEFAULT_VOICES[0].voices;
-  const firstVoice = voices[0];
+  
+  // Try to find a premium Chirp3-HD female voice first (index 3 in our config)
+  // If not available, fall back to the first voice in the list
+  const premiumVoice = voices.find(v => v.name.includes('Chirp3-HD') && v.gender === 'FEMALE');
+  const defaultVoice = premiumVoice || voices[0];
   
   return {
-    voiceName: firstVoice.name,
-    languageCode: firstVoice.languageCode,
-    ssmlGender: firstVoice.gender,
+    voiceName: defaultVoice.name,
+    languageCode: defaultVoice.languageCode,
+    ssmlGender: defaultVoice.gender,
     speakingRate: 1.0,
     pitch: 0.0,
     volumeGainDb: 0.0,

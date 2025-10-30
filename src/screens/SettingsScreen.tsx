@@ -24,6 +24,7 @@ import {
   SentenceLength,
   SENTENCE_LENGTH_CONFIG,
   STORAGE_KEYS,
+  TTSProvider,
 } from '../config/gemini.config';
 import {useTheme} from '../contexts/ThemeContext';
 import {
@@ -57,6 +58,8 @@ const SettingsScreen = ({navigation}: any) => {
   const [showPronunciation, setShowPronunciation] = useState(false);
   const [showGrammarHighlights, setShowGrammarHighlights] = useState(false);
   const [textOnlyMode, setTextOnlyMode] = useState(false);
+  const [ttsProvider, setTtsProvider] = useState<TTSProvider>('google-cloud');
+  
   useEffect(() => {
     loadApiKey();
     loadTtsApiKey();
@@ -69,6 +72,7 @@ const SettingsScreen = ({navigation}: any) => {
     loadShowPronunciation();
     loadShowGrammarHighlights();
     loadTextOnlyMode();
+    loadTtsProvider();
   }, []);
 
   const loadLanguage = async () => {
@@ -191,6 +195,16 @@ const SettingsScreen = ({navigation}: any) => {
     }
   };
 
+  const loadTtsProvider = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.TTS_PROVIDER);
+      // Default to 'google-cloud' if not set (Feature 1)
+      setTtsProvider((savedValue as TTSProvider) || 'google-cloud');
+    } catch (error) {
+      console.error('Error loading TTS provider setting:', error);
+    }
+  };
+
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
       Alert.alert('Error', 'Please enter an API key');
@@ -307,6 +321,17 @@ const SettingsScreen = ({navigation}: any) => {
     } catch (error) {
       console.error('Error saving text-only mode setting:', error);
       Alert.alert('Error', 'Failed to save text-only mode setting');
+    }
+  };
+
+  const handleTtsProviderChange = async (provider: TTSProvider) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.TTS_PROVIDER, provider);
+      setTtsProvider(provider);
+      Alert.alert('Success', t('settings.sections.tts.success'));
+    } catch (error) {
+      console.error('Error saving TTS provider setting:', error);
+      Alert.alert('Error', 'Failed to save TTS provider setting');
     }
   };
 
@@ -829,6 +854,142 @@ const SettingsScreen = ({navigation}: any) => {
               💡 You can use the same API key for both Gemini and TTS, or use
               separate keys. Without this, the app will work in text-only mode
               for AI responses.
+            </Text>
+          </View>
+        </View>
+
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}>
+          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            {t('settings.sections.tts.title')}
+          </Text>
+          <Text
+            style={[
+              styles.sectionDescription,
+              {color: theme.colors.textSecondary},
+            ]}>
+            {t('settings.sections.tts.description')}
+          </Text>
+
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              {t('settings.sections.tts.provider.label')}
+            </Text>
+            
+            <TouchableOpacity
+              style={[
+                styles.optionButton,
+                {
+                  backgroundColor: theme.colors.inputBackground,
+                  borderColor: theme.colors.border,
+                },
+                ttsProvider === 'google-cloud' && {
+                  ...styles.optionButtonActive,
+                  borderColor: theme.colors.primary,
+                  backgroundColor: theme.colors.primaryLight,
+                },
+              ]}
+              onPress={() => handleTtsProviderChange('google-cloud')}>
+              <View style={styles.optionContent}>
+                <View style={styles.optionHeader}>
+                  <Text
+                    style={[
+                      styles.optionTitle,
+                      {color: theme.colors.text},
+                      ttsProvider === 'google-cloud' && {
+                        ...styles.optionTitleActive,
+                        color: theme.colors.primary,
+                      },
+                    ]}>
+                    {t('settings.sections.tts.provider.googleCloud')}
+                  </Text>
+                  {ttsProvider === 'google-cloud' && (
+                    <Text
+                      style={[
+                        styles.checkMark,
+                        {color: theme.colors.primary},
+                      ]}>
+                      ✓
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.optionButton,
+                {
+                  backgroundColor: theme.colors.inputBackground,
+                  borderColor: theme.colors.border,
+                },
+                ttsProvider === 'device' && {
+                  ...styles.optionButtonActive,
+                  borderColor: theme.colors.primary,
+                  backgroundColor: theme.colors.primaryLight,
+                },
+              ]}
+              onPress={() => handleTtsProviderChange('device')}>
+              <View style={styles.optionContent}>
+                <View style={styles.optionHeader}>
+                  <Text
+                    style={[
+                      styles.optionTitle,
+                      {color: theme.colors.text},
+                      ttsProvider === 'device' && {
+                        ...styles.optionTitleActive,
+                        color: theme.colors.primary,
+                      },
+                    ]}>
+                    {t('settings.sections.tts.provider.device')}
+                  </Text>
+                  {ttsProvider === 'device' && (
+                    <Text
+                      style={[
+                        styles.checkMark,
+                        {color: theme.colors.primary},
+                      ]}>
+                      ✓
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            <Text
+              style={[
+                styles.sectionDescription,
+                {color: theme.colors.textSecondary},
+                {marginTop: 8},
+              ]}>
+              {t('settings.sections.tts.provider.description')}
+            </Text>
+          </View>
+
+          <View
+            style={[
+              styles.infoBox,
+              {
+                backgroundColor: theme.colors.primaryLight,
+                borderLeftColor: theme.colors.primary,
+              },
+            ]}>
+            <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
+              {t('settings.sections.tts.apiKeyInfo')}
+            </Text>
+            <Text
+              style={[
+                styles.infoText,
+                {color: theme.colors.primaryDark},
+                {marginTop: 8},
+              ]}>
+              {t('settings.sections.tts.firstTimeInfo')}
             </Text>
           </View>
         </View>

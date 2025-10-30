@@ -4,13 +4,18 @@
  */
 
 import Voice from '@react-native-community/voice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import AIVoiceService from './AIVoiceService';
+import DeviceTTSService from './DeviceTTSService';
+import {STORAGE_KEYS, TTSProvider} from '../config/gemini.config';
 
 export class VoiceService {
   private isListening: boolean = false;
   private onResultCallback: ((text: string) => void) | null = null;
   private onErrorCallback: ((error: any) => void) | null = null;
   private aiVoiceService: AIVoiceService;
+  private deviceTTSService: DeviceTTSService;
+  private ttsProvider: TTSProvider = 'google-cloud'; // Default to Google Cloud
   private lastProcessedResult: string = '';
   private resultProcessingTimeout: NodeJS.Timeout | null = null;
 
@@ -20,6 +25,8 @@ export class VoiceService {
   constructor(proxyUrl?: string) {
     this.initializeVoice();
     this.aiVoiceService = new AIVoiceService(proxyUrl);
+    this.deviceTTSService = new DeviceTTSService();
+    this.loadTTSProvider();
   }
 
   /**
@@ -30,6 +37,47 @@ export class VoiceService {
     Voice.onSpeechEnd = this.onSpeechEnd.bind(this);
     Voice.onSpeechResults = this.onSpeechResults.bind(this);
     Voice.onSpeechError = this.onSpeechError.bind(this);
+  }
+
+  /**
+   * Load TTS provider preference from storage
+   */
+  private async loadTTSProvider() {
+    try {
+      const savedProvider = await AsyncStorage.getItem(STORAGE_KEYS.TTS_PROVIDER);
+      if (savedProvider) {
+        this.ttsProvider = savedProvider as TTSProvider;
+        console.log('VoiceService: Loaded TTS provider:', this.ttsProvider);
+      } else {
+        // First time use - default to Google Cloud and save
+        this.ttsProvider = 'google-cloud';
+        await AsyncStorage.setItem(STORAGE_KEYS.TTS_PROVIDER, this.ttsProvider);
+        console.log('VoiceService: First run - defaulting to Google Cloud TTS');
+      }
+    } catch (error) {
+      console.error('Error loading TTS provider:', error);
+      this.ttsProvider = 'google-cloud';
+    }
+  }
+
+  /**
+   * Set TTS provider
+   */
+  async setTTSProvider(provider: TTSProvider) {
+    try {
+      this.ttsProvider = provider;
+      await AsyncStorage.setItem(STORAGE_KEYS.TTS_PROVIDER, provider);
+      console.log('VoiceService: TTS provider set to:', provider);
+    } catch (error) {
+      console.error('Error setting TTS provider:', error);
+    }
+  }
+
+  /**
+   * Get current TTS provider
+   */
+  getTTSProvider(): TTSProvider {
+    return this.ttsProvider;
   }
 
   /**
@@ -99,14 +147,22 @@ export class VoiceService {
       textLength: text.length,
       textPreview: text.substring(0, 50),
       voiceType,
+      provider: this.ttsProvider,
       timestamp: new Date().toISOString(),
     });
 
     try {
-      await this.aiVoiceService.speak(text, voiceType);
+      // Use the selected TTS provider
+      if (this.ttsProvider === 'device') {
+        await this.deviceTTSService.speak(text, voiceType);
+      } else {
+        await this.aiVoiceService.speak(text, voiceType);
+      }
+      
       const duration = Date.now() - startTime;
       console.log('[VoiceService] Speech completed successfully', {
         durationMs: duration,
+        provider: this.ttsProvider,
       });
     } catch (error) {
       const duration = Date.now() - startTime;
@@ -116,6 +172,7 @@ export class VoiceService {
           error instanceof Error ? error.constructor.name : typeof error,
         durationMs: duration,
         textLength: text.length,
+        provider: this.ttsProvider,
       });
       // Propagate error to allow caller to handle it
       throw error;
@@ -127,6 +184,7 @@ export class VoiceService {
    */
   async setLanguage(languageCode: string) {
     await this.aiVoiceService.setLanguage(languageCode);
+    await this.deviceTTSService.setLanguage(languageCode);
   }
 
   /**
@@ -134,9 +192,11 @@ export class VoiceService {
    */
   async stopSpeaking(): Promise<void> {
     try {
+      // Stop both TTS services
       await this.aiVoiceService.stopSpeaking();
+      await this.deviceTTSService.stopSpeaking();
     } catch (error) {
-      console.error('Error stopping AI voice:', error);
+      console.error('Error stopping voice:', error);
     }
   }
 
@@ -151,6 +211,9 @@ export class VoiceService {
    * Get the voice method currently being used
    */
   getVoiceMethod(): string {
+    if (this.ttsProvider === 'device') {
+      return this.deviceTTSService.getVoiceMethod();
+    }
     return this.aiVoiceService.getVoiceMethod();
   }
 
@@ -238,6 +301,7 @@ export class VoiceService {
 
       await Voice.destroy();
       await this.aiVoiceService.destroy();
+      await this.deviceTTSService.destroy();
     } catch (error) {
       console.error('Error destroying voice service:', error);
     }
