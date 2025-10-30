@@ -116,9 +116,11 @@ export class GeminiService {
       console.log('[GeminiService] Chat initialized successfully');
     } else {
       console.error(
-        '[GeminiService] Failed to initialize chat - model not available',
+        '[GeminiService] Gemini model is not available. Please check your API key and network connection.',
       );
-      throw new Error('Model not initialized. Cannot start conversation.');
+      throw new Error(
+        'Gemini model is not available. Please check your API key and network connection.',
+      );
     }
 
     // Generate the first message in the target language using AI

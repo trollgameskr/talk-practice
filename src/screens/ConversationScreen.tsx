@@ -415,7 +415,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           starterMessage?.length || 0,
         );
 
-        if (!starterMessage || starterMessage.trim().length === 0) {
+        if (!starterMessage) {
           console.error('[ConversationScreen] Starter message is empty!');
           throw new Error('Failed to generate starter message');
         }
