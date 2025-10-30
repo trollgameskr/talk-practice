@@ -266,8 +266,8 @@ export const DEFAULT_VOICES: LanguageVoiceGroup[] = [
   },
 ];
 
-// TTS Configuration interface
-export interface TTSConfig {
+// Voice configuration for a single voice model
+export interface VoiceConfig {
   voiceName: string;
   languageCode: string;
   ssmlGender: 'MALE' | 'FEMALE' | 'NEUTRAL';
@@ -278,13 +278,26 @@ export interface TTSConfig {
   customVoiceName?: string;
   customLanguageCode?: string;
   customGender?: 'MALE' | 'FEMALE' | 'NEUTRAL';
+}
+
+// TTS Configuration interface
+export interface TTSConfig {
+  // AI response voice configuration
+  aiVoice: VoiceConfig;
+  // User response voice configuration (for sample answers)
+  userVoice: VoiceConfig;
   // Region and endpoint configuration (closest to Korea)
   region: string;
   endpoint: string;
 }
 
-// Default TTS configuration
-export const DEFAULT_TTS_CONFIG: TTSConfig = {
+// Per-language TTS configurations
+export interface LanguageTTSConfigs {
+  [languageCode: string]: TTSConfig;
+}
+
+// Default voice configuration
+export const DEFAULT_VOICE_CONFIG: VoiceConfig = {
   voiceName: 'en-US-Neural2-A',
   languageCode: 'en-US',
   ssmlGender: 'FEMALE',
@@ -292,6 +305,12 @@ export const DEFAULT_TTS_CONFIG: TTSConfig = {
   pitch: 0.0,
   volumeGainDb: 0.0,
   useCustomVoice: false,
+};
+
+// Default TTS configuration
+export const DEFAULT_TTS_CONFIG: TTSConfig = {
+  aiVoice: {...DEFAULT_VOICE_CONFIG},
+  userVoice: {...DEFAULT_VOICE_CONFIG},
   // Use Asia-Northeast region (Tokyo/Seoul) for low latency from Korea
   region: 'asia-northeast1',
   endpoint: 'https://texttospeech.googleapis.com',
@@ -334,4 +353,37 @@ export function getLanguageGroupIndexByTargetLanguage(
     de: 6, // 독일어 (German)
   };
   return languageMap[targetLang] ?? 0; // Default to English if not found
+}
+
+// Helper function to get default voice config for a specific language
+export function getDefaultVoiceConfigForLanguage(
+  languageCode: string,
+): VoiceConfig {
+  const groupIndex = getLanguageGroupIndexByTargetLanguage(languageCode);
+  const voices = DEFAULT_VOICES[groupIndex]?.voices || DEFAULT_VOICES[0].voices;
+  const firstVoice = voices[0];
+  
+  return {
+    voiceName: firstVoice.name,
+    languageCode: firstVoice.languageCode,
+    ssmlGender: firstVoice.gender,
+    speakingRate: 1.0,
+    pitch: 0.0,
+    volumeGainDb: 0.0,
+    useCustomVoice: false,
+  };
+}
+
+// Helper function to get default TTS config for a specific language
+export function getDefaultTTSConfigForLanguage(
+  languageCode: string,
+): TTSConfig {
+  const voiceConfig = getDefaultVoiceConfigForLanguage(languageCode);
+  
+  return {
+    aiVoice: {...voiceConfig},
+    userVoice: {...voiceConfig},
+    region: 'asia-northeast1',
+    endpoint: 'https://texttospeech.googleapis.com',
+  };
 }

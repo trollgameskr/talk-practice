@@ -5,7 +5,13 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {TTSConfig, DEFAULT_TTS_CONFIG} from '../config/tts.config';
+import {
+  TTSConfig,
+  VoiceConfig,
+  LanguageTTSConfigs,
+  DEFAULT_TTS_CONFIG,
+  getDefaultTTSConfigForLanguage,
+} from '../config/tts.config';
 import {STORAGE_KEYS} from '../config/gemini.config';
 
 /**
@@ -17,11 +23,14 @@ export interface TTSCapabilities {
   model: TTSModel;
 }
 
+export type VoiceType = 'ai' | 'user';
+
 export class AIVoiceService {
   private isInitialized: boolean = false;
   private isSpeaking: boolean = false;
   private currentAudio: any = null; // HTMLAudioElement in browser
-  private ttsConfig: TTSConfig = DEFAULT_TTS_CONFIG;
+  private ttsConfigsByLanguage: LanguageTTSConfigs = {};
+  private currentLanguage: string = 'en';
   private proxyUrl: string = '';
   private apiKey: string = '';
 
@@ -56,8 +65,8 @@ export class AIVoiceService {
         console.log('AI Voice Service: Using TTS API key from user storage');
       }
 
-      // Load TTS configuration from storage
-      await this.loadTTSConfig();
+      // Load TTS configurations by language from storage
+      await this.loadTTSConfigs();
       this.isInitialized = true;
 
       // Log initialization status with availability info
@@ -79,31 +88,54 @@ export class AIVoiceService {
   }
 
   /**
-   * Load TTS configuration from storage
+   * Load TTS configurations by language from storage
    */
-  private async loadTTSConfig() {
+  private async loadTTSConfigs() {
     try {
-      const savedConfig = await AsyncStorage.getItem(STORAGE_KEYS.TTS_CONFIG);
-      if (savedConfig) {
-        this.ttsConfig = JSON.parse(savedConfig);
+      const savedConfigsStr = await AsyncStorage.getItem(
+        STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
+      );
+      if (savedConfigsStr) {
+        this.ttsConfigsByLanguage = JSON.parse(savedConfigsStr);
       } else {
-        this.ttsConfig = DEFAULT_TTS_CONFIG;
+        this.ttsConfigsByLanguage = {};
       }
     } catch (error) {
-      console.error('Error loading TTS config:', error);
-      this.ttsConfig = DEFAULT_TTS_CONFIG;
+      console.error('Error loading TTS configs:', error);
+      this.ttsConfigsByLanguage = {};
     }
+  }
+
+  /**
+   * Get TTS config for current language
+   */
+  private getTTSConfigForLanguage(languageCode: string): TTSConfig {
+    return (
+      this.ttsConfigsByLanguage[languageCode] ||
+      getDefaultTTSConfigForLanguage(languageCode)
+    );
+  }
+
+  /**
+   * Set current language
+   */
+  async setLanguage(languageCode: string) {
+    this.currentLanguage = languageCode;
+    await this.loadTTSConfigs();
   }
 
   /**
    * Update TTS configuration
    */
   async updateTTSConfig(config: Partial<TTSConfig>) {
-    this.ttsConfig = {...this.ttsConfig, ...config};
+    const currentConfig = this.getTTSConfigForLanguage(this.currentLanguage);
+    const updatedConfig = {...currentConfig, ...config};
+    this.ttsConfigsByLanguage[this.currentLanguage] = updatedConfig;
+    
     try {
       await AsyncStorage.setItem(
-        STORAGE_KEYS.TTS_CONFIG,
-        JSON.stringify(this.ttsConfig),
+        STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
+        JSON.stringify(this.ttsConfigsByLanguage),
       );
     } catch (error) {
       console.error('Error saving TTS config:', error);
@@ -114,18 +146,21 @@ export class AIVoiceService {
    * Get current TTS configuration
    */
   getTTSConfig(): TTSConfig {
-    return this.ttsConfig;
+    return this.getTTSConfigForLanguage(this.currentLanguage);
   }
 
   /**
    * Synthesize speech using AI-generated voices
    * Uses Google Cloud TTS API
+   * @param text Text to speak
+   * @param voiceType Type of voice to use: 'ai' for AI responses, 'user' for user response samples
    */
-  async speak(text: string): Promise<void> {
+  async speak(text: string, voiceType: VoiceType = 'ai'): Promise<void> {
     const startTime = Date.now();
     console.log('[AIVoiceService] Starting speech synthesis', {
       textLength: text.length,
       textPreview: text.substring(0, 50),
+      voiceType,
       hasApiKey: !!this.apiKey,
       hasProxyUrl: !!this.proxyUrl,
       timestamp: new Date().toISOString(),
@@ -139,7 +174,7 @@ export class AIVoiceService {
 
     try {
       // Use Google Cloud TTS API for AI voice generation
-      const audioContent = await this.generateAIVoice(text);
+      const audioContent = await this.generateAIVoice(text, voiceType);
       const generationTime = Date.now() - startTime;
 
       if (audioContent) {
@@ -180,8 +215,13 @@ export class AIVoiceService {
   /**
    * Generate AI voice using Google Cloud Text-to-Speech API
    * Supports both proxy server and direct API calls
+   * @param text Text to synthesize
+   * @param voiceType Type of voice to use
    */
-  private async generateAIVoice(text: string): Promise<string | null> {
+  private async generateAIVoice(
+    text: string,
+    voiceType: VoiceType,
+  ): Promise<string | null> {
     const startTime = Date.now();
 
     // Store config state for logging (avoid logging sensitive apiKey)
@@ -201,21 +241,26 @@ export class AIVoiceService {
     }
 
     try {
+      // Get the appropriate voice config based on voice type
+      const ttsConfig = this.getTTSConfigForLanguage(this.currentLanguage);
+      const voiceConfig: VoiceConfig =
+        voiceType === 'ai' ? ttsConfig.aiVoice : ttsConfig.userVoice;
+
       // Use custom voice if enabled, otherwise use selected voice
       const voiceName =
-        this.ttsConfig.useCustomVoice && this.ttsConfig.customVoiceName
-          ? this.ttsConfig.customVoiceName
-          : this.ttsConfig.voiceName;
+        voiceConfig.useCustomVoice && voiceConfig.customVoiceName
+          ? voiceConfig.customVoiceName
+          : voiceConfig.voiceName;
 
       const languageCode =
-        this.ttsConfig.useCustomVoice && this.ttsConfig.customLanguageCode
-          ? this.ttsConfig.customLanguageCode
-          : this.ttsConfig.languageCode;
+        voiceConfig.useCustomVoice && voiceConfig.customLanguageCode
+          ? voiceConfig.customLanguageCode
+          : voiceConfig.languageCode;
 
       const gender =
-        this.ttsConfig.useCustomVoice && this.ttsConfig.customGender
-          ? this.ttsConfig.customGender
-          : this.ttsConfig.ssmlGender;
+        voiceConfig.useCustomVoice && voiceConfig.customGender
+          ? voiceConfig.customGender
+          : voiceConfig.ssmlGender;
 
       const requestBody = {
         input: {
@@ -228,9 +273,9 @@ export class AIVoiceService {
         },
         audioConfig: {
           audioEncoding: 'MP3',
-          speakingRate: this.ttsConfig.speakingRate,
-          pitch: this.ttsConfig.pitch,
-          volumeGainDb: this.ttsConfig.volumeGainDb,
+          speakingRate: voiceConfig.speakingRate,
+          pitch: voiceConfig.pitch,
+          volumeGainDb: voiceConfig.volumeGainDb,
         },
       };
 
@@ -263,9 +308,9 @@ export class AIVoiceService {
             ssmlGender: gender,
           },
           audioConfig: {
-            speakingRate: this.ttsConfig.speakingRate,
-            pitch: this.ttsConfig.pitch,
-            volumeGainDb: this.ttsConfig.volumeGainDb,
+            speakingRate: voiceConfig.speakingRate,
+            pitch: voiceConfig.pitch,
+            volumeGainDb: voiceConfig.volumeGainDb,
           },
         };
         apiMethod = 'proxy';
