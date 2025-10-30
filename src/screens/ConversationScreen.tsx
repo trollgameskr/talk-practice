@@ -15,6 +15,7 @@ import {
   Modal,
   Pressable,
   TextInput,
+  Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
@@ -30,7 +31,7 @@ import StorageService from '../services/StorageService';
 import LogCaptureService from '../services/LogCaptureService';
 import SessionInfoModal from '../components/SessionInfoModal';
 import {generateId, formatDuration, openURL} from '../utils/helpers';
-import {STORAGE_KEYS} from '../config/gemini.config';
+import {STORAGE_KEYS, CONVERSATION_CONFIG} from '../config/gemini.config';
 import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
 
 const storageService = new StorageService();
@@ -1198,7 +1199,32 @@ const ConversationScreen = ({route, navigation}: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.timerText}>{formatDuration(elapsedTime)}</Text>
+        <View style={styles.timerContainer}>
+          <Text style={styles.timerText}>{formatDuration(elapsedTime)}</Text>
+          {/* Progress bar */}
+          <View style={styles.progressBarContainer}>
+            <View style={styles.progressBarBackground}>
+              <View
+                style={[
+                  styles.progressBarFill,
+                  {
+                    width: `${Math.min(
+                      (elapsedTime / CONVERSATION_CONFIG.maxDuration) * 100,
+                      100,
+                    )}%`,
+                  },
+                ]}
+              />
+            </View>
+            <Text style={styles.progressText}>
+              {Math.round(
+                (elapsedTime / CONVERSATION_CONFIG.maxDuration) * 100,
+              )}
+              % • {formatDuration(CONVERSATION_CONFIG.maxDuration - elapsedTime)}{' '}
+              remaining
+            </Text>
+          </View>
+        </View>
         <View style={styles.headerButtons}>
           <TouchableOpacity
             onPress={() => setShowSessionInfoModal(true)}
@@ -1222,68 +1248,86 @@ const ConversationScreen = ({route, navigation}: any) => {
         style={styles.messagesContainer}
         onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
         contentContainerStyle={styles.messagesContent}>
-        {messages.map(message => (
-          <View
-            key={message.id}
-            style={[
-              styles.messageRow,
-              message.role === 'user' ? styles.userRow : styles.assistantRow,
-            ]}>
+        {messages.map((message, index) => {
+          const isLastMessage = index === messages.length - 1;
+          const isLastAIMessage = message.role === 'assistant' && isLastMessage;
+          
+          return (
             <View
+              key={message.id}
               style={[
-                styles.messageBubble,
-                message.role === 'user'
-                  ? styles.userBubble
-                  : styles.assistantBubble,
+                styles.messageRow,
+                message.role === 'user' ? styles.userRow : styles.assistantRow,
               ]}>
-              {message.role === 'assistant' ? (
-                <>
-                  <View style={styles.clickableTextContainer}>
-                    {renderClickableWords(message)}
-                  </View>
-                  {showTranslation && message.translation && (
-                    <Text style={styles.translationText}>
-                      💬 {message.translation}
-                    </Text>
-                  )}
-                  {showPronunciation && message.pronunciation && (
-                    <Text style={styles.pronunciationText}>
-                      🔊 {message.pronunciation}
-                    </Text>
-                  )}
-                  {/* Feature 1: Replay button for AI messages */}
-                  {!textOnlyMode && (
-                    <TouchableOpacity
-                      style={styles.replayButton}
-                      onPress={() => handleReplayAudio(message)}
-                      disabled={isSpeaking}>
-                      <Text style={styles.replayButtonText}>
-                        {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+              <View
+                style={[
+                  styles.messageBubble,
+                  message.role === 'user'
+                    ? styles.userBubble
+                    : styles.assistantBubble,
+                  isLastAIMessage && styles.lastAIMessageBubble,
+                ]}>
+                {message.role === 'assistant' ? (
+                  <>
+                    <View style={styles.clickableTextContainer}>
+                      {renderClickableWords(message)}
+                    </View>
+                    {showTranslation && message.translation && (
+                      <Text style={styles.translationText}>
+                        💬 {message.translation}
                       </Text>
-                    </TouchableOpacity>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Text style={[styles.messageText, styles.userText]}>
-                    {message.content}
-                  </Text>
-                  {/* Feature 1: Replay button for user messages */}
-                  {!textOnlyMode && (
-                    <TouchableOpacity
-                      style={styles.replayButton}
-                      onPress={() => handleReplayAudio(message)}
-                      disabled={isSpeaking}>
-                      <Text style={styles.replayButtonText}>
-                        {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                    )}
+                    {showPronunciation && message.pronunciation && (
+                      <Text style={styles.pronunciationText}>
+                        🔊 {message.pronunciation}
                       </Text>
-                    </TouchableOpacity>
-                  )}
-                </>
+                    )}
+                    {/* Feature 1: Replay button for AI messages */}
+                    {!textOnlyMode && (
+                      <TouchableOpacity
+                        style={styles.replayButton}
+                        onPress={() => handleReplayAudio(message)}
+                        disabled={isSpeaking}>
+                        <Text style={styles.replayButtonText}>
+                          {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Text style={[styles.messageText, styles.userText]}>
+                      {message.content}
+                    </Text>
+                    {/* Feature 1: Replay button for user messages */}
+                    {!textOnlyMode && (
+                      <TouchableOpacity
+                        style={styles.replayButton}
+                        onPress={() => handleReplayAudio(message)}
+                        disabled={isSpeaking}>
+                        <Text style={styles.replayButtonText}>
+                          {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </>
+                )}
+              </View>
+              
+              {/* Feature 2: Tap to Speak button on the right of last AI message */}
+              {isLastAIMessage && !textOnlyMode && !isListening && (
+                <TouchableOpacity
+                  style={styles.tapToSpeakIconButton}
+                  onPress={handleToggleListening}
+                  disabled={isLoading || isSpeaking}
+                  accessibilityLabel="Tap to Speak"
+                  accessibilityRole="button">
+                  <Text style={styles.tapToSpeakIcon}>🎤</Text>
+                </TouchableOpacity>
               )}
             </View>
-          </View>
-        ))}
+          );
+        })}
 
         {isLoading && (
           <View style={styles.loadingContainer}>
@@ -1323,19 +1367,22 @@ const ConversationScreen = ({route, navigation}: any) => {
             </TouchableOpacity>
           </View>
         ) : (
-          <Pressable
-            style={[styles.micButton, isListening && styles.micButtonActive]}
-            onPress={handleToggleListening}
-            disabled={isLoading || isSpeaking}
-            // @ts-ignore - onContextMenu is a web-only prop
-            onContextMenu={(e: React.MouseEvent<HTMLElement>) =>
-              e.preventDefault()
-            }>
-            <Text style={styles.micIcon}>{isListening ? '⏸️' : '🎤'}</Text>
-            <Text style={styles.micText}>
-              {isListening ? 'Tap to Stop' : 'Tap to Speak'}
-            </Text>
-          </Pressable>
+          // Only show the main Tap to Speak button if there are no messages or if listening
+          (messages.length === 0 || isListening) && (
+            <Pressable
+              style={[styles.micButton, isListening && styles.micButtonActive]}
+              onPress={handleToggleListening}
+              disabled={isLoading || isSpeaking}
+              // @ts-ignore - onContextMenu is a web-only prop
+              onContextMenu={(e: React.MouseEvent<HTMLElement>) =>
+                e.preventDefault()
+              }>
+              <Text style={styles.micIcon}>{isListening ? '⏸️' : '🎤'}</Text>
+              <Text style={styles.micText}>
+                {isListening ? 'Tap to Stop' : 'Tap to Speak'}
+              </Text>
+            </Pressable>
+          )
         )}
 
         {isSpeaking && (
@@ -1546,10 +1593,34 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
+  timerContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
   timerText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1f2937',
+    marginBottom: 4,
+  },
+  progressBarContainer: {
+    marginTop: 4,
+  },
+  progressBarBackground: {
+    height: 6,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#3b82f6',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 10,
+    color: '#6b7280',
+    marginTop: 2,
   },
   headerButtons: {
     flexDirection: 'row',
@@ -1587,17 +1658,24 @@ const styles = StyleSheet.create({
   },
   messageRow: {
     marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
   },
   userRow: {
     alignItems: 'flex-end',
+    justifyContent: 'flex-end',
   },
   assistantRow: {
     alignItems: 'flex-start',
+    justifyContent: 'flex-start',
   },
   messageBubble: {
     maxWidth: '80%',
     padding: 12,
     borderRadius: 16,
+  },
+  lastAIMessageBubble: {
+    maxWidth: '70%',
   },
   userBubble: {
     backgroundColor: '#3b82f6',
@@ -1968,6 +2046,24 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   sendButtonText: {
+    fontSize: 24,
+  },
+  // Feature 2: Tap to Speak icon button styles
+  tapToSpeakIconButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#3b82f6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  tapToSpeakIcon: {
     fontSize: 24,
   },
 });
