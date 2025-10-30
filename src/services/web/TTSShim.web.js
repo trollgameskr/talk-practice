@@ -44,6 +44,8 @@ const selectBestVoice = () => {
 };
 
 const Tts = {
+  listeners: {},
+  
   getInitStatus: async () => {
     return 'speechSynthesis' in window ? 'success' : 'error';
   },
@@ -71,8 +73,24 @@ const Tts = {
         options.pitch !== undefined ? options.pitch : Tts.defaultPitch || 1.0;
       utterance.volume = options.volume !== undefined ? options.volume : 1.0;
 
-      utterance.onend = () => resolve();
-      utterance.onerror = event => reject(event);
+      utterance.onstart = () => {
+        // Call event listeners
+        if (Tts.listeners['tts-start']) {
+          Tts.listeners['tts-start'].forEach(callback => callback());
+        }
+      };
+
+      utterance.onend = () => {
+        // Call event listeners
+        if (Tts.listeners['tts-finish']) {
+          Tts.listeners['tts-finish'].forEach(callback => callback());
+        }
+        resolve();
+      };
+      
+      utterance.onerror = event => {
+        reject(event);
+      };
 
       window.speechSynthesis.speak(utterance);
     });
@@ -81,6 +99,10 @@ const Tts = {
   stop: () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
+      // Call cancel event listeners
+      if (Tts.listeners['tts-cancel']) {
+        Tts.listeners['tts-cancel'].forEach(callback => callback());
+      }
     }
     return Promise.resolve();
   },
@@ -126,8 +148,26 @@ const Tts = {
     }));
   },
 
-  addEventListener: () => {},
-  removeEventListener: () => {},
+  addEventListener: (event, callback) => {
+    if (!Tts.listeners[event]) {
+      Tts.listeners[event] = [];
+    }
+    Tts.listeners[event].push(callback);
+  },
+  
+  removeEventListener: (event, callback) => {
+    if (Tts.listeners[event]) {
+      Tts.listeners[event] = Tts.listeners[event].filter(cb => cb !== callback);
+    }
+  },
+  
+  removeAllListeners: (event) => {
+    if (event) {
+      Tts.listeners[event] = [];
+    } else {
+      Tts.listeners = {};
+    }
+  },
 };
 
 // Defaults optimized for natural AI-like speech

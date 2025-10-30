@@ -1,12 +1,20 @@
 /**
  * Device TTS Service
  * Handles speech synthesis using the device's native TTS engine
- * This is a wrapper around react-native-tts
+ * This is a wrapper around react-native-tts (native) or Web Speech API (web)
  */
 
-import Tts from 'react-native-tts';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {STORAGE_KEYS} from '../config/gemini.config';
+import {Platform} from 'react-native';
+
+// Import based on platform
+let Tts: any;
+if (Platform.OS === 'web') {
+  // Use web shim for web platform
+  Tts = require('./web/TTSShim.web.js').default;
+} else {
+  // Use react-native-tts for native platforms
+  Tts = require('react-native-tts').default;
+}
 
 export type VoiceType = 'ai' | 'user';
 
