@@ -1009,6 +1009,27 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
+  /**
+   * Feature 1: Handle replaying audio for a message
+   */
+  const handleReplayAudio = async (message: Message) => {
+    if (!voiceService.current || textOnlyMode) {
+      return;
+    }
+
+    try {
+      setIsSpeaking(true);
+      const voiceType = message.role === 'assistant' ? 'ai' : 'user';
+      await voiceService.current.replayAudio(message.content, voiceType);
+      console.log('[ConversationScreen] Audio replay completed');
+    } catch (error) {
+      console.error('[ConversationScreen] Failed to replay audio:', error);
+      Alert.alert('Error', 'Failed to replay audio. Please try again.');
+    } finally {
+      setIsSpeaking(false);
+    }
+  };
+
   const saveSession = async () => {
     if (messages.length === 0 || sessionSavedRef.current) {
       return;
@@ -1253,11 +1274,35 @@ const ConversationScreen = ({route, navigation}: any) => {
                       🔊 {message.pronunciation}
                     </Text>
                   )}
+                  {/* Feature 1: Replay button for AI messages */}
+                  {!textOnlyMode && (
+                    <TouchableOpacity
+                      style={styles.replayButton}
+                      onPress={() => handleReplayAudio(message)}
+                      disabled={isSpeaking}>
+                      <Text style={styles.replayButtonText}>
+                        {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </>
               ) : (
-                <Text style={[styles.messageText, styles.userText]}>
-                  {message.content}
-                </Text>
+                <>
+                  <Text style={[styles.messageText, styles.userText]}>
+                    {message.content}
+                  </Text>
+                  {/* Feature 1: Replay button for user messages */}
+                  {!textOnlyMode && (
+                    <TouchableOpacity
+                      style={styles.replayButton}
+                      onPress={() => handleReplayAudio(message)}
+                      disabled={isSpeaking}>
+                      <Text style={styles.replayButtonText}>
+                        {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </>
               )}
             </View>
           </View>
@@ -1918,6 +1963,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#4b5563',
+  },
+  // Feature 1: Replay button styles
+  replayButton: {
+    marginTop: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  replayButtonText: {
+    fontSize: 12,
+    color: '#3b82f6',
+    fontWeight: '500',
   },
   textInputContainer: {
     flexDirection: 'row',

@@ -31,9 +31,10 @@ import AIVoiceService, {VoiceType} from '../services/AIVoiceService';
 
 interface TTSSettingsProps {
   targetLanguage: string;
+  ttsApiKey?: string; // Optional prop to track TTS API key changes
 }
 
-const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
+const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage, ttsApiKey}) => {
   const {theme} = useTheme();
   const [config, setConfig] = useState<TTSConfig>(DEFAULT_TTS_CONFIG);
   const [selectedLanguageGroup, setSelectedLanguageGroup] = useState(0);
@@ -54,6 +55,21 @@ const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage}) => {
       }
     };
   }, [targetLanguage]);
+
+  // Feature 2: Update AIVoiceService when TTS API key changes
+  useEffect(() => {
+    const updateApiKey = async () => {
+      if (aiVoiceServiceRef.current && ttsApiKey && ttsApiKey.trim()) {
+        try {
+          await aiVoiceServiceRef.current.setApiKey(ttsApiKey);
+          console.log('[TTSSettings] API key updated in AIVoiceService');
+        } catch (error) {
+          console.error('[TTSSettings] Error updating API key:', error);
+        }
+      }
+    };
+    updateApiKey();
+  }, [ttsApiKey]);
 
   const loadTTSConfigForLanguage = async (langCode: string) => {
     try {
