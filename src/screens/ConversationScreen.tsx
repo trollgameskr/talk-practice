@@ -1202,7 +1202,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           <TouchableOpacity
             onPress={handleEndSession}
             style={styles.endButton}
-            accessibilityLabel="End Session"
+            accessibilityLabel={t('conversation.buttons.endSession', {defaultValue: 'End Session'})}
             accessibilityRole="button">
             <Text style={styles.endButtonText}>🚪</Text>
           </TouchableOpacity>
@@ -1213,7 +1213,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       {showVoiceMethodToast && (
         <View style={styles.voiceMethodToast}>
           <Text style={styles.voiceMethodToastLabel}>
-            {t('conversation.voiceMethod.label', {defaultValue: '🎙️ 음성 재생:'})}
+            {t('conversation.voiceMethod.label', {defaultValue: '🎙️ Voice Playback:'})}
           </Text>
           <Text style={styles.voiceMethodToastText}>{voiceMethod}</Text>
         </View>
