@@ -57,6 +57,24 @@ describe('LogCaptureService', () => {
     expect(logs).toContain('[DeviceTTSService] Test log message');
   });
 
+  it('should capture ConversationScreen logs', () => {
+    logCaptureService.startCapture();
+
+    console.log('[ConversationScreen] Test log message');
+
+    const logs = logCaptureService.getLogs();
+    expect(logs).toContain('[ConversationScreen] Test log message');
+  });
+
+  it('should capture GeminiService logs', () => {
+    logCaptureService.startCapture();
+
+    console.log('[GeminiService] Test log message');
+
+    const logs = logCaptureService.getLogs();
+    expect(logs).toContain('[GeminiService] Test log message');
+  });
+
   it('should not capture logs from other services', () => {
     logCaptureService.startCapture();
 
@@ -104,7 +122,7 @@ describe('LogCaptureService', () => {
     logCaptureService.startCapture();
 
     const logs = logCaptureService.getLogs();
-    expect(logs).toBe('No voice service logs captured yet.');
+    expect(logs).toBe('No logs captured yet. Make sure conversation has been started.');
   });
 
   it('should clear logs', () => {

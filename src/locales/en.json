@@ -123,6 +123,12 @@
       "voicePermission": "Microphone permission is required to use this feature.",
       "listeningError": "Error listening",
       "speakingError": "Error speaking",
+      "initTimeout": {
+        "title": "Initialization Timeout",
+        "message": "The conversation failed to start within 20 seconds. This may be due to a slow network connection or API issues. Please check the logs and try again.",
+        "goBack": "Go Back",
+        "retry": "Retry"
+      },
       "ttsApiNotEnabled": {
         "title": "Google Cloud TTS API Not Enabled",
         "message": "The Cloud Text-to-Speech API has not been enabled in your project.\n\nHow to fix:\n1. Click the link below to open Google Cloud Console\n2. Click 'Enable API' button\n3. Wait a few minutes and try again\n\n💡 After enabling the API, it may take a few minutes for the changes to propagate.",
@@ -142,6 +148,17 @@
         "message": "The AI generated a response but speech playback didn't start.\n\nPossible causes:\n• TTS service response delay\n• Slow network connection\n• Browser audio playback blocked\n\n💡 You can read the text response and continue the conversation.\n\nCheck the browser console logs for detailed information.",
         "continue": "Continue"
       }
+    },
+    "initialization": {
+      "checkingApiKey": "Checking API key...",
+      "loadingPreferences": "Loading preferences...",
+      "initializingAI": "Initializing AI service...",
+      "initializingVoice": "Initializing voice service...",
+      "startingConversation": "Starting conversation...",
+      "enrichingMessage": "Preparing message...",
+      "generatingSamples": "Generating sample responses...",
+      "playingVoice": "Playing AI voice...",
+      "restoringContext": "Restoring conversation context..."
     },
     "copyLogs": {
       "success": "Logs copied to clipboard!",

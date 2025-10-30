@@ -123,6 +123,12 @@
       "voicePermission": "이 기능을 사용하려면 마이크 권한이 필요합니다.",
       "listeningError": "듣기 오류",
       "speakingError": "말하기 오류",
+      "initTimeout": {
+        "title": "초기화 시간 초과",
+        "message": "대화가 20초 이내에 시작되지 않았습니다. 네트워크 연결이 느리거나 API 문제일 수 있습니다. 로그를 확인하고 다시 시도하세요.",
+        "goBack": "뒤로 가기",
+        "retry": "다시 시도"
+      },
       "ttsApiNotEnabled": {
         "title": "Google Cloud TTS API 활성화 필요",
         "message": "Google Cloud Text-to-Speech API가 프로젝트에서 활성화되지 않았습니다.\n\n해결 방법:\n1. 아래 링크를 클릭하여 Google Cloud Console로 이동\n2. 'API 사용 설정' 버튼 클릭\n3. 몇 분 후 다시 시도\n\n💡 API를 활성화한 직후에는 시스템에 반영되는 데 몇 분이 걸릴 수 있습니다.",
@@ -142,6 +148,17 @@
         "message": "AI가 응답을 생성했지만 음성 재생이 시작되지 않았습니다.\n\n가능한 원인:\n• TTS 서비스 응답 지연\n• 네트워크 연결 느림\n• 브라우저 오디오 재생 차단\n\n💡 텍스트 응답을 읽을 수 있으며 대화를 계속할 수 있습니다.\n\n자세한 내용은 브라우저 콘솔 로그를 확인하세요.",
         "continue": "계속"
       }
+    },
+    "initialization": {
+      "checkingApiKey": "API 키 확인 중...",
+      "loadingPreferences": "환경 설정 로드 중...",
+      "initializingAI": "AI 서비스 초기화 중...",
+      "initializingVoice": "음성 서비스 초기화 중...",
+      "startingConversation": "대화 시작 중...",
+      "enrichingMessage": "메시지 준비 중...",
+      "generatingSamples": "샘플 답변 생성 중...",
+      "playingVoice": "AI 음성 재생 중...",
+      "restoringContext": "대화 컨텍스트 복원 중..."
     },
     "copyLogs": {
       "success": "로그가 클립보드에 복사되었습니다!",
