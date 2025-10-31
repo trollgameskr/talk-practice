@@ -1041,6 +1041,10 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
+  const handleCJKModalContentClick = (e: any) => {
+    e.stopPropagation();
+  };
+
   const handleCJKBreakdownRequest = async (sentence: string) => {
     if (!geminiService.current || !sentence.trim()) {
       return;
@@ -1708,7 +1712,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           onPress={() => setShowCJKBreakdownModal(false)}>
           <Pressable
             style={styles.cjkModalContent}
-            onPress={e => e.stopPropagation()}>
+            onPress={handleCJKModalContentClick}>
             <Text style={styles.modalTitle}>
               {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
             </Text>
