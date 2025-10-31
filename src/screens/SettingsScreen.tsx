@@ -59,6 +59,7 @@ const SettingsScreen = ({navigation}: any) => {
   const [showGrammarHighlights, setShowGrammarHighlights] = useState(false);
   const [textOnlyMode, setTextOnlyMode] = useState(false);
   const [ttsProvider, setTtsProvider] = useState<TTSProvider>('google-cloud');
+  const [sessionDuration, setSessionDuration] = useState(300);
   
   useEffect(() => {
     loadApiKey();
@@ -73,6 +74,7 @@ const SettingsScreen = ({navigation}: any) => {
     loadShowGrammarHighlights();
     loadTextOnlyMode();
     loadTtsProvider();
+    loadSessionDuration();
   }, []);
 
   const loadLanguage = async () => {
@@ -202,6 +204,16 @@ const SettingsScreen = ({navigation}: any) => {
       setTtsProvider((savedValue as TTSProvider) || 'google-cloud');
     } catch (error) {
       console.error('Error loading TTS provider setting:', error);
+    }
+  };
+
+  const loadSessionDuration = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_DURATION);
+      // Default to 300 seconds (5 minutes) if not set
+      setSessionDuration(savedValue ? parseInt(savedValue, 10) : 300);
+    } catch (error) {
+      console.error('Error loading session duration setting:', error);
     }
   };
 
@@ -335,6 +347,17 @@ const SettingsScreen = ({navigation}: any) => {
     }
   };
 
+  const handleSessionDurationChange = async (duration: number) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.SESSION_DURATION, duration.toString());
+      setSessionDuration(duration);
+      Alert.alert('Success', 'Session duration preference saved!');
+    } catch (error) {
+      console.error('Error saving session duration:', error);
+      Alert.alert('Error', 'Failed to save session duration preference');
+    }
+  };
+
   const handleGetApiKey = async () => {
     await openURL(GEMINI_API_KEY_URL);
   };
@@ -405,10 +428,8 @@ const SettingsScreen = ({navigation}: any) => {
           onPress: async () => {
             try {
               await AsyncStorage.removeItem(GUEST_MODE_KEY);
-              Alert.alert(
-                'Guest Mode Exited',
-                'You will be redirected to the login screen shortly.',
-              );
+              // The NavigationContainer in App.tsx will automatically remount
+              // and show the login screen when guest mode is removed
             } catch (error) {
               Alert.alert('Error', 'Failed to exit guest mode');
             }
@@ -881,7 +902,7 @@ const SettingsScreen = ({navigation}: any) => {
             <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
               {t('settings.sections.tts.provider.label')}
             </Text>
-            
+
             <TouchableOpacity
               style={[
                 styles.optionButton,
@@ -911,10 +932,7 @@ const SettingsScreen = ({navigation}: any) => {
                   </Text>
                   {ttsProvider === 'google-cloud' && (
                     <Text
-                      style={[
-                        styles.checkMark,
-                        {color: theme.colors.primary},
-                      ]}>
+                      style={[styles.checkMark, {color: theme.colors.primary}]}>
                       ✓
                     </Text>
                   )}
@@ -951,10 +969,7 @@ const SettingsScreen = ({navigation}: any) => {
                   </Text>
                   {ttsProvider === 'device' && (
                     <Text
-                      style={[
-                        styles.checkMark,
-                        {color: theme.colors.primary},
-                      ]}>
+                      style={[styles.checkMark, {color: theme.colors.primary}]}>
                       ✓
                     </Text>
                   )}
@@ -1012,6 +1027,50 @@ const SettingsScreen = ({navigation}: any) => {
             ]}>
             Adjust the length of AI responses and suggested user responses
           </Text>
+
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              Session Duration (minutes)
+            </Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: theme.colors.inputBackground,
+                    borderColor: theme.colors.inputBorder,
+                    color: theme.colors.text,
+                  },
+                ]}
+                value={(sessionDuration / 60).toString()}
+                onChangeText={(text) => {
+                  const minutes = parseInt(text, 10);
+                  if (isNaN(minutes)) {
+                    return; // Don't update for non-numeric input
+                  }
+                  if (minutes < 1) {
+                    Alert.alert('Invalid Duration', 'Session duration must be at least 1 minute.');
+                    return;
+                  }
+                  if (minutes > 60) {
+                    Alert.alert('Invalid Duration', 'Session duration cannot exceed 60 minutes.');
+                    return;
+                  }
+                  handleSessionDurationChange(minutes * 60);
+                }}
+                placeholder="5"
+                placeholderTextColor={theme.colors.textTertiary}
+                keyboardType="numeric"
+              />
+            </View>
+            <Text
+              style={[
+                styles.sectionDescription,
+                {color: theme.colors.textSecondary},
+              ]}>
+              Set practice session time limit (1-60 minutes)
+            </Text>
+          </View>
 
           <View style={styles.optionGroup}>
             <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
@@ -1251,7 +1310,10 @@ const SettingsScreen = ({navigation}: any) => {
         </View>
 
         {ttsProvider === 'google-cloud' && (
-          <TTSSettings targetLanguage={selectedTargetLanguage} ttsApiKey={ttsApiKey} />
+          <TTSSettings
+            targetLanguage={selectedTargetLanguage}
+            ttsApiKey={ttsApiKey}
+          />
         )}
 
         <View

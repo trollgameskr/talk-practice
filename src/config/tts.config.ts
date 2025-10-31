@@ -326,12 +326,14 @@ export function getDefaultVoiceConfigForLanguage(
 ): VoiceConfig {
   const groupIndex = getLanguageGroupIndexByTargetLanguage(languageCode);
   const voices = DEFAULT_VOICES[groupIndex]?.voices || DEFAULT_VOICES[0].voices;
-  
+
   // Try to find a premium Chirp3-HD female voice first (index 3 in our config)
   // If not available, fall back to the first voice in the list
-  const premiumVoice = voices.find(v => v.name.includes('Chirp3-HD') && v.gender === 'FEMALE');
+  const premiumVoice = voices.find(
+    v => v.name.includes('Chirp3-HD') && v.gender === 'FEMALE',
+  );
   const defaultVoice = premiumVoice || voices[0];
-  
+
   return {
     voiceName: defaultVoice.name,
     languageCode: defaultVoice.languageCode,
@@ -348,7 +350,7 @@ export function getDefaultTTSConfigForLanguage(
   languageCode: string,
 ): TTSConfig {
   const voiceConfig = getDefaultVoiceConfigForLanguage(languageCode);
-  
+
   return {
     aiVoice: {...voiceConfig},
     userVoice: {...voiceConfig},

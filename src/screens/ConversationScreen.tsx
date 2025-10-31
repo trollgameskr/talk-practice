@@ -91,6 +91,7 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [showSessionInfoModal, setShowSessionInfoModal] = useState(false);
   const [targetLanguage, setTargetLanguage] = useState<string>('en');
+  const [maxSessionDuration, setMaxSessionDuration] = useState(CONVERSATION_CONFIG.maxDuration);
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -104,19 +105,20 @@ const ConversationScreen = ({route, navigation}: any) => {
 
   // Calculate progress percentage
   const progressPercentage = Math.round(
-    (elapsedTime / CONVERSATION_CONFIG.maxDuration) * 100,
+    (elapsedTime / maxSessionDuration) * 100,
   );
-  const isTimeUp = elapsedTime >= CONVERSATION_CONFIG.maxDuration;
+  const isTimeUp = elapsedTime >= maxSessionDuration;
   const remainingTimeText = isTimeUp
     ? 'Time limit reached'
-    : `${formatDuration(
-        CONVERSATION_CONFIG.maxDuration - elapsedTime,
-      )} remaining`;
+    : `${formatDuration(maxSessionDuration - elapsedTime)} remaining`;
 
   useEffect(() => {
     // Initialize log capture service
     logCaptureService.current = new LogCaptureService();
     logCaptureService.current.startCapture();
+
+    // Load session duration preference
+    loadSessionDuration();
 
     // Start new session directly without checking for saved session
     initializeServices();
@@ -128,12 +130,61 @@ const ConversationScreen = ({route, navigation}: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Handle navigation back button to end session
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
+      // Prevent default behavior if session has messages
+      if (messages.length > 0 && !sessionSavedRef.current) {
+        e.preventDefault();
+        
+        // Prompt user to confirm
+        Alert.alert(
+          'End Session',
+          'Are you sure you want to end this practice session?',
+          [
+            {text: 'Cancel', style: 'cancel'},
+            {
+              text: 'End Session',
+              style: 'destructive',
+              onPress: async () => {
+                // Mark session as saved to prevent duplicate saves
+                sessionSavedRef.current = true;
+                await saveSession();
+                // Unblock and navigate
+                navigation.dispatch(e.data.action);
+              },
+            },
+          ],
+        );
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, messages]);
+
   // Listen for header button press to open session info modal
   useEffect(() => {
     if (route.params?.openSessionInfoTrigger) {
       setShowSessionInfoModal(true);
     }
   }, [route.params?.openSessionInfoTrigger]);
+
+  /**
+   * Load session duration preference
+   */
+  const loadSessionDuration = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_DURATION);
+      if (savedValue) {
+        const duration = parseInt(savedValue, 10);
+        if (!isNaN(duration) && duration > 0) {
+          setMaxSessionDuration(duration);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading session duration:', error);
+    }
+  };
 
   /**
    * Helper function to handle TTS errors consistently
@@ -798,22 +849,39 @@ const ConversationScreen = ({route, navigation}: any) => {
   };
 
   const handleEndSession = async () => {
+    // 세션 종료 확인 alert 표시
     Alert.alert(
-      'End Session',
-      'Are you sure you want to end this practice session?',
+      t('conversation.endSession.title'),
+      t('conversation.endSession.message'),
       [
-        {text: 'Cancel', style: 'cancel'},
+        {text: t('conversation.endSession.cancel'), style: 'cancel'},
         {
-          text: 'End Session',
+          text: t('conversation.endSession.confirm'),
           style: 'destructive',
           onPress: async () => {
-            // Mark session as saved to prevent duplicate saves
+            // 세션 저장
             sessionSavedRef.current = true;
             await saveSession();
-            // Use setTimeout to ensure cleanup happens after navigation
-            setTimeout(() => {
-              navigation.goBack();
-            }, 100);
+            
+            // 세션 종료 안내 모달 표시
+            Alert.alert(
+              t('conversation.sessionEnded.title'),
+              t('conversation.sessionEnded.message'),
+              [
+                {
+                  text: t('conversation.sessionEnded.goToHome'),
+                  onPress: () => {
+                    // 홈 화면으로 안전하게 이동 (네비게이션 스택 리셋)
+                    // 세션 종료 후 뒤로 가기로 대화 화면에 돌아올 수 없도록 함
+                    navigation.reset({
+                      index: 0,
+                      routes: [{name: 'Home'}],
+                    });
+                  },
+                },
+              ],
+              {cancelable: false}, // 모달 외부 클릭으로 닫기 방지
+            );
           },
         },
       ],
@@ -1256,41 +1324,17 @@ const ConversationScreen = ({route, navigation}: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.timerContainer}>
-          <Text style={styles.timerText}>{formatDuration(elapsedTime)}</Text>
-          {/* Progress bar */}
-          <View style={styles.progressBarContainer}>
-            <View style={styles.progressBarBackground}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: `${Math.min(progressPercentage, 100)}%`,
-                    backgroundColor: isTimeUp ? '#ef4444' : '#3b82f6',
-                  },
-                ]}
-              />
-            </View>
-            <Text style={styles.progressText}>
-              {progressPercentage}% • {remainingTimeText}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            onPress={() => setShowSessionInfoModal(true)}
-            style={styles.sessionInfoButton}
-            accessibilityLabel="Session Information"
-            accessibilityRole="button">
-            <Text style={styles.sessionInfoButtonText}>📊</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleEndSession}
-            style={styles.endButton}
-            accessibilityLabel={t('conversation.endSession.confirm')}
-            accessibilityRole="button">
-            <Text style={styles.endButtonText}>🚪</Text>
-          </TouchableOpacity>
+        {/* Compact progress bar */}
+        <View style={styles.compactProgressBarContainer}>
+          <View
+            style={[
+              styles.compactProgressBarFill,
+              {
+                width: `${Math.min(progressPercentage, 100)}%`,
+                backgroundColor: isTimeUp ? '#ef4444' : '#3b82f6',
+              },
+            ]}
+          />
         </View>
       </View>
 
@@ -1695,66 +1739,23 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 1,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
-  timerContainer: {
+  compactProgressBarContainer: {
     flex: 1,
-    marginRight: 12,
-  },
-  timerText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-  progressBarContainer: {
-    marginTop: 4,
-  },
-  progressBarBackground: {
-    height: 6,
+    height: 4,
     backgroundColor: '#e5e7eb',
-    borderRadius: 3,
+    borderRadius: 2,
     overflow: 'hidden',
   },
-  progressBarFill: {
+  compactProgressBarFill: {
     height: '100%',
-    borderRadius: 3,
-  },
-  progressText: {
-    fontSize: 10,
-    color: '#6b7280',
-    marginTop: 2,
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  sessionInfoButton: {
-    backgroundColor: '#3b82f6',
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sessionInfoButtonText: {
-    fontSize: 18,
-  },
-  endButton: {
-    backgroundColor: '#ef4444',
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  endButtonText: {
-    fontSize: 18,
+    borderRadius: 2,
   },
   messagesContainer: {
     flex: 1,

@@ -94,4 +94,5 @@ export const STORAGE_KEYS = {
   TEXT_ONLY_MODE: '@text_only_mode',
   TTS_CONFIG: '@tts_config',
   TTS_CONFIGS_BY_LANGUAGE: '@tts_configs_by_language',
+  SESSION_DURATION: '@session_duration',
 } as const;

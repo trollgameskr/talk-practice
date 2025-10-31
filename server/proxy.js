@@ -77,11 +77,16 @@ app.post('/api/generateContent', async (req, res) => {
 // POST /api/synthesize - Text-to-Speech proxy
 // Request body: { text, voice: { languageCode, name, ssmlGender }, audioConfig: { speakingRate, pitch, volumeGainDb } }
 app.post('/api/synthesize', async (req, res) => {
-  const apiKey = process.env.GOOGLE_TTS_API_KEY || process.env.GEMINI_API_KEY || null;
+  const apiKey =
+    process.env.GOOGLE_TTS_API_KEY || process.env.GEMINI_API_KEY || null;
 
   if (!apiKey) {
-    console.error('TTS proxy request but no GOOGLE_TTS_API_KEY or GEMINI_API_KEY configured');
-    return res.status(400).json({error: 'Missing GOOGLE_TTS_API_KEY on server'});
+    console.error(
+      'TTS proxy request but no GOOGLE_TTS_API_KEY or GEMINI_API_KEY configured',
+    );
+    return res
+      .status(400)
+      .json({error: 'Missing GOOGLE_TTS_API_KEY on server'});
   }
 
   const {text, voice, audioConfig} = req.body;

@@ -737,6 +737,7 @@ Important: Break down the text into meaningful units (kanji with their readings,
    * End the current conversation
    */
   endConversation() {
+    // 채팅 인스턴스 및 세션 데이터 정리
     this.chat = null;
     this.currentTopic = null;
     this.resetSessionTokenUsage();
