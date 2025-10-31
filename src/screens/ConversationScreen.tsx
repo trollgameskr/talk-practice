@@ -23,6 +23,7 @@ import {
   Message,
   ConversationSession,
   VocabularyWord,
+  CJKCharacterBreakdown,
 } from '../types';
 import GeminiService from '../services/GeminiService';
 import VoiceService from '../services/VoiceService';
@@ -59,6 +60,12 @@ const ConversationScreen = ({route, navigation}: any) => {
     examples: string[];
   } | null>(null);
   const [showDefinitionModal, setShowDefinitionModal] = useState(false);
+  const [cjkCharacterBreakdown, setCjkCharacterBreakdown] = useState<
+    CJKCharacterBreakdown[]
+  >([]);
+  const [showCJKBreakdownModal, setShowCJKBreakdownModal] = useState(false);
+  const [selectedSentenceForBreakdown, setSelectedSentenceForBreakdown] =
+    useState<string>('');
   const [autoReadResponse, setAutoReadResponse] = useState(true);
   const [showTranslation, setShowTranslation] = useState(false);
   const [showPronunciation, setShowPronunciation] = useState(false);
@@ -83,6 +90,7 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [initializationStatus, setInitializationStatus] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState(true);
   const [showSessionInfoModal, setShowSessionInfoModal] = useState(false);
+  const [targetLanguage, setTargetLanguage] = useState<string>('en');
   const [maxSessionDuration, setMaxSessionDuration] = useState(CONVERSATION_CONFIG.maxDuration);
 
   const geminiService = useRef<GeminiService | null>(null);
@@ -386,14 +394,17 @@ const ConversationScreen = ({route, navigation}: any) => {
       console.log('[ConversationScreen] Initializing Gemini service');
 
       // Load language preferences
-      const targetLanguage = await getTargetLanguage();
+      const loadedTargetLanguage = await getTargetLanguage();
       const nativeLanguage = getCurrentLanguage();
+
+      // Store target language in state for CJK breakdown feature
+      setTargetLanguage(loadedTargetLanguage);
 
       // Initialize Gemini service with API key, sentence length, and languages
       geminiService.current = new GeminiService(
         apiKey,
         sentenceLength,
-        targetLanguage,
+        loadedTargetLanguage,
         nativeLanguage,
       );
 
@@ -418,7 +429,7 @@ const ConversationScreen = ({route, navigation}: any) => {
         console.log('[ConversationScreen] Initializing voice service');
         voiceService.current = new VoiceService();
         // Set the target language for TTS
-        await voiceService.current.setLanguage(targetLanguage);
+        await voiceService.current.setLanguage(loadedTargetLanguage);
       }
 
       // Always start a new conversation
@@ -1024,6 +1035,31 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
+  const handleCJKBreakdownRequest = async (sentence: string) => {
+    if (!geminiService.current || !sentence.trim()) {
+      return;
+    }
+
+    // Check if the target language is Chinese or Japanese
+    if (targetLanguage !== 'zh' && targetLanguage !== 'ja') {
+      return;
+    }
+
+    setSelectedSentenceForBreakdown(sentence);
+    setShowCJKBreakdownModal(true);
+    setCjkCharacterBreakdown([]); // Clear previous breakdown
+
+    try {
+      const breakdown = await geminiService.current.getCJKCharacterBreakdown(
+        sentence,
+      );
+      setCjkCharacterBreakdown(breakdown);
+    } catch (error) {
+      console.error('Error getting CJK character breakdown:', error);
+      setCjkCharacterBreakdown([]);
+    }
+  };
+
   const handleUseSample = async (sampleObj: {
     text: string;
     translation?: string;
@@ -1342,6 +1378,18 @@ const ConversationScreen = ({route, navigation}: any) => {
                         🔊 {message.pronunciation}
                       </Text>
                     )}
+                    {/* CJK Character Breakdown button for Chinese and Japanese */}
+                    {(targetLanguage === 'zh' || targetLanguage === 'ja') && (
+                      <TouchableOpacity
+                        style={styles.cjkBreakdownButton}
+                        onPress={() =>
+                          handleCJKBreakdownRequest(message.content)
+                        }>
+                        <Text style={styles.cjkBreakdownButtonText}>
+                          📖 {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
                     {/* Feature 1: Replay button for AI messages */}
                     {!textOnlyMode && (
                       <TouchableOpacity
@@ -1622,6 +1670,51 @@ const ConversationScreen = ({route, navigation}: any) => {
             </TouchableOpacity>
           </View>
         </View>
+      </Modal>
+
+      {/* CJK Character Breakdown Modal */}
+      <Modal
+        visible={showCJKBreakdownModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowCJKBreakdownModal(false)}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowCJKBreakdownModal(false)}>
+          <View style={styles.cjkModalContent}>
+            <Text style={styles.modalTitle}>
+              {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
+            </Text>
+            <Text style={styles.cjkOriginalSentence}>
+              {selectedSentenceForBreakdown}
+            </Text>
+            <ScrollView style={styles.cjkBreakdownScroll}>
+              {cjkCharacterBreakdown.length > 0 ? (
+                cjkCharacterBreakdown.map((item, index) => (
+                  <View key={index} style={styles.cjkCharacterItem}>
+                    <Text style={styles.cjkCharacter}>{item.character}</Text>
+                    <View style={styles.cjkCharacterDetails}>
+                      <Text style={styles.cjkPronunciation}>
+                        🔊 {item.pronunciation}
+                      </Text>
+                      {item.reading && (
+                        <Text style={styles.cjkReading}>📝 {item.reading}</Text>
+                      )}
+                      <Text style={styles.cjkMeaning}>💬 {item.meaning}</Text>
+                    </View>
+                  </View>
+                ))
+              ) : (
+                <ActivityIndicator size="large" color="#3b82f6" />
+              )}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowCJKBreakdownModal(false)}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
       </Modal>
 
       {/* Session Info Modal */}
@@ -1931,6 +2024,78 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 11,
     fontWeight: '700',
+  },
+  cjkBreakdownButton: {
+    marginTop: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  cjkBreakdownButtonText: {
+    fontSize: 12,
+    color: '#8b5cf6',
+    fontWeight: '500',
+  },
+  cjkModalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 500,
+    maxHeight: '85%',
+  },
+  cjkOriginalSentence: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 16,
+    padding: 12,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+    textAlign: 'center',
+  },
+  cjkBreakdownScroll: {
+    maxHeight: 400,
+  },
+  cjkCharacterItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  cjkCharacter: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#1f2937',
+    marginRight: 16,
+    minWidth: 50,
+    textAlign: 'center',
+  },
+  cjkCharacterDetails: {
+    flex: 1,
+  },
+  cjkPronunciation: {
+    fontSize: 14,
+    color: '#8b5cf6',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  cjkReading: {
+    fontSize: 14,
+    color: '#3b82f6',
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  cjkMeaning: {
+    fontSize: 14,
+    color: '#4b5563',
+    lineHeight: 20,
   },
   voiceDisplayOverlay: {
     flex: 1,
