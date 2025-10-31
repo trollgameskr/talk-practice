@@ -120,10 +120,10 @@ const ConversationScreen = ({route, navigation}: any) => {
 
   // Listen for header button press to open session info modal
   useEffect(() => {
-    if (route.params?.openSessionInfo) {
+    if (route.params?.openSessionInfoTrigger) {
       setShowSessionInfoModal(true);
     }
-  }, [route.params?.openSessionInfo]);
+  }, [route.params?.openSessionInfoTrigger]);
 
   /**
    * Helper function to handle TTS errors consistently

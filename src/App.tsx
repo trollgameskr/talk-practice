@@ -167,9 +167,11 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
                     <CostDisplay 
                       compact 
                       onPress={() => {
-                        // Navigate to trigger modal opening
-                        // We'll use a ref-based approach in ConversationScreen
-                        navigation.setParams({openSessionInfo: Date.now()});
+                        // Trigger modal opening by updating a counter param
+                        const currentCount = (navigation.getState().routes.find(
+                          (r: any) => r.name === 'Conversation'
+                        )?.params as any)?.openSessionInfoTrigger || 0;
+                        navigation.setParams({openSessionInfoTrigger: currentCount + 1});
                       }}
                     />
                   ),
