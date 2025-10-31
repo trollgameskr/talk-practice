@@ -59,6 +59,7 @@ const SettingsScreen = ({navigation}: any) => {
   const [showGrammarHighlights, setShowGrammarHighlights] = useState(false);
   const [textOnlyMode, setTextOnlyMode] = useState(false);
   const [ttsProvider, setTtsProvider] = useState<TTSProvider>('google-cloud');
+  const [sessionDuration, setSessionDuration] = useState(300);
   
   useEffect(() => {
     loadApiKey();
@@ -73,6 +74,7 @@ const SettingsScreen = ({navigation}: any) => {
     loadShowGrammarHighlights();
     loadTextOnlyMode();
     loadTtsProvider();
+    loadSessionDuration();
   }, []);
 
   const loadLanguage = async () => {
@@ -205,6 +207,16 @@ const SettingsScreen = ({navigation}: any) => {
     }
   };
 
+  const loadSessionDuration = async () => {
+    try {
+      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_DURATION);
+      // Default to 300 seconds (5 minutes) if not set
+      setSessionDuration(savedValue ? parseInt(savedValue, 10) : 300);
+    } catch (error) {
+      console.error('Error loading session duration setting:', error);
+    }
+  };
+
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
       Alert.alert('Error', 'Please enter an API key');
@@ -332,6 +344,17 @@ const SettingsScreen = ({navigation}: any) => {
     } catch (error) {
       console.error('Error saving TTS provider setting:', error);
       Alert.alert('Error', 'Failed to save TTS provider setting');
+    }
+  };
+
+  const handleSessionDurationChange = async (duration: number) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.SESSION_DURATION, duration.toString());
+      setSessionDuration(duration);
+      Alert.alert('Success', 'Session duration preference saved!');
+    } catch (error) {
+      console.error('Error saving session duration:', error);
+      Alert.alert('Error', 'Failed to save session duration preference');
     }
   };
 
@@ -1012,6 +1035,41 @@ const SettingsScreen = ({navigation}: any) => {
             ]}>
             Adjust the length of AI responses and suggested user responses
           </Text>
+
+          <View style={styles.optionGroup}>
+            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+              Session Duration (minutes)
+            </Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: theme.colors.inputBackground,
+                    borderColor: theme.colors.inputBorder,
+                    color: theme.colors.text,
+                  },
+                ]}
+                value={(sessionDuration / 60).toString()}
+                onChangeText={(text) => {
+                  const minutes = parseInt(text, 10);
+                  if (!isNaN(minutes) && minutes > 0 && minutes <= 60) {
+                    handleSessionDurationChange(minutes * 60);
+                  }
+                }}
+                placeholder="5"
+                placeholderTextColor={theme.colors.textTertiary}
+                keyboardType="numeric"
+              />
+            </View>
+            <Text
+              style={[
+                styles.sectionDescription,
+                {color: theme.colors.textSecondary},
+              ]}>
+              Set practice session time limit (1-60 minutes)
+            </Text>
+          </View>
 
           <View style={styles.optionGroup}>
             <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
