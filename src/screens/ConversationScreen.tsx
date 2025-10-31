@@ -36,6 +36,9 @@ import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
 
 const storageService = new StorageService();
 
+// Maximum number of cached CJK breakdowns to prevent memory issues
+const MAX_CJK_CACHE_SIZE = 50;
+
 const ConversationScreen = ({route, navigation}: any) => {
   const {topic} = route.params as {topic: ConversationTopic};
   const {t} = useTranslation();
@@ -1065,11 +1068,17 @@ const ConversationScreen = ({route, navigation}: any) => {
         sentence,
       );
       setCjkCharacterBreakdown(breakdown);
-      // Cache the result
-      setCjkBreakdownCache(prev => ({
-        ...prev,
-        [sentence]: breakdown,
-      }));
+      // Cache the result with LRU behavior
+      setCjkBreakdownCache(prev => {
+        const newCache = {...prev, [sentence]: breakdown};
+        // If cache exceeds max size, remove oldest entry
+        const cacheKeys = Object.keys(newCache);
+        if (cacheKeys.length > MAX_CJK_CACHE_SIZE) {
+          // Remove the first (oldest) key
+          delete newCache[cacheKeys[0]];
+        }
+        return newCache;
+      });
     } catch (error) {
       console.error('Error getting CJK character breakdown:', error);
       setCjkCharacterBreakdown([]);
