@@ -167,11 +167,9 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
                     <CostDisplay 
                       compact 
                       onPress={() => {
-                        // Trigger modal opening by updating a counter param
-                        const currentCount = (navigation.getState().routes.find(
-                          (r: any) => r.name === 'Conversation'
-                        )?.params as any)?.openSessionInfoTrigger || 0;
-                        navigation.setParams({openSessionInfoTrigger: currentCount + 1});
+                        // Trigger modal opening by setting a timestamp
+                        // This ensures each press triggers a new change
+                        navigation.setParams({openSessionInfoTrigger: Math.random()});
                       }}
                     />
                   ),
