@@ -1470,43 +1470,24 @@ const ConversationScreen = ({route, navigation}: any) => {
                             handleCJKBreakdownRequest(message.content)
                           }>
                           <Text style={styles.cjkBreakdownButtonText}>
-                            📖{' '}
-                            {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
+                            📖 {t('conversation.cjkBreakdown.buttonLabel')}
                           </Text>
                         </TouchableOpacity>
                       )}
-                      {showPronunciation && message.pronunciation && (
-                        <Text style={styles.pronunciationText}>
-                          🔊 {message.pronunciation}
-                        </Text>
+                      {/* Feature 1: Replay button for AI messages */}
+                      {!textOnlyMode && (
+                        <TouchableOpacity
+                          style={styles.replayButton}
+                          onPress={() => handleReplayAudio(message)}
+                          disabled={isSpeaking}>
+                          <Text style={styles.replayButtonText}>
+                            {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                          </Text>
+                        </TouchableOpacity>
                       )}
-                      {/* CJK Character Breakdown button and Replay button in the same row */}
-                      <View style={styles.aiMessageButtonsRow}>
-                        {(targetLanguage === 'zh' || targetLanguage === 'ja') && (
-                          <TouchableOpacity
-                            style={styles.cjkBreakdownButton}
-                            onPress={() =>
-                              handleCJKBreakdownRequest(message.content)
-                            }>
-                            <Text style={styles.cjkBreakdownButtonText}>
-                              📖 {t('conversation.cjkBreakdown.buttonLabel')}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
-                        {/* Feature 1: Replay button for AI messages */}
-                        {!textOnlyMode && (
-                          <TouchableOpacity
-                            style={styles.replayButton}
-                            onPress={() => handleReplayAudio(message)}
-                            disabled={isSpeaking}>
-                            <Text style={styles.replayButtonText}>
-                              {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    </>
-                  ) : (
+                    </View>
+                  </>
+                ) : (
                     <>
                       <Text style={[styles.messageText, styles.userText]}>
                         {message.content}
@@ -1525,7 +1506,6 @@ const ConversationScreen = ({route, navigation}: any) => {
                     </>
                   )}
                 </View>
-              </View>
 
               {/* Features 2, 3, 4: Tap to Speak and Text Input buttons below last AI message */}
               {isLastAIMessage && !textOnlyMode && !isListening && (
