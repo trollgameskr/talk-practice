@@ -46,6 +46,7 @@ export class DeviceTTSService {
       // Set language
       await Tts.setDefaultLanguage(
         this.getDeviceLanguageCode(this.currentLanguage),
+      );
 
       this.isInitialized = true;
       console.log('Device TTS Service initialized');
