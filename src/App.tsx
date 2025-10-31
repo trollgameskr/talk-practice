@@ -128,7 +128,8 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
         barStyle={theme.colors.statusBarStyle}
         backgroundColor={theme.colors.statusBarBackground}
       />
-      <NavigationContainer>
+      <NavigationContainer
+        key={isAuthenticated ? 'authenticated' : 'unauthenticated'}>
         <Stack.Navigator
           initialRouteName={isAuthenticated ? 'Home' : 'Login'}
           screenOptions={{
@@ -140,7 +141,7 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
             headerTitleStyle: styles.headerTitle,
             headerRight: isAuthenticated ? HeaderRight : undefined,
           }}>
-          {!isAuthenticated && firebaseService.isFirebaseConfigured() ? (
+          {!isAuthenticated ? (
             <Stack.Screen
               name="Login"
               component={LoginScreen}
@@ -164,12 +165,14 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
                 options={({navigation}) => ({
                   title: t('navigation.conversation'),
                   headerRight: () => (
-                    <CostDisplay 
-                      compact 
+                    <CostDisplay
+                      compact
                       onPress={() => {
                         // Trigger modal opening by setting a timestamp
                         // This ensures each press triggers a new change
-                        navigation.setParams({openSessionInfoTrigger: Math.random()});
+                        navigation.setParams({
+                          openSessionInfoTrigger: Math.random(),
+                        });
                       }}
                     />
                   ),

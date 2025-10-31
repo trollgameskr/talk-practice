@@ -34,7 +34,10 @@ interface TTSSettingsProps {
   ttsApiKey?: string; // Optional prop to track TTS API key changes
 }
 
-const TTSSettings: React.FC<TTSSettingsProps> = ({targetLanguage, ttsApiKey}) => {
+const TTSSettings: React.FC<TTSSettingsProps> = ({
+  targetLanguage,
+  ttsApiKey,
+}) => {
   const {theme} = useTheme();
   const [config, setConfig] = useState<TTSConfig>(DEFAULT_TTS_CONFIG);
   const [selectedLanguageGroup, setSelectedLanguageGroup] = useState(0);

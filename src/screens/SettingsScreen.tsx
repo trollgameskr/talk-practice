@@ -59,7 +59,7 @@ const SettingsScreen = ({navigation}: any) => {
   const [showGrammarHighlights, setShowGrammarHighlights] = useState(false);
   const [textOnlyMode, setTextOnlyMode] = useState(false);
   const [ttsProvider, setTtsProvider] = useState<TTSProvider>('google-cloud');
-  
+
   useEffect(() => {
     loadApiKey();
     loadTtsApiKey();
@@ -405,10 +405,8 @@ const SettingsScreen = ({navigation}: any) => {
           onPress: async () => {
             try {
               await AsyncStorage.removeItem(GUEST_MODE_KEY);
-              Alert.alert(
-                'Guest Mode Exited',
-                'You will be redirected to the login screen shortly.',
-              );
+              // The NavigationContainer in App.tsx will automatically remount
+              // and show the login screen when guest mode is removed
             } catch (error) {
               Alert.alert('Error', 'Failed to exit guest mode');
             }
@@ -881,7 +879,7 @@ const SettingsScreen = ({navigation}: any) => {
             <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
               {t('settings.sections.tts.provider.label')}
             </Text>
-            
+
             <TouchableOpacity
               style={[
                 styles.optionButton,
@@ -911,10 +909,7 @@ const SettingsScreen = ({navigation}: any) => {
                   </Text>
                   {ttsProvider === 'google-cloud' && (
                     <Text
-                      style={[
-                        styles.checkMark,
-                        {color: theme.colors.primary},
-                      ]}>
+                      style={[styles.checkMark, {color: theme.colors.primary}]}>
                       ✓
                     </Text>
                   )}
@@ -951,10 +946,7 @@ const SettingsScreen = ({navigation}: any) => {
                   </Text>
                   {ttsProvider === 'device' && (
                     <Text
-                      style={[
-                        styles.checkMark,
-                        {color: theme.colors.primary},
-                      ]}>
+                      style={[styles.checkMark, {color: theme.colors.primary}]}>
                       ✓
                     </Text>
                   )}
@@ -1251,7 +1243,10 @@ const SettingsScreen = ({navigation}: any) => {
         </View>
 
         {ttsProvider === 'google-cloud' && (
-          <TTSSettings targetLanguage={selectedTargetLanguage} ttsApiKey={ttsApiKey} />
+          <TTSSettings
+            targetLanguage={selectedTargetLanguage}
+            ttsApiKey={ttsApiKey}
+          />
         )}
 
         <View

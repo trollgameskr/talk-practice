@@ -31,7 +31,7 @@ export async function migrateOldTTSConfig(): Promise<boolean> {
     }
 
     const oldConfig = JSON.parse(oldConfigStr);
-    
+
     // Check if it's the old format (has voiceName instead of aiVoice/userVoice)
     if (!oldConfig.voiceName || oldConfig.aiVoice || oldConfig.userVoice) {
       // Not old format or already migrated
@@ -39,7 +39,7 @@ export async function migrateOldTTSConfig(): Promise<boolean> {
     }
 
     console.log('[TTSMigration] Migrating old TTS config to new format');
-    
+
     // Convert old format to new format
     const migratedConfig: TTSConfig = {
       aiVoice: {
