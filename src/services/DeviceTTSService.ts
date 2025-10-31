@@ -12,11 +12,11 @@ import {Platform} from 'react-native';
 let Tts: any;
 if (Platform.OS === 'web') {
   // Use web shim for web platform
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   Tts = require('./web/TTSShim.web.js').default;
 } else {
   // Use react-native-tts for native platforms
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   Tts = require('react-native-tts').default;
 }
 
@@ -38,14 +38,15 @@ export class DeviceTTSService {
     try {
       // Initialize TTS
       await Tts.getInitStatus();
-      
+
       // Set default settings
       await Tts.setDefaultRate(0.5); // Normal speed
       await Tts.setDefaultPitch(1.0); // Normal pitch
-      
+
       // Set language
-      await Tts.setDefaultLanguage(this.getDeviceLanguageCode(this.currentLanguage));
-      
+      await Tts.setDefaultLanguage(
+        this.getDeviceLanguageCode(this.currentLanguage),
+
       this.isInitialized = true;
       console.log('Device TTS Service initialized');
     } catch (error) {
@@ -104,7 +105,7 @@ export class DeviceTTSService {
 
     try {
       this.isSpeaking = true;
-      
+
       return new Promise((resolve, reject) => {
         // Set up event listeners
         Tts.addEventListener('tts-start', () => {

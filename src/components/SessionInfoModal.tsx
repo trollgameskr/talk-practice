@@ -145,7 +145,9 @@ const SessionInfoModal: React.FC<SessionInfoModalProps> = ({
                 </TouchableOpacity>
               </View>
               <ScrollView style={styles.logsContainer}>
-                <Text style={styles.logsText}>{logs || 'No logs available'}</Text>
+                <Text style={styles.logsText}>
+                  {logs || 'No logs available'}
+                </Text>
               </ScrollView>
             </View>
           </ScrollView>

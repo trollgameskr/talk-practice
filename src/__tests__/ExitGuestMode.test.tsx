@@ -40,12 +40,16 @@ describe('Exit Guest Mode UI Behavior', () => {
     it('should trigger NavigationContainer remount when auth state changes', () => {
       // This test verifies the concept that NavigationContainer key changes
       const isAuthenticatedBefore = true;
-      const keyBefore = isAuthenticatedBefore ? 'authenticated' : 'unauthenticated';
+      const keyBefore = isAuthenticatedBefore
+        ? 'authenticated'
+        : 'unauthenticated';
       expect(keyBefore).toBe('authenticated');
 
       // After exiting guest mode
       const isAuthenticatedAfter = false;
-      const keyAfter = isAuthenticatedAfter ? 'authenticated' : 'unauthenticated';
+      const keyAfter = isAuthenticatedAfter
+        ? 'authenticated'
+        : 'unauthenticated';
       expect(keyAfter).toBe('unauthenticated');
 
       // The key change forces React to remount NavigationContainer
@@ -80,13 +84,13 @@ describe('Exit Guest Mode UI Behavior', () => {
     it('should not show confusing alert message', async () => {
       // The old implementation showed: "You will be redirected to the login screen shortly."
       // The new implementation should just remove the key and let navigation handle it
-      
+
       // Remove guest mode
       await AsyncStorage.removeItem(GUEST_MODE_KEY);
-      
+
       // Verify removal was successful
       expect(AsyncStorage.removeItem).toHaveBeenCalledWith(GUEST_MODE_KEY);
-      
+
       // No additional alert needed - navigation handles the transition automatically
     });
   });

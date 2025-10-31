@@ -84,14 +84,14 @@ describe('AIVoiceService', () => {
       // Mock AsyncStorage to return API key
       const AsyncStorage = require('@react-native-async-storage/async-storage');
       AsyncStorage.getItem.mockResolvedValueOnce('test-api-key');
-      
+
       const directService = new AIVoiceService();
       // Wait for initialization to complete
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       const method = directService.getVoiceMethod();
       expect(method).toBe('Google Cloud TTS (Direct API - AI 음성)');
-      
+
       await directService.destroy();
     });
 
@@ -131,9 +131,9 @@ describe('AIVoiceService', () => {
       let audioInstance: any = null;
 
       // Mock Audio constructor
-      (global as any).Audio = jest.fn(function(this: any) {
+      (global as any).Audio = jest.fn(function (this: any) {
         audioInstance = this;
-        this.load = jest.fn(function() {
+        this.load = jest.fn(function () {
           // Trigger oncanplay and onended immediately for testing
           if (this.oncanplay) {
             this.oncanplay();
@@ -185,8 +185,8 @@ describe('AIVoiceService', () => {
       });
 
       // Mock Audio constructor
-      (global as any).Audio = jest.fn(function(this: any) {
-        this.load = jest.fn(function() {
+      (global as any).Audio = jest.fn(function (this: any) {
+        this.load = jest.fn(function () {
           if (this.oncanplay) {
             this.oncanplay();
           }
@@ -249,8 +249,8 @@ describe('AIVoiceService', () => {
       });
 
       // Mock Audio constructor
-      (global as any).Audio = jest.fn(function(this: any) {
-        this.load = jest.fn(function() {
+      (global as any).Audio = jest.fn(function (this: any) {
+        this.load = jest.fn(function () {
           if (this.oncanplay) {
             this.oncanplay();
           }

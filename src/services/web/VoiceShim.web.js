@@ -18,16 +18,22 @@ class Voice {
   onSpeechError = null;
 
   start = async locale => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      const error = new Error('Speech recognition not supported in this browser');
+    if (
+      !('webkitSpeechRecognition' in window) &&
+      !('SpeechRecognition' in window)
+    ) {
+      const error = new Error(
+        'Speech recognition not supported in this browser',
+      );
       if (this.onSpeechError) {
         this.onSpeechError({error: {message: error.message}});
       }
       throw error;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
     if (this.recognition) {
       this.recognition.stop();
     }
@@ -55,12 +61,12 @@ class Voice {
 
     this.recognition.onresult = event => {
       const results = [];
-      
+
       // Process only new results starting from lastResultIndex
       for (let i = this.lastResultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         const transcript = result[0].transcript;
-        
+
         if (result.isFinal) {
           results.push(transcript);
           this.lastResultIndex = i + 1;

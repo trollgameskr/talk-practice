@@ -329,7 +329,10 @@ export class VoiceService {
   /**
    * Feature 1: Replay audio for a specific text and voice type
    */
-  async replayAudio(text: string, voiceType: 'ai' | 'user' = 'ai'): Promise<void> {
+  async replayAudio(
+    text: string,
+    voiceType: 'ai' | 'user' = 'ai',
+  ): Promise<void> {
     if (this.ttsProvider === 'device') {
       // For device TTS, just speak the text again
       await this.deviceTTSService.speak(text, voiceType);

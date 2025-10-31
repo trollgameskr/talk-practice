@@ -23,7 +23,12 @@ const SAMPLE_TEXTS: {[key: string]: string} = {
   ja: 'こんにちは！選択した音声のプレビューです。速度やその他の設定を調整できます。',
 };
 
-const createTestVoiceConfig = (voiceName: string, languageCode: string, gender: 'MALE' | 'FEMALE', speakingRate = 1.0) => ({
+const createTestVoiceConfig = (
+  voiceName: string,
+  languageCode: string,
+  gender: 'MALE' | 'FEMALE',
+  speakingRate = 1.0,
+) => ({
   voiceName,
   languageCode,
   ssmlGender: gender as const,
@@ -36,7 +41,12 @@ const createTestVoiceConfig = (voiceName: string, languageCode: string, gender: 
 const createTestTTSConfig = (langCode: string) => ({
   [langCode]: {
     aiVoice: createTestVoiceConfig('en-US-Standard-B', 'en-US', 'MALE', 1.5),
-    userVoice: createTestVoiceConfig('en-US-Standard-C', 'en-US', 'FEMALE', 1.0),
+    userVoice: createTestVoiceConfig(
+      'en-US-Standard-C',
+      'en-US',
+      'FEMALE',
+      1.0,
+    ),
     region: 'asia-northeast1',
     endpoint: 'https://texttospeech.googleapis.com',
   },
@@ -58,7 +68,8 @@ describe('TTSSettings Preview Functionality', () => {
   });
 
   describe('getSampleTextForLanguage', () => {
-    const getSampleText = (langCode: string) => SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
+    const getSampleText = (langCode: string) =>
+      SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
 
     it('should return English sample text for "en" language code', () => {
       expect(getSampleText('en')).toBe(SAMPLE_TEXTS.en);
@@ -97,7 +108,12 @@ describe('TTSSettings Preview Functionality', () => {
       mockUpdateConfig.mockResolvedValue();
 
       const testConfig = {
-        aiVoice: createTestVoiceConfig('en-US-Standard-B', 'en-US', 'MALE', 1.5),
+        aiVoice: createTestVoiceConfig(
+          'en-US-Standard-B',
+          'en-US',
+          'MALE',
+          1.5,
+        ),
         userVoice: createTestVoiceConfig('en-US-Standard-C', 'en-US', 'FEMALE'),
         region: 'asia-northeast1',
         endpoint: 'https://texttospeech.googleapis.com',
@@ -140,16 +156,25 @@ describe('TTSSettings Preview Functionality', () => {
       const mockGetItem = jest.spyOn(AsyncStorage, 'getItem');
       const testConfig = {
         en: {
-          aiVoice: createTestVoiceConfig('en-US-Standard-B', 'en-US', 'MALE', 1.5),
+          aiVoice: createTestVoiceConfig(
+            'en-US-Standard-B',
+            'en-US',
+            'MALE',
+            1.5,
+          ),
         },
       };
-      
+
       mockGetItem.mockResolvedValue(JSON.stringify(testConfig));
 
-      const result = await AsyncStorage.getItem(STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE);
+      const result = await AsyncStorage.getItem(
+        STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
+      );
       const parsedConfig = result ? JSON.parse(result) : null;
 
-      expect(mockGetItem).toHaveBeenCalledWith(STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE);
+      expect(mockGetItem).toHaveBeenCalledWith(
+        STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
+      );
       expect(parsedConfig).toEqual(testConfig);
     });
   });

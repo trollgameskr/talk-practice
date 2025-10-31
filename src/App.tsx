@@ -141,7 +141,7 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
             headerTitleStyle: styles.headerTitle,
             headerRight: isAuthenticated ? HeaderRight : undefined,
           }}>
-          {!isAuthenticated && firebaseService.isFirebaseConfigured() ? (
+          {!isAuthenticated ? (
             <Stack.Screen
               name="Login"
               component={LoginScreen}

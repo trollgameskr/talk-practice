@@ -122,7 +122,9 @@ describe('LogCaptureService', () => {
     logCaptureService.startCapture();
 
     const logs = logCaptureService.getLogs();
-    expect(logs).toBe('No logs captured yet. Make sure conversation has been started.');
+    expect(logs).toBe(
+      'No logs captured yet. Make sure conversation has been started.',
+    );
   });
 
   it('should clear logs', () => {
