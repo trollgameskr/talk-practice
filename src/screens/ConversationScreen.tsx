@@ -47,7 +47,7 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionStartTime, setSessionStartTime] = useState(new Date());
+  const [sessionStartTime] = useState(new Date());
   const [elapsedTime, setElapsedTime] = useState(0);
   const [enrichedSampleAnswers, setEnrichedSampleAnswers] = useState<
     Array<{
@@ -97,7 +97,9 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [showSessionInfoModal, setShowSessionInfoModal] = useState(false);
   const [targetLanguage, setTargetLanguage] = useState<string>('en');
-  const [maxSessionDuration, setMaxSessionDuration] = useState(CONVERSATION_CONFIG.maxDuration);
+  const [maxSessionDuration, setMaxSessionDuration] = useState(
+    CONVERSATION_CONFIG.maxDuration,
+  );
   const [showTextInputModal, setShowTextInputModal] = useState(false);
   const [textInputValue, setTextInputValue] = useState('');
 
@@ -116,9 +118,6 @@ const ConversationScreen = ({route, navigation}: any) => {
     (elapsedTime / maxSessionDuration) * 100,
   );
   const isTimeUp = elapsedTime >= maxSessionDuration;
-  const remainingTimeText = isTimeUp
-    ? 'Time limit reached'
-    : `${formatDuration(maxSessionDuration - elapsedTime)} remaining`;
 
   useEffect(() => {
     // Initialize log capture service
@@ -144,7 +143,6 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Prevent default behavior if session has messages
       if (messages.length > 0 && !sessionSavedRef.current) {
         e.preventDefault();
-        
         // Prompt user to confirm
         Alert.alert(
           'End Session',
@@ -168,6 +166,7 @@ const ConversationScreen = ({route, navigation}: any) => {
     });
 
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, messages]);
 
   // Listen for header button press to open session info modal

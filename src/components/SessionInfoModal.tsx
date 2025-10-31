@@ -11,7 +11,6 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
 import {formatDuration} from '../utils/helpers';
 import {TokenUsage} from '../types';
