@@ -123,4 +123,3 @@ describe('Exit Guest Mode UI Behavior', () => {
     });
   });
 });
-
