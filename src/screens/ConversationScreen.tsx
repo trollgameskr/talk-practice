@@ -2,7 +2,7 @@
  * Conversation Screen - Main practice interface
  */
 
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useMemo} from 'react';
 import {
   View,
   Text,
@@ -47,7 +47,7 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionStartTime] = useState(new Date());
+  const sessionStartTime = useMemo(() => new Date(), []);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [enrichedSampleAnswers, setEnrichedSampleAnswers] = useState<
     Array<{
@@ -166,6 +166,10 @@ const ConversationScreen = ({route, navigation}: any) => {
     });
 
     return unsubscribe;
+    // saveSession is intentionally not in dependencies because:
+    // 1. It uses refs that are stable across renders
+    // 2. Adding it would cause listener to re-register on every render
+    // 3. The listener only needs to update when navigation or messages change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, messages]);
 
