@@ -39,21 +39,10 @@ const SessionInfoModal: React.FC<SessionInfoModalProps> = ({
   logs,
 }) => {
   const handleEndSession = () => {
-    Alert.alert(
-      'End Session',
-      'Are you sure you want to end this practice session?',
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'End Session',
-          style: 'destructive',
-          onPress: () => {
-            onClose();
-            onEndSession();
-          },
-        },
-      ],
-    );
+    // 모달 닫고 부모 컴포넌트의 세션 종료 핸들러 호출
+    // 부모 컴포넌트(ConversationScreen)에서 확인 및 종료 안내를 처리함
+    onClose();
+    onEndSession();
   };
 
   const formatTokens = (tokens: number): string => {

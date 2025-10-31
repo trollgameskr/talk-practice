@@ -117,6 +117,11 @@
       "vocabulary": "New Vocabulary",
       "ok": "OK"
     },
+    "sessionEnded": {
+      "title": "Practice Session Ended",
+      "message": "Well done! Your practice session has been successfully ended.",
+      "goToHome": "Go to Home"
+    },
     "errors": {
       "initializationFailed": "Failed to initialize services. Please check your settings.",
       "noApiKey": "No API key found. Please configure it in Settings.",
