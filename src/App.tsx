@@ -161,7 +161,19 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
               <Stack.Screen
                 name="Conversation"
                 component={ConversationScreen}
-                options={{title: t('navigation.conversation')}}
+                options={({navigation}) => ({
+                  title: t('navigation.conversation'),
+                  headerRight: () => (
+                    <CostDisplay 
+                      compact 
+                      onPress={() => {
+                        // Navigate to trigger modal opening
+                        // We'll use a ref-based approach in ConversationScreen
+                        navigation.setParams({openSessionInfo: Date.now()});
+                      }}
+                    />
+                  ),
+                })}
               />
               <Stack.Screen
                 name="Progress"

@@ -118,6 +118,13 @@ const ConversationScreen = ({route, navigation}: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Listen for header button press to open session info modal
+  useEffect(() => {
+    if (route.params?.openSessionInfo) {
+      setShowSessionInfoModal(true);
+    }
+  }, [route.params?.openSessionInfo]);
+
   /**
    * Helper function to handle TTS errors consistently
    */
