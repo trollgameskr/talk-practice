@@ -787,22 +787,39 @@ const ConversationScreen = ({route, navigation}: any) => {
   };
 
   const handleEndSession = async () => {
+    // 세션 종료 확인 alert 표시
     Alert.alert(
-      'End Session',
-      'Are you sure you want to end this practice session?',
+      t('conversation.endSession.title'),
+      t('conversation.endSession.message'),
       [
-        {text: 'Cancel', style: 'cancel'},
+        {text: t('conversation.endSession.cancel'), style: 'cancel'},
         {
-          text: 'End Session',
+          text: t('conversation.endSession.confirm'),
           style: 'destructive',
           onPress: async () => {
-            // Mark session as saved to prevent duplicate saves
+            // 세션 저장
             sessionSavedRef.current = true;
             await saveSession();
-            // Use setTimeout to ensure cleanup happens after navigation
-            setTimeout(() => {
-              navigation.goBack();
-            }, 100);
+            
+            // 세션 종료 안내 모달 표시
+            Alert.alert(
+              t('conversation.sessionEnded.title'),
+              t('conversation.sessionEnded.message'),
+              [
+                {
+                  text: t('conversation.sessionEnded.goToHome'),
+                  onPress: () => {
+                    // 홈 화면으로 안전하게 이동 (네비게이션 스택 리셋)
+                    // 세션 종료 후 뒤로 가기로 대화 화면에 돌아올 수 없도록 함
+                    navigation.reset({
+                      index: 0,
+                      routes: [{name: 'Home'}],
+                    });
+                  },
+                },
+              ],
+              {cancelable: false}, // 모달 외부 클릭으로 닫기 방지
+            );
           },
         },
       ],

@@ -638,9 +638,11 @@ Example format:
   }
 
   /**
+   * 현재 대화 세션 종료
    * End the current conversation
    */
   endConversation() {
+    // 채팅 인스턴스 및 세션 데이터 정리
     this.chat = null;
     this.currentTopic = null;
     this.resetSessionTokenUsage();
