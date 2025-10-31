@@ -56,7 +56,7 @@ const Tts = {
   defaultLanguage: 'en-US',
   defaultRate: 0.95, // Slightly slower for clarity
   defaultPitch: 1.0,
-  
+
   getInitStatus: async () => {
     return 'speechSynthesis' in window ? 'success' : 'error';
   },
@@ -94,7 +94,7 @@ const Tts = {
         triggerListeners(Tts.listeners, 'tts-finish');
         resolve();
       };
-      
+
       utterance.onerror = event => {
         reject(event);
       };
@@ -159,15 +159,15 @@ const Tts = {
     }
     Tts.listeners.get(event).push(callback);
   },
-  
+
   removeEventListener: (event, callback) => {
     if (Tts.listeners.has(event)) {
       const callbacks = Tts.listeners.get(event).filter(cb => cb !== callback);
       Tts.listeners.set(event, callbacks);
     }
   },
-  
-  removeAllListeners: (event) => {
+
+  removeAllListeners: event => {
     if (event) {
       Tts.listeners.set(event, []);
     } else {

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Session end confirmation modal with clear user feedback
+  - After ending a session, users now see a "연습이 종료되었습니다" (Practice Session Ended) confirmation modal
+  - Modal includes a "처음으로 이동" (Go to Home) button that navigates directly to the home screen
+  - Improves UX by making session termination more explicit and preventing confusion
+
 ### Fixed
 - AI's first message now correctly uses the target language instead of English
   - When learning Japanese, the first message will be in Japanese (e.g., "友達と何をするのが好きですか？")

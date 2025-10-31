@@ -15,7 +15,10 @@ interface CostDisplayProps {
   onPress?: () => void;
 }
 
-const CostDisplay: React.FC<CostDisplayProps> = ({compact = false, onPress}) => {
+const CostDisplay: React.FC<CostDisplayProps> = ({
+  compact = false,
+  onPress,
+}) => {
   const {isDark} = useTheme();
   const [totalCost, setTotalCost] = useState<number>(0);
   const [totalTokens, setTotalTokens] = useState<number>(0);

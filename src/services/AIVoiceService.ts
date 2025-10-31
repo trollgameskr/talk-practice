@@ -101,7 +101,7 @@ export class AIVoiceService {
       const savedConfigsStr = await AsyncStorage.getItem(
         STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
       );
-      
+
       if (savedConfigsStr) {
         this.ttsConfigsByLanguage = JSON.parse(savedConfigsStr);
       } else {
@@ -138,7 +138,7 @@ export class AIVoiceService {
     const currentConfig = this.getTTSConfigForLanguage(this.currentLanguage);
     const updatedConfig = {...currentConfig, ...config};
     this.ttsConfigsByLanguage[this.currentLanguage] = updatedConfig;
-    
+
     try {
       await AsyncStorage.setItem(
         STORAGE_KEYS.TTS_CONFIGS_BY_LANGUAGE,
@@ -163,7 +163,11 @@ export class AIVoiceService {
    * @param voiceType Type of voice to use: 'ai' for AI responses, 'user' for user response samples
    * @param useCache Whether to use cached audio (Feature 1)
    */
-  async speak(text: string, voiceType: VoiceType = 'ai', useCache: boolean = true): Promise<void> {
+  async speak(
+    text: string,
+    voiceType: VoiceType = 'ai',
+    useCache: boolean = true,
+  ): Promise<void> {
     const startTime = Date.now();
     console.log('[AIVoiceService] Starting speech synthesis', {
       textLength: text.length,
@@ -205,12 +209,12 @@ export class AIVoiceService {
           generationTimeMs: generationTime,
           audioContentLength: audioContent.length,
         });
-        
+
         // Feature 1: Cache the generated audio
         if (useCache) {
           this.cacheAudio(text, voiceType, audioContent);
         }
-        
+
         await this.playAudio(audioContent);
         const totalTime = Date.now() - startTime;
         console.log('[AIVoiceService] Speech synthesis completed', {
@@ -370,15 +374,17 @@ export class AIVoiceService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        
+
         // Check for 403 SERVICE_DISABLED error specifically
         if (response.status === 403 && errorData.error) {
           const error = errorData.error;
-          const isServiceDisabled = 
+          const isServiceDisabled =
             error.status === 'PERMISSION_DENIED' &&
-            (error.message?.includes('Cloud Text-to-Speech API has not been used') ||
-             error.message?.includes('it is disabled'));
-          
+            (error.message?.includes(
+              'Cloud Text-to-Speech API has not been used',
+            ) ||
+              error.message?.includes('it is disabled'));
+
           if (isServiceDisabled) {
             // Create a detailed error for 403 SERVICE_DISABLED
             const detailedError = new Error('TTS_API_NOT_ENABLED');
@@ -388,7 +394,7 @@ export class AIVoiceService {
             throw detailedError;
           }
         }
-        
+
         const errorMsg = `API request failed: ${response.status} - ${
           errorData.error?.message || errorData.error || 'Unknown error'
         }`;
@@ -610,12 +616,12 @@ export class AIVoiceService {
     const ttsConfig = this.getTTSConfigForLanguage(this.currentLanguage);
     const voiceConfig: VoiceConfig =
       voiceType === 'ai' ? ttsConfig.aiVoice : ttsConfig.userVoice;
-    
+
     const voiceName =
       voiceConfig.useCustomVoice && voiceConfig.customVoiceName
         ? voiceConfig.customVoiceName
         : voiceConfig.voiceName;
-    
+
     // Create a unique key based on text, voice, and language
     return `${text}|${voiceName}|${this.currentLanguage}|${voiceConfig.speakingRate}`;
   }
@@ -631,10 +637,16 @@ export class AIVoiceService {
   /**
    * Feature 1: Cache audio data
    */
-  private cacheAudio(text: string, voiceType: VoiceType, audioData: string): void {
+  private cacheAudio(
+    text: string,
+    voiceType: VoiceType,
+    audioData: string,
+  ): void {
     const key = this.getCacheKey(text, voiceType);
     this.audioCache.set(key, audioData);
-    console.log(`[AIVoiceService] Cached audio for key: ${key.substring(0, 50)}...`);
+    console.log(
+      `[AIVoiceService] Cached audio for key: ${key.substring(0, 50)}...`,
+    );
   }
 
   /**
