@@ -471,7 +471,7 @@ export class AIVoiceService {
         console.log('[AIVoiceService] Audio element created');
 
         // Wait for audio to be ready before playing to prevent cutting off the beginning
-        this.currentAudio.oncanplay = () => {
+        this.currentAudio.oncanplaythrough = () => {
           const loadTime = Date.now() - startTime;
           console.log('[AIVoiceService] Audio ready to play', {
             loadTimeMs: loadTime,
