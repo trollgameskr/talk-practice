@@ -10,7 +10,13 @@ import {
   SentenceLength,
   SENTENCE_LENGTH_CONFIG,
 } from '../config/gemini.config';
-import {ConversationTopic, Message, Feedback, TokenUsage} from '../types';
+import {
+  ConversationTopic,
+  Message,
+  Feedback,
+  TokenUsage,
+  CJKCharacterBreakdown,
+} from '../types';
 import {getConversationPrompts} from '../data/conversationPrompts';
 import {LANGUAGE_NAMES} from '../utils/helpers';
 
@@ -640,14 +646,9 @@ Example format:
   /**
    * Get character-by-character breakdown for Chinese and Japanese text
    */
-  async getCJKCharacterBreakdown(text: string): Promise<
-    Array<{
-      character: string;
-      meaning: string;
-      pronunciation: string;
-      reading?: string;
-    }>
-  > {
+  async getCJKCharacterBreakdown(
+    text: string,
+  ): Promise<CJKCharacterBreakdown[]> {
     const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
     const isChinese = this.targetLanguage === 'zh';
     const isJapanese = this.targetLanguage === 'ja';
@@ -716,8 +717,13 @@ Important: Break down the text into meaningful units (kanji with their readings,
       // Try to parse JSON response
       const jsonMatch = response.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return parsed;
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return parsed;
+        } catch (parseError) {
+          console.error('Error parsing JSON from response:', parseError);
+          return [];
+        }
       }
 
       return [];

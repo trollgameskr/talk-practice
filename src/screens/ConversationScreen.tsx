@@ -23,6 +23,7 @@ import {
   Message,
   ConversationSession,
   VocabularyWord,
+  CJKCharacterBreakdown,
 } from '../types';
 import GeminiService from '../services/GeminiService';
 import VoiceService from '../services/VoiceService';
@@ -60,12 +61,7 @@ const ConversationScreen = ({route, navigation}: any) => {
   } | null>(null);
   const [showDefinitionModal, setShowDefinitionModal] = useState(false);
   const [cjkCharacterBreakdown, setCjkCharacterBreakdown] = useState<
-    Array<{
-      character: string;
-      meaning: string;
-      pronunciation: string;
-      reading?: string;
-    }>
+    CJKCharacterBreakdown[]
   >([]);
   const [showCJKBreakdownModal, setShowCJKBreakdownModal] = useState(false);
   const [selectedSentenceForBreakdown, setSelectedSentenceForBreakdown] =
