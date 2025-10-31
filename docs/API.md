@@ -282,10 +282,10 @@ export const GEMINI_CONFIG = {
 
 ```typescript
 export const CONVERSATION_CONFIG = {
-  maxDuration: 1800,        // 30 minutes
-  minSessionDuration: 60,   // 1 minute
-  feedbackDelay: 2000,      // 2 seconds
-  autoSaveInterval: 30000,  // 30 seconds
+  maxDuration: 300,         // 5분 (5 minutes in seconds)
+  minSessionDuration: 60,   // 1분 (1 minute)
+  feedbackDelay: 2000,      // 2초 (2 seconds)
+  autoSaveInterval: 30000,  // 30초 (30 seconds)
 };
 ```
 
