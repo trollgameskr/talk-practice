@@ -72,10 +72,10 @@
   },
   "conversation": {
     "apiKeyRequired": {
-      "title": "需要API密钥",
-      "message": "开始练习需要Gemini API密钥。您可以从Google AI Studio免费获取。\n\n前往设置配置您的API密钥。",
+      "title": "⚠️ 必须设置Gemini API密钥",
+      "message": "🔑 开始练习必须要有Gemini API密钥！\n\n目前未设置API密钥，无法开始对话。\n\n✅ 您可以从Google AI Studio免费获取API密钥。\n\n请立即前往设置配置您的API密钥。",
       "cancel": "取消",
-      "goToSettings": "前往设置"
+      "goToSettings": "✅ 前往设置"
     },
     "buttons": {
       "startListening": "🎤 开始说话",
