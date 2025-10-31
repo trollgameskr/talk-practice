@@ -1053,9 +1053,18 @@ const SettingsScreen = ({navigation}: any) => {
                 value={(sessionDuration / 60).toString()}
                 onChangeText={(text) => {
                   const minutes = parseInt(text, 10);
-                  if (!isNaN(minutes) && minutes > 0 && minutes <= 60) {
-                    handleSessionDurationChange(minutes * 60);
+                  if (isNaN(minutes)) {
+                    return; // Don't update for non-numeric input
                   }
+                  if (minutes < 1) {
+                    Alert.alert('Invalid Duration', 'Session duration must be at least 1 minute.');
+                    return;
+                  }
+                  if (minutes > 60) {
+                    Alert.alert('Invalid Duration', 'Session duration cannot exceed 60 minutes.');
+                    return;
+                  }
+                  handleSessionDurationChange(minutes * 60);
                 }}
                 placeholder="5"
                 placeholderTextColor={theme.colors.textTertiary}
