@@ -1267,9 +1267,6 @@ const ConversationScreen = ({route, navigation}: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.timerContainer}>
-          <Text style={styles.timerText}>{formatDuration(elapsedTime)}</Text>
-        </View>
         {/* Compact progress bar */}
         <View style={styles.compactProgressBarContainer}>
           <View
@@ -1630,18 +1627,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 1,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
-  },
-  timerContainer: {
-    marginRight: 12,
-  },
-  timerText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
   },
   compactProgressBarContainer: {
     flex: 1,
