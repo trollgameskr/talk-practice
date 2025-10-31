@@ -294,4 +294,84 @@ describe('GeminiService', () => {
       expect(typeof tokenUsage.estimatedCost).toBe('number');
     });
   });
+
+  describe('getCJKCharacterBreakdown', () => {
+    it('should return breakdown for Chinese text', async () => {
+      const chineseService = new GeminiService(
+        'test-api-key',
+        'medium',
+        'zh',
+        'en',
+      );
+
+      const breakdown =
+        await chineseService.getCJKCharacterBreakdown('你好');
+
+      expect(Array.isArray(breakdown)).toBe(true);
+      if (breakdown.length > 0) {
+        expect(breakdown[0]).toHaveProperty('character');
+        expect(breakdown[0]).toHaveProperty('meaning');
+        expect(breakdown[0]).toHaveProperty('pronunciation');
+      }
+
+      chineseService.endConversation();
+    });
+
+    it('should return breakdown for Japanese text', async () => {
+      const japaneseService = new GeminiService(
+        'test-api-key',
+        'medium',
+        'ja',
+        'en',
+      );
+
+      const breakdown =
+        await japaneseService.getCJKCharacterBreakdown('こんにちは');
+
+      expect(Array.isArray(breakdown)).toBe(true);
+      if (breakdown.length > 0) {
+        expect(breakdown[0]).toHaveProperty('character');
+        expect(breakdown[0]).toHaveProperty('meaning');
+        expect(breakdown[0]).toHaveProperty('pronunciation');
+        // Japanese may have reading field
+        if (breakdown[0].reading) {
+          expect(typeof breakdown[0].reading).toBe('string');
+        }
+      }
+
+      japaneseService.endConversation();
+    });
+
+    it('should return empty array for non-CJK languages', async () => {
+      const englishService = new GeminiService(
+        'test-api-key',
+        'medium',
+        'en',
+        'ko',
+      );
+
+      const breakdown =
+        await englishService.getCJKCharacterBreakdown('Hello');
+
+      expect(Array.isArray(breakdown)).toBe(true);
+      expect(breakdown.length).toBe(0);
+
+      englishService.endConversation();
+    });
+
+    it('should handle empty text gracefully', async () => {
+      const chineseService = new GeminiService(
+        'test-api-key',
+        'medium',
+        'zh',
+        'en',
+      );
+
+      const breakdown = await chineseService.getCJKCharacterBreakdown('');
+
+      expect(Array.isArray(breakdown)).toBe(true);
+
+      chineseService.endConversation();
+    });
+  });
 });
