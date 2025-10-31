@@ -15,9 +15,10 @@ const triggerListeners = (listeners, event) => {
 };
 
 /**
- * Select the best AI voice from available voices
+ * Select the best AI voice from available voices for a given language
+ * @param {string} language - The language code (e.g., 'en-US', 'ja-JP', 'ko-KR')
  */
-const selectBestVoice = () => {
+const selectBestVoice = language => {
   if (!('speechSynthesis' in window)) {
     return null;
   }
@@ -27,26 +28,58 @@ const selectBestVoice = () => {
     return null;
   }
 
-  // Priority order for AI/Neural voices
+  // Extract base language code (e.g., 'ja' from 'ja-JP')
+  const baseLang = language ? language.split('-')[0] : 'en';
+  const fullLang = language || 'en-US';
+
+  console.log('[TTSShim] Selecting voice for language:', fullLang);
+
+  // Priority order for selecting the best voice
+  // 1. Google voice for the exact language
+  // 2. Microsoft Neural voice for the exact language
+  // 3. Premium/Enhanced voice for the exact language
+  // 4. Any voice matching the exact language code
+  // 5. Any voice matching the base language code
+  // 6. Fallback to first available voice
   const voicePriorities = [
-    v => v.name.includes('Google') && v.name.includes('US'),
-    v => v.name.includes('Google') && v.lang === 'en-US',
-    v => v.name.includes('Microsoft') && v.name.includes('Neural'),
-    v => v.name.includes('Premium') && v.lang === 'en-US',
-    v => v.name.includes('Enhanced') && v.lang === 'en-US',
-    v => v.lang === 'en-US' && v.localService,
-    v => v.lang === 'en-US',
-    v => v.lang.startsWith('en'),
+    v => v.name.includes('Google') && v.lang === fullLang,
+    v => v.name.includes('Google') && v.lang.startsWith(baseLang),
+    v =>
+      v.name.includes('Microsoft') &&
+      v.name.includes('Neural') &&
+      v.lang === fullLang,
+    v =>
+      v.name.includes('Microsoft') &&
+      v.name.includes('Neural') &&
+      v.lang.startsWith(baseLang),
+    v =>
+      (v.name.includes('Premium') || v.name.includes('Enhanced')) &&
+      v.lang === fullLang,
+    v =>
+      (v.name.includes('Premium') || v.name.includes('Enhanced')) &&
+      v.lang.startsWith(baseLang),
+    v => v.lang === fullLang,
+    v => v.lang.startsWith(baseLang),
   ];
 
   for (const priorityCheck of voicePriorities) {
     const voice = voices.find(priorityCheck);
     if (voice) {
-      console.log('Selected AI voice:', voice.name);
+      console.log(
+        '[TTSShim] Selected voice:',
+        voice.name,
+        'for language:',
+        voice.lang,
+      );
       return voice;
     }
   }
 
+  console.warn(
+    '[TTSShim] No matching voice found for language:',
+    fullLang,
+    '- using first available voice',
+  );
   return voices[0];
 };
 
@@ -70,14 +103,17 @@ const Tts = {
     return new Promise((resolve, reject) => {
       const utterance = new SpeechSynthesisUtterance(text);
 
-      // Select the best AI voice available
-      const bestVoice = selectBestVoice();
+      // Determine the language to use
+      const targetLang = options.language || Tts.defaultLanguage || 'en-US';
+
+      // Select the best voice for the target language
+      const bestVoice = selectBestVoice(targetLang);
       if (bestVoice) {
         utterance.voice = bestVoice;
       }
 
       // Apply options with better defaults for AI-like speech
-      utterance.lang = options.language || Tts.defaultLanguage || 'en-US';
+      utterance.lang = targetLang;
       utterance.rate =
         options.rate !== undefined ? options.rate : Tts.defaultRate || 0.95;
       utterance.pitch =

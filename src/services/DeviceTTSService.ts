@@ -12,11 +12,9 @@ import {Platform} from 'react-native';
 let Tts: any;
 if (Platform.OS === 'web') {
   // Use web shim for web platform
-   
   Tts = require('./web/TTSShim.web.js').default;
 } else {
   // Use react-native-tts for native platforms
-   
   Tts = require('react-native-tts').default;
 }
 
@@ -95,6 +93,7 @@ export class DeviceTTSService {
       textLength: text.length,
       textPreview: text.substring(0, 50),
       voiceType,
+      language: this.currentLanguage,
       timestamp: new Date().toISOString(),
     });
 
@@ -128,8 +127,11 @@ export class DeviceTTSService {
           resolve();
         });
 
-        // Speak the text
-        Tts.speak(text).catch((error: any) => {
+        // Speak the text with language option
+        const deviceLanguageCode = this.getDeviceLanguageCode(
+          this.currentLanguage,
+        );
+        Tts.speak(text, {language: deviceLanguageCode}).catch((error: any) => {
           const totalTime = Date.now() - startTime;
           console.error('[DeviceTTSService] Speech synthesis failed', {
             error: error instanceof Error ? error.message : String(error),
