@@ -97,7 +97,9 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [showSessionInfoModal, setShowSessionInfoModal] = useState(false);
   const [targetLanguage, setTargetLanguage] = useState<string>('en');
-  const [maxSessionDuration, setMaxSessionDuration] = useState(CONVERSATION_CONFIG.maxDuration);
+  const [maxSessionDuration, setMaxSessionDuration] = useState(
+    CONVERSATION_CONFIG.maxDuration,
+  );
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -142,7 +144,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Prevent default behavior if session has messages
       if (messages.length > 0 && !sessionSavedRef.current) {
         e.preventDefault();
-        
+
         // Prompt user to confirm
         Alert.alert(
           'End Session',
@@ -180,7 +182,9 @@ const ConversationScreen = ({route, navigation}: any) => {
    */
   const loadSessionDuration = async () => {
     try {
-      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_DURATION);
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.SESSION_DURATION,
+      );
       if (savedValue) {
         const duration = parseInt(savedValue, 10);
         if (!isNaN(duration) && duration > 0) {
@@ -872,7 +876,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             // 세션 저장
             sessionSavedRef.current = true;
             await saveSession();
-            
+
             // 세션 종료 안내 모달 표시
             Alert.alert(
               t('conversation.sessionEnded.title'),
@@ -1176,6 +1180,29 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
+  /**
+   * Handle replaying audio in the voice display modal
+   */
+  const handleReplayVoiceDisplayAudio = async () => {
+    if (!voiceService.current || textOnlyMode || !voiceDisplayText) {
+      return;
+    }
+
+    try {
+      setIsSpeaking(true);
+      await voiceService.current.speak(voiceDisplayText, 'user');
+      console.log('[ConversationScreen] Voice display audio replay completed');
+    } catch (error) {
+      console.error(
+        '[ConversationScreen] Failed to replay voice display audio:',
+        error,
+      );
+      Alert.alert('Error', 'Failed to replay audio. Please try again.');
+    } finally {
+      setIsSpeaking(false);
+    }
+  };
+
   const saveSession = async () => {
     if (messages.length === 0 || sessionSavedRef.current) {
       return;
@@ -1420,7 +1447,8 @@ const ConversationScreen = ({route, navigation}: any) => {
                             handleCJKBreakdownRequest(message.content)
                           }>
                           <Text style={styles.cjkBreakdownButtonText}>
-                            📖 {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
+                            📖{' '}
+                            {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
                           </Text>
                         </TouchableOpacity>
                       )}
@@ -1665,7 +1693,6 @@ const ConversationScreen = ({route, navigation}: any) => {
         onRequestClose={() => setShowVoiceDisplayModal(false)}>
         <View style={styles.voiceDisplayOverlay}>
           <View style={styles.voiceDisplayContent}>
-            <Text style={styles.voiceDisplayTitle}>🔊 음성 재생 중</Text>
             <Text style={styles.voiceDisplayText}>{voiceDisplayText}</Text>
 
             {/* Display translation if available */}
@@ -1682,13 +1709,15 @@ const ConversationScreen = ({route, navigation}: any) => {
               </Text>
             )}
 
-            {/* Voice method display - matching token usage display style */}
-            <View style={styles.voiceMethodDisplayContainer}>
-              <Text style={styles.voiceMethodDisplayLabel}>
-                🎙️ 음성 재생 모델:
+            {/* Replay audio button */}
+            <TouchableOpacity
+              style={styles.voiceDisplayReplayButton}
+              onPress={handleReplayVoiceDisplayAudio}
+              disabled={isSpeaking}>
+              <Text style={styles.voiceDisplayReplayText}>
+                {isSpeaking ? '⏸️ 재생 중...' : '🔊 다시 듣기'}
               </Text>
-              <Text style={styles.voiceMethodDisplayText}>{voiceMethod}</Text>
-            </View>
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.voiceDisplayCloseButton}
@@ -2128,13 +2157,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 10,
   },
-  voiceDisplayTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#3b82f6',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
   voiceDisplayText: {
     fontSize: 28,
     fontWeight: '600',
@@ -2159,28 +2181,18 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 16,
   },
-  voiceMethodDisplayContainer: {
-    backgroundColor: '#f0fdf4',
+  voiceDisplayReplayButton: {
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
     borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#86efac',
-    width: '100%',
+    marginTop: 16,
+    marginBottom: 12,
   },
-  voiceMethodDisplayLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#15803d',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  voiceMethodDisplayText: {
+  voiceDisplayReplayText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#166534',
-    textAlign: 'center',
+    fontWeight: '600',
+    color: '#ffffff',
   },
   voiceDisplayCloseButton: {
     backgroundColor: '#e5e7eb',
