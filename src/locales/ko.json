@@ -103,6 +103,11 @@
       "cancel": "계속",
       "confirm": "세션 종료"
     },
+    "sessionEnded": {
+      "title": "연습이 종료되었습니다",
+      "message": "수고하셨습니다! 연습 세션이 성공적으로 종료되었습니다.",
+      "goToHome": "처음으로 이동"
+    },
     "resumeSession": {
       "title": "이전 세션 재개하기?",
       "message": "완료되지 않은 연습 세션이 있습니다. 중단했던 곳부터 계속하시겠습니까?",
@@ -116,11 +121,6 @@
       "feedback": "피드백",
       "vocabulary": "새로운 어휘",
       "ok": "확인"
-    },
-    "sessionEnded": {
-      "title": "연습이 종료되었습니다",
-      "message": "수고하셨습니다! 연습 세션이 성공적으로 종료되었습니다.",
-      "goToHome": "처음으로 이동"
     },
     "errors": {
       "initializationFailed": "서비스 초기화에 실패했습니다. 설정을 확인하세요.",

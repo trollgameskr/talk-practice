@@ -803,8 +803,12 @@ const ConversationScreen = ({route, navigation}: any) => {
                 {
                   text: t('conversation.sessionEnded.goToHome'),
                   onPress: () => {
-                    // 홈 화면으로 이동
-                    navigation.navigate('Home');
+                    // 홈 화면으로 안전하게 이동 (네비게이션 스택 리셋)
+                    // 세션 종료 후 뒤로 가기로 대화 화면에 돌아올 수 없도록 함
+                    navigation.reset({
+                      index: 0,
+                      routes: [{name: 'Home'}],
+                    });
                   },
                 },
               ],

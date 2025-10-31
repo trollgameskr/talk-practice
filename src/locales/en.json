@@ -103,6 +103,11 @@
       "cancel": "Continue",
       "confirm": "End Session"
     },
+    "sessionEnded": {
+      "title": "Practice Session Ended",
+      "message": "Well done! Your practice session has been successfully ended.",
+      "goToHome": "Go to Home"
+    },
     "resumeSession": {
       "title": "Resume Previous Session?",
       "message": "You have an unfinished practice session. Would you like to continue from where you left off?",
@@ -116,11 +121,6 @@
       "feedback": "Feedback",
       "vocabulary": "New Vocabulary",
       "ok": "OK"
-    },
-    "sessionEnded": {
-      "title": "Practice Session Ended",
-      "message": "Well done! Your practice session has been successfully ended.",
-      "goToHome": "Go to Home"
     },
     "errors": {
       "initializationFailed": "Failed to initialize services. Please check your settings.",
