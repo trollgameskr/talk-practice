@@ -405,10 +405,8 @@ const SettingsScreen = ({navigation}: any) => {
           onPress: async () => {
             try {
               await AsyncStorage.removeItem(GUEST_MODE_KEY);
-              Alert.alert(
-                'Guest Mode Exited',
-                'You will be redirected to the login screen shortly.',
-              );
+              // The NavigationContainer in App.tsx will automatically remount
+              // and show the login screen when guest mode is removed
             } catch (error) {
               Alert.alert('Error', 'Failed to exit guest mode');
             }
