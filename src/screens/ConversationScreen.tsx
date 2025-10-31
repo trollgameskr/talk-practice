@@ -504,7 +504,10 @@ const ConversationScreen = ({route, navigation}: any) => {
       setMessages([assistantMessage]);
       console.log('[ConversationScreen] Messages state updated');
 
-      // Generate 2 sample answer options for the user
+      // Run sample answer generation and AI speech in parallel to reduce wait time
+      const tasks = [];
+
+      // Task 1: Generate 2 sample answer options for the user
       // Pass loaded values directly to avoid relying on state (Bug 2 fix)
       setInitializationStatus(
         t('conversation.initialization.generatingSamples', {
@@ -512,47 +515,56 @@ const ConversationScreen = ({route, navigation}: any) => {
         }),
       );
       console.log('[ConversationScreen] Generating sample answers');
-      await generateSampleAnswers(starterMessage, {
-        translation: loadedShowTranslation,
-        pronunciation: loadedShowPronunciation,
-      });
-      console.log('[ConversationScreen] Sample answers generated');
+      tasks.push(
+        generateSampleAnswers(starterMessage, {
+          translation: loadedShowTranslation,
+          pronunciation: loadedShowPronunciation,
+        }).then(() => {
+          console.log('[ConversationScreen] Sample answers generated');
+        }),
+      );
 
-      // Speak the starter message (only if not in text-only mode)
+      // Task 2: Speak the starter message (only if not in text-only mode)
       if (!loadedTextOnlyMode && voiceService.current) {
-        try {
-          setInitializationStatus(
-            t('conversation.initialization.playingVoice', {
-              defaultValue: 'Playing AI voice...',
-            }),
-          );
-          console.log(
-            '[ConversationScreen] Starting AI speech for starter message',
-          );
-          console.log(
-            '[ConversationScreen] Starter message to speak:',
-            starterMessage,
-          );
-          await voiceService.current.speak(starterMessage, 'ai');
-          // Get the voice method that was used
-          const method = voiceService.current.getVoiceMethod();
-          updateVoiceMethod(method);
-          console.log('[ConversationScreen] AI speech completed successfully');
-        } catch (speechError) {
-          console.error(
-            '[ConversationScreen] Failed to speak starter message',
-            {
-              error:
-                speechError instanceof Error
-                  ? speechError.message
-                  : String(speechError),
-              starterMessageLength: starterMessage.length,
-            },
-          );
+        setInitializationStatus(
+          t('conversation.initialization.playingVoice', {
+            defaultValue: 'Playing AI voice...',
+          }),
+        );
+        tasks.push(
+          voiceService.current
+            .speak(starterMessage, 'ai')
+            .then(() => {
+              // Get the voice method that was used
+              const method = voiceService.current!.getVoiceMethod();
+              updateVoiceMethod(method);
+              console.log(
+                '[ConversationScreen] AI speech completed successfully',
+              );
+            })
+            .catch(speechError => {
+              console.error(
+                '[ConversationScreen] Failed to speak starter message',
+                {
+                  error:
+                    speechError instanceof Error
+                      ? speechError.message
+                      : String(speechError),
+                  starterMessageLength: starterMessage.length,
+                },
+              );
 
-          // Use helper function to handle TTS error
-          handleTTSError(speechError);
-        }
+              // Use helper function to handle TTS error
+              handleTTSError(speechError);
+            }),
+        );
+        console.log(
+          '[ConversationScreen] Starting AI speech for starter message',
+        );
+        console.log(
+          '[ConversationScreen] Starter message to speak:',
+          starterMessage,
+        );
       } else {
         console.log(
           '[ConversationScreen] Skipping speech - text-only mode:',
@@ -561,6 +573,9 @@ const ConversationScreen = ({route, navigation}: any) => {
           !!voiceService.current,
         );
       }
+
+      // Wait for all tasks to complete
+      await Promise.all(tasks);
 
       console.log('[ConversationScreen] Conversation initialization complete');
 
