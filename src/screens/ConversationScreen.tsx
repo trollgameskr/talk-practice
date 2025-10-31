@@ -144,7 +144,7 @@ const ConversationScreen = ({route, navigation}: any) => {
       // Prevent default behavior if session has messages
       if (messages.length > 0 && !sessionSavedRef.current) {
         e.preventDefault();
-        
+
         // Prompt user to confirm
         Alert.alert(
           'End Session',
@@ -182,7 +182,9 @@ const ConversationScreen = ({route, navigation}: any) => {
    */
   const loadSessionDuration = async () => {
     try {
-      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_DURATION);
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.SESSION_DURATION,
+      );
       if (savedValue) {
         const duration = parseInt(savedValue, 10);
         if (!isNaN(duration) && duration > 0) {
@@ -502,7 +504,10 @@ const ConversationScreen = ({route, navigation}: any) => {
       setMessages([assistantMessage]);
       console.log('[ConversationScreen] Messages state updated');
 
-      // Generate 2 sample answer options for the user
+      // Run sample answer generation and AI speech in parallel to reduce wait time
+      const tasks = [];
+
+      // Task 1: Generate 2 sample answer options for the user
       // Pass loaded values directly to avoid relying on state (Bug 2 fix)
       setInitializationStatus(
         t('conversation.initialization.generatingSamples', {
@@ -510,47 +515,56 @@ const ConversationScreen = ({route, navigation}: any) => {
         }),
       );
       console.log('[ConversationScreen] Generating sample answers');
-      await generateSampleAnswers(starterMessage, {
-        translation: loadedShowTranslation,
-        pronunciation: loadedShowPronunciation,
-      });
-      console.log('[ConversationScreen] Sample answers generated');
+      tasks.push(
+        generateSampleAnswers(starterMessage, {
+          translation: loadedShowTranslation,
+          pronunciation: loadedShowPronunciation,
+        }).then(() => {
+          console.log('[ConversationScreen] Sample answers generated');
+        }),
+      );
 
-      // Speak the starter message (only if not in text-only mode)
+      // Task 2: Speak the starter message (only if not in text-only mode)
       if (!loadedTextOnlyMode && voiceService.current) {
-        try {
-          setInitializationStatus(
-            t('conversation.initialization.playingVoice', {
-              defaultValue: 'Playing AI voice...',
-            }),
-          );
-          console.log(
-            '[ConversationScreen] Starting AI speech for starter message',
-          );
-          console.log(
-            '[ConversationScreen] Starter message to speak:',
-            starterMessage,
-          );
-          await voiceService.current.speak(starterMessage, 'ai');
-          // Get the voice method that was used
-          const method = voiceService.current.getVoiceMethod();
-          updateVoiceMethod(method);
-          console.log('[ConversationScreen] AI speech completed successfully');
-        } catch (speechError) {
-          console.error(
-            '[ConversationScreen] Failed to speak starter message',
-            {
-              error:
-                speechError instanceof Error
-                  ? speechError.message
-                  : String(speechError),
-              starterMessageLength: starterMessage.length,
-            },
-          );
+        setInitializationStatus(
+          t('conversation.initialization.playingVoice', {
+            defaultValue: 'Playing AI voice...',
+          }),
+        );
+        tasks.push(
+          voiceService.current
+            .speak(starterMessage, 'ai')
+            .then(() => {
+              // Get the voice method that was used
+              const method = voiceService.current!.getVoiceMethod();
+              updateVoiceMethod(method);
+              console.log(
+                '[ConversationScreen] AI speech completed successfully',
+              );
+            })
+            .catch(speechError => {
+              console.error(
+                '[ConversationScreen] Failed to speak starter message',
+                {
+                  error:
+                    speechError instanceof Error
+                      ? speechError.message
+                      : String(speechError),
+                  starterMessageLength: starterMessage.length,
+                },
+              );
 
-          // Use helper function to handle TTS error
-          handleTTSError(speechError);
-        }
+              // Use helper function to handle TTS error
+              handleTTSError(speechError);
+            }),
+        );
+        console.log(
+          '[ConversationScreen] Starting AI speech for starter message',
+        );
+        console.log(
+          '[ConversationScreen] Starter message to speak:',
+          starterMessage,
+        );
       } else {
         console.log(
           '[ConversationScreen] Skipping speech - text-only mode:',
@@ -559,6 +573,9 @@ const ConversationScreen = ({route, navigation}: any) => {
           !!voiceService.current,
         );
       }
+
+      // Wait for all tasks to complete
+      await Promise.all(tasks);
 
       console.log('[ConversationScreen] Conversation initialization complete');
 
@@ -885,7 +902,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             // 세션 저장
             sessionSavedRef.current = true;
             await saveSession();
-            
+
             // 세션 종료 안내 모달 표시
             Alert.alert(
               t('conversation.sessionEnded.title'),
@@ -1189,6 +1206,29 @@ const ConversationScreen = ({route, navigation}: any) => {
     }
   };
 
+  /**
+   * Handle replaying audio in the voice display modal
+   */
+  const handleReplayVoiceDisplayAudio = async () => {
+    if (!voiceService.current || textOnlyMode || !voiceDisplayText) {
+      return;
+    }
+
+    try {
+      setIsSpeaking(true);
+      await voiceService.current.speak(voiceDisplayText, 'user');
+      console.log('[ConversationScreen] Voice display audio replay completed');
+    } catch (error) {
+      console.error(
+        '[ConversationScreen] Failed to replay voice display audio:',
+        error,
+      );
+      Alert.alert('Error', 'Failed to replay audio. Please try again.');
+    } finally {
+      setIsSpeaking(false);
+    }
+  };
+
   const saveSession = async () => {
     if (messages.length === 0 || sessionSavedRef.current) {
       return;
@@ -1406,22 +1446,34 @@ const ConversationScreen = ({route, navigation}: any) => {
                   styles.messageRow,
                   message.role === 'user' ? styles.userRow : styles.assistantRow,
                 ]}>
-                <View
-                  style={[
-                    styles.messageBubble,
-                    message.role === 'user'
-                      ? styles.userBubble
-                      : styles.assistantBubble,
-                  ]}>
-                  {message.role === 'assistant' ? (
-                    <>
-                      <View style={styles.clickableTextContainer}>
-                        {renderClickableWords(message)}
-                      </View>
-                      {showTranslation && message.translation && (
-                        <Text style={styles.translationText}>
-                          💬 {message.translation}
-                        </Text>
+                {message.role === 'assistant' ? (
+                  <>
+                    <View style={styles.clickableTextContainer}>
+                      {renderClickableWords(message)}
+                    </View>
+                    {showTranslation && message.translation && (
+                      <Text style={styles.translationText}>
+                        💬 {message.translation}
+                      </Text>
+                    )}
+                    {showPronunciation && message.pronunciation && (
+                      <Text style={styles.pronunciationText}>
+                        🔊 {message.pronunciation}
+                      </Text>
+                    )}
+                    {/* CJK Character Breakdown button and Replay button in the same row */}
+                    <View style={styles.aiMessageButtonsRow}>
+                      {(targetLanguage === 'zh' || targetLanguage === 'ja') && (
+                        <TouchableOpacity
+                          style={styles.cjkBreakdownButton}
+                          onPress={() =>
+                            handleCJKBreakdownRequest(message.content)
+                          }>
+                          <Text style={styles.cjkBreakdownButtonText}>
+                            📖{' '}
+                            {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
+                          </Text>
+                        </TouchableOpacity>
                       )}
                       {showPronunciation && message.pronunciation && (
                         <Text style={styles.pronunciationText}>
@@ -1702,7 +1754,6 @@ const ConversationScreen = ({route, navigation}: any) => {
         onRequestClose={() => setShowVoiceDisplayModal(false)}>
         <View style={styles.voiceDisplayOverlay}>
           <View style={styles.voiceDisplayContent}>
-            <Text style={styles.voiceDisplayTitle}>🔊 음성 재생 중</Text>
             <Text style={styles.voiceDisplayText}>{voiceDisplayText}</Text>
 
             {/* Display translation if available */}
@@ -1719,13 +1770,15 @@ const ConversationScreen = ({route, navigation}: any) => {
               </Text>
             )}
 
-            {/* Voice method display - matching token usage display style */}
-            <View style={styles.voiceMethodDisplayContainer}>
-              <Text style={styles.voiceMethodDisplayLabel}>
-                🎙️ 음성 재생 모델:
+            {/* Replay audio button */}
+            <TouchableOpacity
+              style={styles.voiceDisplayReplayButton}
+              onPress={handleReplayVoiceDisplayAudio}
+              disabled={isSpeaking}>
+              <Text style={styles.voiceDisplayReplayText}>
+                {isSpeaking ? '⏸️ 재생 중...' : '🔊 다시 듣기'}
               </Text>
-              <Text style={styles.voiceMethodDisplayText}>{voiceMethod}</Text>
-            </View>
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.voiceDisplayCloseButton}
@@ -2217,13 +2270,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 10,
   },
-  voiceDisplayTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#3b82f6',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
   voiceDisplayText: {
     fontSize: 28,
     fontWeight: '600',
@@ -2248,28 +2294,18 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 16,
   },
-  voiceMethodDisplayContainer: {
-    backgroundColor: '#f0fdf4',
+  voiceDisplayReplayButton: {
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
     borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#86efac',
-    width: '100%',
+    marginTop: 16,
+    marginBottom: 12,
   },
-  voiceMethodDisplayLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#15803d',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  voiceMethodDisplayText: {
+  voiceDisplayReplayText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#166534',
-    textAlign: 'center',
+    fontWeight: '600',
+    color: '#ffffff',
   },
   voiceDisplayCloseButton: {
     backgroundColor: '#e5e7eb',
