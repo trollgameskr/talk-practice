@@ -1407,29 +1407,31 @@ const ConversationScreen = ({route, navigation}: any) => {
                         🔊 {message.pronunciation}
                       </Text>
                     )}
-                    {/* CJK Character Breakdown button for Chinese and Japanese */}
-                    {(targetLanguage === 'zh' || targetLanguage === 'ja') && (
-                      <TouchableOpacity
-                        style={styles.cjkBreakdownButton}
-                        onPress={() =>
-                          handleCJKBreakdownRequest(message.content)
-                        }>
-                        <Text style={styles.cjkBreakdownButtonText}>
-                          📖 {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                    {/* Feature 1: Replay button for AI messages */}
-                    {!textOnlyMode && (
-                      <TouchableOpacity
-                        style={styles.replayButton}
-                        onPress={() => handleReplayAudio(message)}
-                        disabled={isSpeaking}>
-                        <Text style={styles.replayButtonText}>
-                          {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
+                    {/* CJK Character Breakdown button and Replay button in the same row */}
+                    <View style={styles.aiMessageButtonsRow}>
+                      {(targetLanguage === 'zh' || targetLanguage === 'ja') && (
+                        <TouchableOpacity
+                          style={styles.cjkBreakdownButton}
+                          onPress={() =>
+                            handleCJKBreakdownRequest(message.content)
+                          }>
+                          <Text style={styles.cjkBreakdownButtonText}>
+                            📖 {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      {/* Feature 1: Replay button for AI messages */}
+                      {!textOnlyMode && (
+                        <TouchableOpacity
+                          style={styles.replayButton}
+                          onPress={() => handleReplayAudio(message)}
+                          disabled={isSpeaking}>
+                          <Text style={styles.replayButtonText}>
+                            {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   </>
                 ) : (
                   <>
@@ -1531,9 +1533,6 @@ const ConversationScreen = ({route, navigation}: any) => {
         {/* 2 Response Test Options - User can select one to practice */}
         {showSamples && enrichedSampleAnswers.length > 0 && (
           <View style={styles.samplesContainer}>
-            <Text style={styles.samplesTitle}>
-              💡 Response Options (Choose one to practice):
-            </Text>
             <ScrollView style={styles.samplesScrollView}>
               {enrichedSampleAnswers.map((sample, index) => (
                 <TouchableOpacity
@@ -1559,11 +1558,6 @@ const ConversationScreen = ({route, navigation}: any) => {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity
-              style={styles.dismissButton}
-              onPress={() => setShowSamples(false)}>
-              <Text style={styles.dismissText}>Dismiss</Text>
-            </TouchableOpacity>
           </View>
         )}
       </View>
@@ -1899,16 +1893,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#bfdbfe',
-    maxHeight: 250,
-  },
-  samplesTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1e40af',
-    marginBottom: 8,
+    maxHeight: 300,
   },
   samplesScrollView: {
-    maxHeight: 180,
+    maxHeight: 280,
   },
   sampleButton: {
     backgroundColor: '#ffffff',
@@ -1949,15 +1937,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 2,
     lineHeight: 16,
-  },
-  dismissButton: {
-    alignSelf: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  dismissText: {
-    fontSize: 12,
-    color: '#6b7280',
   },
   modalOverlay: {
     flex: 1,
@@ -2056,7 +2035,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   cjkBreakdownButton: {
-    marginTop: 8,
     paddingVertical: 6,
     paddingHorizontal: 12,
     backgroundColor: 'rgba(139, 92, 246, 0.1)',
@@ -2211,9 +2189,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#4b5563',
   },
+  // AI message buttons row (CJK breakdown + Replay)
+  aiMessageButtonsRow: {
+    flexDirection: 'row',
+    marginTop: 8,
+    gap: 8,
+  },
   // Feature 1: Replay button styles
   replayButton: {
-    marginTop: 8,
     paddingVertical: 6,
     paddingHorizontal: 12,
     backgroundColor: 'rgba(59, 130, 246, 0.1)',
