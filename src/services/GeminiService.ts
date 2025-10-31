@@ -638,6 +638,96 @@ Example format:
   }
 
   /**
+   * Get character-by-character breakdown for Chinese and Japanese text
+   */
+  async getCJKCharacterBreakdown(text: string): Promise<
+    Array<{
+      character: string;
+      meaning: string;
+      pronunciation: string;
+      reading?: string;
+    }>
+  > {
+    const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
+    const isChinese = this.targetLanguage === 'zh';
+    const isJapanese = this.targetLanguage === 'ja';
+
+    if (!isChinese && !isJapanese) {
+      return [];
+    }
+
+    const breakdownPrompt = isChinese
+      ? `Analyze the following Chinese text and provide a character-by-character breakdown. For each character or meaningful word unit, provide:
+- character: the Chinese character(s)
+- meaning: meaning in ${nativeLangName}
+- pronunciation: pinyin pronunciation
+
+"${text}"
+
+Return a JSON array. Example format:
+[
+  {
+    "character": "你",
+    "meaning": "you",
+    "pronunciation": "nǐ"
+  },
+  {
+    "character": "好",
+    "meaning": "good/well",
+    "pronunciation": "hǎo"
+  }
+]
+
+Important: Break down the text into meaningful units (individual characters or common compound words). Include all characters from the original text.`
+      : `Analyze the following Japanese text and provide a character-by-character breakdown. For each character or meaningful word unit, provide:
+- character: the Japanese character(s) (kanji, hiragana, or katakana)
+- meaning: meaning in ${nativeLangName} (for kanji and meaningful words)
+- pronunciation: romaji pronunciation
+- reading: hiragana reading (for kanji)
+
+"${text}"
+
+Return a JSON array. Example format:
+[
+  {
+    "character": "私",
+    "meaning": "I, me",
+    "pronunciation": "watashi",
+    "reading": "わたし"
+  },
+  {
+    "character": "は",
+    "meaning": "(topic marker)",
+    "pronunciation": "wa",
+    "reading": "は"
+  }
+]
+
+Important: Break down the text into meaningful units (kanji with their readings, or hiragana/katakana groups). Include all characters from the original text.`;
+
+    try {
+      if (!this.model) {
+        throw new Error('Model not initialized');
+      }
+
+      const result = await this.model.generateContent(breakdownPrompt);
+      const response = result.response.text();
+
+      // Try to parse JSON response
+      const jsonMatch = response.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return parsed;
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error getting CJK character breakdown:', error);
+      return [];
+    }
+  }
+
+  /**
    * End the current conversation
    */
   endConversation() {

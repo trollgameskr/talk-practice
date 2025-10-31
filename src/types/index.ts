@@ -124,3 +124,15 @@ export interface GrammarHighlight {
   startIndex: number; // Start position in the message
   endIndex: number; // End position in the message
 }
+
+export interface CJKCharacterBreakdown {
+  character: string; // The individual character or word
+  meaning: string; // Meaning/definition in native language
+  pronunciation: string; // Pinyin for Chinese, Romaji for Japanese
+  reading?: string; // Additional reading info (e.g., hiragana for Japanese)
+}
+
+export interface CJKSentenceBreakdown {
+  original: string; // Original sentence
+  characters: CJKCharacterBreakdown[]; // Character-by-character breakdown
+}
