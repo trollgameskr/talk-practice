@@ -72,10 +72,10 @@
   },
   "conversation": {
     "apiKeyRequired": {
-      "title": "API-Schlüssel Erforderlich",
-      "message": "Sie benötigen einen Gemini API-Schlüssel, um mit dem Üben zu beginnen. Sie können einen kostenlos von Google AI Studio erhalten.\n\nGehen Sie zu den Einstellungen, um Ihren API-Schlüssel zu konfigurieren.",
+      "title": "⚠️ Gemini API-Schlüssel Erforderlich",
+      "message": "🔑 Ein Gemini API-Schlüssel ist zwingend erforderlich, um mit dem Üben zu beginnen!\n\nSie können keine Unterhaltung starten, ohne zuerst Ihren API-Schlüssel zu konfigurieren.\n\n✅ Sie können einen kostenlosen API-Schlüssel von Google AI Studio erhalten.\n\nBitte gehen Sie jetzt zu den Einstellungen, um Ihren API-Schlüssel zu konfigurieren.",
       "cancel": "Abbrechen",
-      "goToSettings": "Zu Einstellungen"
+      "goToSettings": "✅ Zu Einstellungen"
     },
     "buttons": {
       "startListening": "🎤 Sprechen Beginnen",

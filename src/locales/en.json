@@ -72,10 +72,10 @@
   },
   "conversation": {
     "apiKeyRequired": {
-      "title": "API Key Required",
-      "message": "You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nGo to Settings to configure your API key.",
+      "title": "⚠️ Gemini API Key Required",
+      "message": "🔑 A Gemini API key is required to start practicing!\n\nYou cannot start a conversation without configuring your API key first.\n\n✅ You can get a free API key from Google AI Studio.\n\nPlease go to Settings now to configure your API key.",
       "cancel": "Cancel",
-      "goToSettings": "Go to Settings"
+      "goToSettings": "✅ Go to Settings"
     },
     "buttons": {
       "startListening": "🎤 Start Talking",

@@ -72,10 +72,10 @@
   },
   "conversation": {
     "apiKeyRequired": {
-      "title": "Clé API Requise",
-      "message": "Vous avez besoin d'une clé API Gemini pour commencer à pratiquer. Vous pouvez en obtenir une gratuitement depuis Google AI Studio.\n\nAllez dans les Paramètres pour configurer votre clé API.",
+      "title": "⚠️ Clé API Gemini Obligatoire",
+      "message": "🔑 Une clé API Gemini est absolument requise pour commencer à pratiquer !\n\nVous ne pouvez pas démarrer une conversation sans configurer d'abord votre clé API.\n\n✅ Vous pouvez obtenir une clé API gratuite depuis Google AI Studio.\n\nVeuillez aller dans les Paramètres maintenant pour configurer votre clé API.",
       "cancel": "Annuler",
-      "goToSettings": "Aller aux Paramètres"
+      "goToSettings": "✅ Aller aux Paramètres"
     },
     "buttons": {
       "startListening": "🎤 Commencer à Parler",

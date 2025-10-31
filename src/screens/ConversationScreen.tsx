@@ -322,12 +322,16 @@ const ConversationScreen = ({route, navigation}: any) => {
           clearTimeout(initTimeoutRef.current);
         }
         Alert.alert(
-          'API Key Required',
-          'You need a Gemini API key to start practicing. You can get one for free from Google AI Studio.\n\nGo to Settings to configure your API key.',
+          t('conversation.apiKeyRequired.title'),
+          t('conversation.apiKeyRequired.message'),
           [
-            {text: 'Cancel', onPress: () => navigation.goBack()},
             {
-              text: 'Go to Settings',
+              text: t('conversation.apiKeyRequired.cancel'),
+              onPress: () => navigation.goBack(),
+              style: 'cancel',
+            },
+            {
+              text: t('conversation.apiKeyRequired.goToSettings'),
               onPress: () => navigation.navigate('Settings'),
             },
           ],
