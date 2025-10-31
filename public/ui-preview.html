@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>UI Changes Preview</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9fafb; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+    .message-bubble { background: #fff; border: 1px solid #e5e7eb; padding: 12px; border-radius: 16px; margin-bottom: 8px; }
+    .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .text-input-button { 
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: #8b5cf6; color: white; padding: 10px 16px; border-radius: 8px;
+      border: none; cursor: pointer; font-size: 14px; font-weight: 600;
+    }
+    .tap-to-speak-button {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: #3b82f6; color: white; padding: 12px 16px; border-radius: 8px;
+      border: none; cursor: pointer; font-size: 16px; font-weight: 600;
+    }
+    .cjk-button { 
+      background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #8b5cf6; padding: 6px 12px; border-radius: 6px; display: inline-block;
+      margin-top: 8px; font-size: 12px; font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>UI Changes Preview</h1>
+    
+    <h2>Feature 1: CJK Breakdown Button (Localized)</h2>
+    <div class="message-bubble">
+      <p>你好吗？</p>
+      <div class="cjk-button">📖 한자 분석</div>
+      <small style="color: #6b7280; display: block; margin-top: 4px;">
+        (Previously: 漢字解析, now localized to user's language)
+      </small>
+    </div>
+    
+    <h2>Features 2, 3, 4: New Button Layout</h2>
+    <div class="message-bubble">
+      <p>Hello! How are you today?</p>
+      <p style="color: #6b7280; font-style: italic; font-size: 13px;">💬 안녕하세요! 오늘 어떻게 지내세요?</p>
+    </div>
+    
+    <div class="action-buttons">
+      <button class="text-input-button">
+        <span>✏️</span>
+        <span>텍스트 입력</span>
+      </button>
+      <button class="tap-to-speak-button">
+        <span>🎤</span>
+        <span>Tap to Speak</span>
+      </button>
+    </div>
+    
+    <div style="margin-top: 20px; padding: 12px; background: #fef3c7; border-radius: 8px;">
+      <strong>Changes Summary:</strong>
+      <ul>
+        <li><strong>Feature 1:</strong> CJK breakdown button text now shows in native language (한자 분석 instead of 漢字解析)</li>
+        <li><strong>Feature 2:</strong> Buttons moved from right side to below the message</li>
+        <li><strong>Feature 3:</strong> "Tap to Speak" changed from circular (⭕) to rectangular shape with rounded corners</li>
+        <li><strong>Feature 4:</strong> New "Text Input" button added above "Tap to Speak"</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

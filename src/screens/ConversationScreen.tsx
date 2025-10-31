@@ -97,9 +97,9 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [showSessionInfoModal, setShowSessionInfoModal] = useState(false);
   const [targetLanguage, setTargetLanguage] = useState<string>('en');
-  const [maxSessionDuration, setMaxSessionDuration] = useState(
-    CONVERSATION_CONFIG.maxDuration,
-  );
+  const [maxSessionDuration, setMaxSessionDuration] = useState(CONVERSATION_CONFIG.maxDuration);
+  const [showTextInputModal, setShowTextInputModal] = useState(false);
+  const [textInputValue, setTextInputValue] = useState('');
 
   const geminiService = useRef<GeminiService | null>(null);
   const voiceService = useRef<VoiceService | null>(null);
@@ -711,6 +711,17 @@ const ConversationScreen = ({route, navigation}: any) => {
 
     const text = userInputText.trim();
     setUserInputText('');
+    await handleUserMessage(text, !textOnlyMode);
+  };
+
+  const handleSendTextInputModal = async () => {
+    if (!textInputValue.trim()) {
+      return;
+    }
+
+    const text = textInputValue.trim();
+    setTextInputValue('');
+    setShowTextInputModal(false);
     await handleUserMessage(text, !textOnlyMode);
   };
 
@@ -1427,16 +1438,13 @@ const ConversationScreen = ({route, navigation}: any) => {
             <View
               key={message.id}
               style={[
-                styles.messageRow,
-                message.role === 'user' ? styles.userRow : styles.assistantRow,
+                styles.messageContainer,
+                message.role === 'user' ? styles.userContainer : styles.assistantContainer,
               ]}>
               <View
                 style={[
-                  styles.messageBubble,
-                  message.role === 'user'
-                    ? styles.userBubble
-                    : styles.assistantBubble,
-                  isLastAIMessage && styles.lastAIMessageBubble,
+                  styles.messageRow,
+                  message.role === 'user' ? styles.userRow : styles.assistantRow,
                 ]}>
                 {message.role === 'assistant' ? (
                   <>
@@ -1467,7 +1475,43 @@ const ConversationScreen = ({route, navigation}: any) => {
                           </Text>
                         </TouchableOpacity>
                       )}
-                      {/* Feature 1: Replay button for AI messages */}
+                      {showPronunciation && message.pronunciation && (
+                        <Text style={styles.pronunciationText}>
+                          🔊 {message.pronunciation}
+                        </Text>
+                      )}
+                      {/* CJK Character Breakdown button and Replay button in the same row */}
+                      <View style={styles.aiMessageButtonsRow}>
+                        {(targetLanguage === 'zh' || targetLanguage === 'ja') && (
+                          <TouchableOpacity
+                            style={styles.cjkBreakdownButton}
+                            onPress={() =>
+                              handleCJKBreakdownRequest(message.content)
+                            }>
+                            <Text style={styles.cjkBreakdownButtonText}>
+                              📖 {t('conversation.cjkBreakdown.buttonLabel')}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                        {/* Feature 1: Replay button for AI messages */}
+                        {!textOnlyMode && (
+                          <TouchableOpacity
+                            style={styles.replayButton}
+                            onPress={() => handleReplayAudio(message)}
+                            disabled={isSpeaking}>
+                            <Text style={styles.replayButtonText}>
+                              {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <Text style={[styles.messageText, styles.userText]}>
+                        {message.content}
+                      </Text>
+                      {/* Feature 1: Replay button for user messages */}
                       {!textOnlyMode && (
                         <TouchableOpacity
                           style={styles.replayButton}
@@ -1478,38 +1522,40 @@ const ConversationScreen = ({route, navigation}: any) => {
                           </Text>
                         </TouchableOpacity>
                       )}
-                    </View>
-                  </>
-                ) : (
-                  <>
-                    <Text style={[styles.messageText, styles.userText]}>
-                      {message.content}
-                    </Text>
-                    {/* Feature 1: Replay button for user messages */}
-                    {!textOnlyMode && (
-                      <TouchableOpacity
-                        style={styles.replayButton}
-                        onPress={() => handleReplayAudio(message)}
-                        disabled={isSpeaking}>
-                        <Text style={styles.replayButtonText}>
-                          {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </>
-                )}
+                    </>
+                  )}
+                </View>
               </View>
 
-              {/* Feature 2: Tap to Speak button on the right of last AI message */}
+              {/* Features 2, 3, 4: Tap to Speak and Text Input buttons below last AI message */}
               {isLastAIMessage && !textOnlyMode && !isListening && (
-                <TouchableOpacity
-                  style={styles.tapToSpeakIconButton}
-                  onPress={handleToggleListening}
-                  disabled={isLoading || isSpeaking}
-                  accessibilityLabel="Tap to Speak"
-                  accessibilityRole="button">
-                  <Text style={styles.tapToSpeakIcon}>🎤</Text>
-                </TouchableOpacity>
+                <View style={styles.actionButtonsContainer}>
+                  {/* Feature 4: Text Input button */}
+                  <TouchableOpacity
+                    style={styles.textInputButton}
+                    onPress={() => setShowTextInputModal(true)}
+                    disabled={isLoading || isSpeaking}
+                    accessibilityLabel="Text Input"
+                    accessibilityRole="button">
+                    <Text style={styles.textInputButtonIcon}>✏️</Text>
+                    <Text style={styles.textInputButtonText}>
+                      {t('conversation.textInput.buttonLabel')}
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  {/* Features 2 & 3: Tap to Speak button - moved below and changed to square */}
+                  <TouchableOpacity
+                    style={styles.tapToSpeakButton}
+                    onPress={handleToggleListening}
+                    disabled={isLoading || isSpeaking}
+                    accessibilityLabel="Tap to Speak"
+                    accessibilityRole="button">
+                    <Text style={styles.tapToSpeakButtonIcon}>🎤</Text>
+                    <Text style={styles.tapToSpeakButtonText}>
+                      {t('conversation.tapToSpeak.buttonLabel')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
           );
@@ -1786,6 +1832,58 @@ const ConversationScreen = ({route, navigation}: any) => {
               onPress={() => setShowCJKBreakdownModal(false)}>
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Text Input Modal - Feature 4 */}
+      <Modal
+        visible={showTextInputModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowTextInputModal(false)}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowTextInputModal(false)}>
+          <Pressable
+            style={styles.textInputModalContent}
+            onPress={(e) => e.stopPropagation()}>
+            <Text style={styles.modalTitle}>
+              {t('conversation.textInput.buttonLabel')}
+            </Text>
+            <TextInput
+              style={styles.textInputModalField}
+              value={textInputValue}
+              onChangeText={setTextInputValue}
+              placeholder={t('conversation.textInput.placeholder')}
+              placeholderTextColor="#9ca3af"
+              multiline
+              maxLength={500}
+              autoFocus
+            />
+            <View style={styles.textInputModalButtons}>
+              <TouchableOpacity
+                style={styles.textInputModalCancelButton}
+                onPress={() => {
+                  setTextInputValue('');
+                  setShowTextInputModal(false);
+                }}>
+                <Text style={styles.textInputModalCancelText}>
+                  {t('conversation.textInput.cancel')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.textInputModalSendButton,
+                  !textInputValue.trim() && styles.textInputModalSendButtonDisabled,
+                ]}
+                onPress={handleSendTextInputModal}
+                disabled={!textInputValue.trim()}>
+                <Text style={styles.textInputModalSendText}>
+                  {t('conversation.textInput.send')}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </Pressable>
         </Pressable>
       </Modal>
@@ -2272,23 +2370,120 @@ const styles = StyleSheet.create({
   sendButtonText: {
     fontSize: 24,
   },
-  // Feature 2: Tap to Speak icon button styles
-  tapToSpeakIconButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#3b82f6',
+  // New container styles for message with action buttons
+  messageContainer: {
+    marginBottom: 12,
+  },
+  userContainer: {
+    alignItems: 'flex-end',
+  },
+  assistantContainer: {
+    alignItems: 'flex-start',
+  },
+  // Features 2, 3, 4: Action buttons container (below message)
+  actionButtonsContainer: {
+    marginTop: 8,
+    gap: 8,
+  },
+  // Feature 4: Text Input button
+  textInputButton: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 8,
+    backgroundColor: '#8b5cf6',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  textInputButtonIcon: {
+    fontSize: 18,
+  },
+  textInputButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  // Features 2 & 3: Tap to Speak button (square shape, below message)
+  tapToSpeakButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3b82f6',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
   },
-  tapToSpeakIcon: {
-    fontSize: 24,
+  tapToSpeakButtonIcon: {
+    fontSize: 20,
+  },
+  tapToSpeakButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // Text Input Modal styles
+  textInputModalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxWidth: 500,
+  },
+  textInputModalField: {
+    backgroundColor: '#f9fafb',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 100,
+    maxHeight: 200,
+    textAlignVertical: 'top',
+    color: '#1f2937',
+  },
+  textInputModalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    marginTop: 16,
+  },
+  textInputModalCancelButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: '#e5e7eb',
+  },
+  textInputModalCancelText: {
+    color: '#4b5563',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  textInputModalSendButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: '#3b82f6',
+  },
+  textInputModalSendButtonDisabled: {
+    backgroundColor: '#9ca3af',
+    opacity: 0.5,
+  },
+  textInputModalSendText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

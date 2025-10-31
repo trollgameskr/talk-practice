@@ -128,6 +128,18 @@
       "success": "Logs copied to clipboard!",
       "error": "Failed to copy logs",
       "noLogs": "No logs available to copy"
+    },
+    "cjkBreakdown": {
+      "buttonLabel": "汉字解析"
+    },
+    "textInput": {
+      "buttonLabel": "文本输入",
+      "placeholder": "输入您的消息...",
+      "cancel": "取消",
+      "send": "发送"
+    },
+    "tapToSpeak": {
+      "buttonLabel": "点击说话"
     }
   },
   "progress": {

@@ -128,6 +128,18 @@
       "success": "Logs copied to clipboard!",
       "error": "Failed to copy logs",
       "noLogs": "No logs available to copy"
+    },
+    "cjkBreakdown": {
+      "buttonLabel": "Análisis de Caracteres"
+    },
+    "textInput": {
+      "buttonLabel": "Entrada de Texto",
+      "placeholder": "Escribe tu mensaje...",
+      "cancel": "Cancelar",
+      "send": "Enviar"
+    },
+    "tapToSpeak": {
+      "buttonLabel": "Toca para Hablar"
     }
   },
   "progress": {

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>UI Changes Preview</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9fafb; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .message-container { margin-bottom: 24px; }
+    .message-bubble { 
+      background: #fff; border: 1px solid #e5e7eb; padding: 12px; 
+      border-radius: 16px; margin-bottom: 8px; max-width: 80%;
+    }
+    .action-buttons { display: flex; flex-direction: column; gap: 8px; }
+    .text-input-button { 
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: #8b5cf6; color: white; padding: 10px 16px; border-radius: 8px;
+      border: none; cursor: pointer; font-size: 14px; font-weight: 600;
+      box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+    }
+    .tap-to-speak-button {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: #3b82f6; color: white; padding: 12px 16px; border-radius: 8px;
+      border: none; cursor: pointer; font-size: 16px; font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .cjk-button { 
+      background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #8b5cf6; padding: 6px 12px; border-radius: 6px; display: inline-block;
+      margin-top: 8px; font-size: 12px; font-weight: 500; cursor: pointer;
+    }
+    .translation { color: #6b7280; font-style: italic; font-size: 13px; margin-top: 8px; }
+    h2 { color: #1f2937; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; }
+    .summary { margin-top: 20px; padding: 16px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b; }
+    .old-design { opacity: 0.6; text-decoration: line-through; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="color: #3b82f6;">✨ UI Changes Preview</h1>
+    
+    <h2>📖 Feature 1: CJK Breakdown Button (Localized)</h2>
+    <div class="message-container">
+      <div class="message-bubble">
+        <p>你好吗？</p>
+        <p class="translation">💬 어떻게 지내세요?</p>
+        <div class="cjk-button">📖 한자 분석</div>
+      </div>
+      <small style="color: #6b7280;">
+        <span class="old-design">Previously: 📖 漢字解析 (hardcoded Chinese)</span><br>
+        ✅ Now: <strong>📖 한자 분석</strong> (localized to Korean/native language)
+      </small>
+    </div>
+    
+    <h2>🎤 Features 2, 3, 4: New Button Layout</h2>
+    <div class="message-container">
+      <div class="message-bubble">
+        <p style="margin: 0;">Hello! How are you today?</p>
+        <p class="translation">💬 안녕하세요! 오늘 어떻게 지내세요?</p>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="text-input-button">
+          <span>✏️</span>
+          <span>텍스트 입력</span>
+        </button>
+        <button class="tap-to-speak-button">
+          <span>🎤</span>
+          <span>Tap to Speak</span>
+        </button>
+      </div>
+      
+      <div style="margin-top: 12px;">
+        <small style="color: #6b7280;">
+          <span class="old-design">Old: 🎤 button was circular and on the right side →</span><br>
+          ✅ New: Buttons are rectangular and below the message ↓
+        </small>
+      </div>
+    </div>
+    
+    <div class="summary">
+      <strong style="font-size: 18px;">📋 Changes Summary:</strong>
+      <ul style="margin-top: 12px;">
+        <li><strong>Feature 1 - Localized CJK Button:</strong> 
+          The "漢字解析" button now displays in the user's native language 
+          (e.g., "한자 분석" in Korean, "Character Analysis" in English)</li>
+        
+        <li><strong>Feature 2 - Bottom Alignment:</strong> 
+          The "Tap to Speak" button moved from the right side of the message 
+          to below it for better accessibility</li>
+        
+        <li><strong>Feature 3 - Square Shape:</strong> 
+          Changed from circular shape (borderRadius: 24) to rounded square 
+          (borderRadius: 8) with text label</li>
+        
+        <li><strong>Feature 4 - Text Input Button:</strong> 
+          New purple "텍스트 입력" (Text Input) button added above 
+          "Tap to Speak" to allow text-based responses</li>
+      </ul>
+    </div>
+    
+    <div style="margin-top: 20px; padding: 12px; background: #e0f2fe; border-radius: 8px;">
+      <strong>🎯 Implementation Details:</strong>
+      <ul>
+        <li>Added translation keys in all 7 locale files (ko, en, ja, zh, es, fr, de)</li>
+        <li>Restructured message layout with new container and action buttons section</li>
+        <li>Implemented text input modal with send/cancel functionality</li>
+        <li>Updated styles for new button shapes and positioning</li>
+      </ul>
+    </div>
+  </div>
+  
+  <script>
+    // Unregister service workers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
