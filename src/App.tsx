@@ -161,7 +161,19 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
               <Stack.Screen
                 name="Conversation"
                 component={ConversationScreen}
-                options={{title: t('navigation.conversation')}}
+                options={({navigation}) => ({
+                  title: t('navigation.conversation'),
+                  headerRight: () => (
+                    <CostDisplay 
+                      compact 
+                      onPress={() => {
+                        // Trigger modal opening by setting a timestamp
+                        // This ensures each press triggers a new change
+                        navigation.setParams({openSessionInfoTrigger: Math.random()});
+                      }}
+                    />
+                  ),
+                })}
               />
               <Stack.Screen
                 name="Progress"

@@ -4,7 +4,7 @@
  */
 
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import StorageService from '../services/StorageService';
 import {useTheme} from '../contexts/ThemeContext';
 
@@ -12,9 +12,10 @@ const storageService = new StorageService();
 
 interface CostDisplayProps {
   compact?: boolean;
+  onPress?: () => void;
 }
 
-const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
+const CostDisplay: React.FC<CostDisplayProps> = ({compact = false, onPress}) => {
   const {isDark} = useTheme();
   const [totalCost, setTotalCost] = useState<number>(0);
   const [totalTokens, setTotalTokens] = useState<number>(0);
@@ -51,25 +52,21 @@ const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
     return tokens.toString();
   };
 
-  if (compact) {
-    return (
-      <View
-        style={[
-          styles.compactContainer,
-          {
-            backgroundColor: isDark ? '#065f46' : '#f0fdf4',
-            borderColor: isDark ? '#10b981' : '#86efac',
-          },
-        ]}>
-        <Text
-          style={[styles.compactText, {color: isDark ? '#d1fae5' : '#166534'}]}>
-          💰 {formatCost(totalCost)} ({formatTokens(totalTokens)} tokens)
-        </Text>
-      </View>
-    );
-  }
-
-  return (
+  const content = compact ? (
+    <View
+      style={[
+        styles.compactContainer,
+        {
+          backgroundColor: isDark ? '#065f46' : '#f0fdf4',
+          borderColor: isDark ? '#10b981' : '#86efac',
+        },
+      ]}>
+      <Text
+        style={[styles.compactText, {color: isDark ? '#d1fae5' : '#166534'}]}>
+        💰 {formatCost(totalCost)} ({formatTokens(totalTokens)} tokens)
+      </Text>
+    </View>
+  ) : (
     <View
       style={[
         styles.container,
@@ -96,6 +93,17 @@ const CostDisplay: React.FC<CostDisplayProps> = ({compact = false}) => {
       </View>
     </View>
   );
+
+  // If onPress is provided, wrap content in TouchableOpacity
+  if (onPress) {
+    return (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return content;
 };
 
 const styles = StyleSheet.create({
