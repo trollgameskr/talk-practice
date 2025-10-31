@@ -66,6 +66,9 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [showCJKBreakdownModal, setShowCJKBreakdownModal] = useState(false);
   const [selectedSentenceForBreakdown, setSelectedSentenceForBreakdown] =
     useState<string>('');
+  const [cjkBreakdownCache, setCjkBreakdownCache] = useState<
+    Record<string, CJKCharacterBreakdown[]>
+  >({});
   const [autoReadResponse, setAutoReadResponse] = useState(true);
   const [showTranslation, setShowTranslation] = useState(false);
   const [showPronunciation, setShowPronunciation] = useState(false);
@@ -1047,6 +1050,14 @@ const ConversationScreen = ({route, navigation}: any) => {
 
     setSelectedSentenceForBreakdown(sentence);
     setShowCJKBreakdownModal(true);
+
+    // Check if breakdown is already cached
+    if (cjkBreakdownCache[sentence]) {
+      setCjkCharacterBreakdown(cjkBreakdownCache[sentence]);
+      return;
+    }
+
+    // Not in cache, fetch from API
     setCjkCharacterBreakdown([]); // Clear previous breakdown
 
     try {
@@ -1054,6 +1065,11 @@ const ConversationScreen = ({route, navigation}: any) => {
         sentence,
       );
       setCjkCharacterBreakdown(breakdown);
+      // Cache the result
+      setCjkBreakdownCache(prev => ({
+        ...prev,
+        [sentence]: breakdown,
+      }));
     } catch (error) {
       console.error('Error getting CJK character breakdown:', error);
       setCjkCharacterBreakdown([]);
@@ -1681,7 +1697,9 @@ const ConversationScreen = ({route, navigation}: any) => {
         <Pressable
           style={styles.modalOverlay}
           onPress={() => setShowCJKBreakdownModal(false)}>
-          <View style={styles.cjkModalContent}>
+          <Pressable
+            style={styles.cjkModalContent}
+            onPress={e => e.stopPropagation()}>
             <Text style={styles.modalTitle}>
               {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
             </Text>
@@ -1713,7 +1731,7 @@ const ConversationScreen = ({route, navigation}: any) => {
               onPress={() => setShowCJKBreakdownModal(false)}>
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
-          </View>
+          </Pressable>
         </Pressable>
       </Modal>
 
@@ -1933,7 +1951,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
   modalContent: {
     backgroundColor: '#ffffff',
@@ -2045,8 +2062,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     width: '100%',
-    maxWidth: 500,
-    maxHeight: '85%',
+    height: '100%',
   },
   cjkOriginalSentence: {
     fontSize: 18,
@@ -2059,7 +2075,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   cjkBreakdownScroll: {
-    maxHeight: 400,
+    flex: 1,
   },
   cjkCharacterItem: {
     flexDirection: 'row',
