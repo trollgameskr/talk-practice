@@ -169,6 +169,12 @@
       "success": "로그가 클립보드에 복사되었습니다!",
       "error": "로그 복사 실패",
       "noLogs": "복사할 로그가 없습니다"
+    },
+    "cjkBreakdown": {
+      "buttonLabel": "한자 분석"
+    },
+    "textInput": {
+      "buttonLabel": "텍스트 입력"
     }
   },
   "progress": {

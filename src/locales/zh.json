@@ -128,6 +128,12 @@
       "success": "Logs copied to clipboard!",
       "error": "Failed to copy logs",
       "noLogs": "No logs available to copy"
+    },
+    "cjkBreakdown": {
+      "buttonLabel": "汉字解析"
+    },
+    "textInput": {
+      "buttonLabel": "文本输入"
     }
   },
   "progress": {

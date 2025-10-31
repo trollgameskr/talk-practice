@@ -169,6 +169,12 @@
       "success": "Logs copied to clipboard!",
       "error": "Failed to copy logs",
       "noLogs": "No logs available to copy"
+    },
+    "cjkBreakdown": {
+      "buttonLabel": "Character Analysis"
+    },
+    "textInput": {
+      "buttonLabel": "Text Input"
     }
   },
   "progress": {
