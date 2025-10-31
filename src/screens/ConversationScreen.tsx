@@ -1499,7 +1499,9 @@ const ConversationScreen = ({route, navigation}: any) => {
                     accessibilityLabel="Tap to Speak"
                     accessibilityRole="button">
                     <Text style={styles.tapToSpeakButtonIcon}>🎤</Text>
-                    <Text style={styles.tapToSpeakButtonText}>Tap to Speak</Text>
+                    <Text style={styles.tapToSpeakButtonText}>
+                      {t('conversation.tapToSpeak.buttonLabel')}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -1800,7 +1802,7 @@ const ConversationScreen = ({route, navigation}: any) => {
               style={styles.textInputModalField}
               value={textInputValue}
               onChangeText={setTextInputValue}
-              placeholder="Type your message..."
+              placeholder={t('conversation.textInput.placeholder')}
               placeholderTextColor="#9ca3af"
               multiline
               maxLength={500}
@@ -1813,7 +1815,9 @@ const ConversationScreen = ({route, navigation}: any) => {
                   setTextInputValue('');
                   setShowTextInputModal(false);
                 }}>
-                <Text style={styles.textInputModalCancelText}>Cancel</Text>
+                <Text style={styles.textInputModalCancelText}>
+                  {t('conversation.textInput.cancel')}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -1822,7 +1826,9 @@ const ConversationScreen = ({route, navigation}: any) => {
                 ]}
                 onPress={handleSendTextInputModal}
                 disabled={!textInputValue.trim()}>
-                <Text style={styles.textInputModalSendText}>Send</Text>
+                <Text style={styles.textInputModalSendText}>
+                  {t('conversation.textInput.send')}
+                </Text>
               </TouchableOpacity>
             </View>
           </Pressable>

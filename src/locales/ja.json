@@ -133,7 +133,13 @@
       "buttonLabel": "漢字解析"
     },
     "textInput": {
-      "buttonLabel": "テキスト入力"
+      "buttonLabel": "テキスト入力",
+      "placeholder": "メッセージを入力してください...",
+      "cancel": "キャンセル",
+      "send": "送信"
+    },
+    "tapToSpeak": {
+      "buttonLabel": "話す"
     }
   },
   "progress": {

@@ -174,7 +174,13 @@
       "buttonLabel": "Character Analysis"
     },
     "textInput": {
-      "buttonLabel": "Text Input"
+      "buttonLabel": "Text Input",
+      "placeholder": "Type your message...",
+      "cancel": "Cancel",
+      "send": "Send"
+    },
+    "tapToSpeak": {
+      "buttonLabel": "Tap to Speak"
     }
   },
   "progress": {

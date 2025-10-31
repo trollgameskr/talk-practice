@@ -133,7 +133,13 @@
       "buttonLabel": "Analyse des Caractères"
     },
     "textInput": {
-      "buttonLabel": "Saisie de Texte"
+      "buttonLabel": "Saisie de Texte",
+      "placeholder": "Tapez votre message...",
+      "cancel": "Annuler",
+      "send": "Envoyer"
+    },
+    "tapToSpeak": {
+      "buttonLabel": "Appuyez pour Parler"
     }
   },
   "progress": {
