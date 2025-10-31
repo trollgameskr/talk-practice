@@ -60,7 +60,7 @@ const SettingsScreen = ({navigation}: any) => {
   const [textOnlyMode, setTextOnlyMode] = useState(false);
   const [ttsProvider, setTtsProvider] = useState<TTSProvider>('google-cloud');
   const [sessionDuration, setSessionDuration] = useState(300);
-  
+
   useEffect(() => {
     loadApiKey();
     loadTtsApiKey();
@@ -209,7 +209,9 @@ const SettingsScreen = ({navigation}: any) => {
 
   const loadSessionDuration = async () => {
     try {
-      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_DURATION);
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.SESSION_DURATION,
+      );
       // Default to 300 seconds (5 minutes) if not set
       setSessionDuration(savedValue ? parseInt(savedValue, 10) : 300);
     } catch (error) {
@@ -218,9 +220,17 @@ const SettingsScreen = ({navigation}: any) => {
   };
 
   const handleSaveApiKey = async () => {
+    // If the API key is empty, remove it from storage
     if (!apiKey.trim()) {
-      Alert.alert('Error', 'Please enter an API key');
-      return;
+      try {
+        await AsyncStorage.removeItem(STORAGE_KEYS.API_KEY);
+        Alert.alert('Success', 'API key deleted successfully!');
+        return;
+      } catch (error) {
+        console.error('Error deleting API key:', error);
+        Alert.alert('Error', 'Failed to delete API key');
+        return;
+      }
     }
 
     if (!isValidApiKey(apiKey)) {
@@ -241,9 +251,17 @@ const SettingsScreen = ({navigation}: any) => {
   };
 
   const handleSaveTtsApiKey = async () => {
+    // If the TTS API key is empty, remove it from storage
     if (!ttsApiKey.trim()) {
-      Alert.alert('Error', 'Please enter a TTS API key');
-      return;
+      try {
+        await AsyncStorage.removeItem(STORAGE_KEYS.TTS_API_KEY);
+        Alert.alert('Success', 'TTS API key deleted successfully!');
+        return;
+      } catch (error) {
+        console.error('Error deleting TTS API key:', error);
+        Alert.alert('Error', 'Failed to delete TTS API key');
+        return;
+      }
     }
 
     if (!isValidApiKey(ttsApiKey)) {
@@ -349,7 +367,10 @@ const SettingsScreen = ({navigation}: any) => {
 
   const handleSessionDurationChange = async (duration: number) => {
     try {
-      await AsyncStorage.setItem(STORAGE_KEYS.SESSION_DURATION, duration.toString());
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.SESSION_DURATION,
+        duration.toString(),
+      );
       setSessionDuration(duration);
       Alert.alert('Success', 'Session duration preference saved!');
     } catch (error) {
@@ -1043,17 +1064,23 @@ const SettingsScreen = ({navigation}: any) => {
                   },
                 ]}
                 value={(sessionDuration / 60).toString()}
-                onChangeText={(text) => {
+                onChangeText={text => {
                   const minutes = parseInt(text, 10);
                   if (isNaN(minutes)) {
                     return; // Don't update for non-numeric input
                   }
                   if (minutes < 1) {
-                    Alert.alert('Invalid Duration', 'Session duration must be at least 1 minute.');
+                    Alert.alert(
+                      'Invalid Duration',
+                      'Session duration must be at least 1 minute.',
+                    );
                     return;
                   }
                   if (minutes > 60) {
-                    Alert.alert('Invalid Duration', 'Session duration cannot exceed 60 minutes.');
+                    Alert.alert(
+                      'Invalid Duration',
+                      'Session duration cannot exceed 60 minutes.',
+                    );
                     return;
                   }
                   handleSessionDurationChange(minutes * 60);
