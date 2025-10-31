@@ -407,7 +407,7 @@ const SettingsScreen = ({navigation}: any) => {
               await AsyncStorage.removeItem(GUEST_MODE_KEY);
               Alert.alert(
                 'Guest Mode Exited',
-                'You will need to restart the app to sign in or create an account.',
+                'You will be redirected to the login screen shortly.',
               );
             } catch (error) {
               Alert.alert('Error', 'Failed to exit guest mode');

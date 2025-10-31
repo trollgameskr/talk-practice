@@ -94,7 +94,8 @@ const AppContent = () => {
         setIsAuthenticated(true);
       } else if (guestMode !== 'true' && isGuestMode) {
         setIsGuestMode(false);
-        // Will be handled by auth state listener
+        setIsAuthenticated(false);
+        // This will trigger the app to show the login screen
       }
     }, 1000);
 
