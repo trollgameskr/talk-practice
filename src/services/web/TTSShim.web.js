@@ -30,8 +30,7 @@ const selectBestVoice = language => {
 
   // Extract base language code (e.g., 'ja' from 'ja-JP')
   // Handle empty string and null/undefined consistently
-  const baseLang =
-    language && language.split('-')[0] ? language.split('-')[0] : 'en';
+  const baseLang = language?.split('-')[0] || 'en';
   const fullLang = language || 'en-US';
 
   console.log('[TTSShim] Selecting voice for language:', fullLang);
