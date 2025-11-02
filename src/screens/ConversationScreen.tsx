@@ -15,6 +15,7 @@ import {
   Modal,
   Pressable,
   TextInput,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
@@ -2570,7 +2571,12 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 2,
     lineHeight: 16,
-    fontFamily: 'monospace', // Use monospace for better character alignment
+    fontFamily: Platform.select({
+      ios: 'Courier New',
+      android: 'monospace',
+      web: 'monospace',
+      default: 'monospace',
+    }),
   },
 });
 
