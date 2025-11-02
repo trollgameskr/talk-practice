@@ -5,7 +5,7 @@
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {StatusBar, StyleSheet, ActivityIndicator, View} from 'react-native';
+import {StatusBar, StyleSheet, ActivityIndicator, View, BackHandler, Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
 
@@ -121,6 +121,26 @@ const AppContent = () => {
 const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
   const {t} = useTranslation();
   const {theme} = useTheme();
+  const navigationRef = React.useRef<any>(null);
+
+  // Handle Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (navigationRef.current) {
+          const canGoBack = navigationRef.current.canGoBack();
+          if (canGoBack) {
+            navigationRef.current.goBack();
+            return true; // Prevent default behavior (app exit)
+          }
+        }
+        return false; // Allow default behavior if can't go back
+      }
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <>
@@ -129,6 +149,7 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
         backgroundColor={theme.colors.statusBarBackground}
       />
       <NavigationContainer
+        ref={navigationRef}
         key={isAuthenticated ? 'authenticated' : 'unauthenticated'}>
         <Stack.Navigator
           initialRouteName={isAuthenticated ? 'Home' : 'Login'}
