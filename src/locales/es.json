@@ -130,7 +130,14 @@
       "noLogs": "No logs available to copy"
     },
     "cjkBreakdown": {
-      "buttonLabel": "Análisis de Caracteres"
+      "buttonLabel": "Análisis de Caracteres",
+      "modalTitle": "Análisis de Caracteres",
+      "loading": "Analizando caracteres...",
+      "error": "Error en el Análisis de Caracteres",
+      "errorMessage": "No se pudo cargar el análisis de caracteres. Por favor, verifique su conexión de red e inténtelo de nuevo.",
+      "retry": "Reintentar",
+      "timeout": "Tiempo de Espera Agotado",
+      "timeoutMessage": "El análisis de caracteres ha agotado el tiempo de espera. Por favor, inténtelo de nuevo."
     },
     "textInput": {
       "buttonLabel": "Entrada de Texto",

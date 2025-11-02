@@ -130,7 +130,14 @@
       "noLogs": "No logs available to copy"
     },
     "cjkBreakdown": {
-      "buttonLabel": "Zeichenanalyse"
+      "buttonLabel": "Zeichenanalyse",
+      "modalTitle": "Zeichenanalyse",
+      "loading": "Zeichen werden analysiert...",
+      "error": "Zeichenanalyse fehlgeschlagen",
+      "errorMessage": "Die Zeichenanalyse konnte nicht geladen werden. Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.",
+      "retry": "Erneut versuchen",
+      "timeout": "Zeitüberschreitung",
+      "timeoutMessage": "Die Zeichenanalyse ist abgelaufen. Bitte versuchen Sie es erneut."
     },
     "textInput": {
       "buttonLabel": "Texteingabe",

@@ -73,6 +73,10 @@ const ConversationScreen = ({route, navigation}: any) => {
   const [cjkBreakdownCache, setCjkBreakdownCache] = useState<
     Record<string, CJKCharacterBreakdown[]>
   >({});
+  const [cjkBreakdownError, setCjkBreakdownError] = useState<string | null>(
+    null,
+  );
+  const [cjkBreakdownLoading, setCjkBreakdownLoading] = useState(false);
   const [autoReadResponse, setAutoReadResponse] = useState(true);
   const [showTranslation, setShowTranslation] = useState(false);
   const [showPronunciation, setShowPronunciation] = useState(false);
@@ -1068,45 +1072,93 @@ const ConversationScreen = ({route, navigation}: any) => {
 
   const handleCJKBreakdownRequest = async (sentence: string) => {
     if (!geminiService.current || !sentence.trim()) {
+      console.log('[CJKBreakdown] Skipping - no gemini service or empty sentence');
       return;
     }
 
     // Check if the target language is Chinese or Japanese
     if (targetLanguage !== 'zh' && targetLanguage !== 'ja') {
+      console.log('[CJKBreakdown] Skipping - target language is not Chinese or Japanese:', targetLanguage);
       return;
     }
 
+    console.log('[CJKBreakdown] Starting breakdown request for sentence:', sentence);
     setSelectedSentenceForBreakdown(sentence);
     setShowCJKBreakdownModal(true);
+    setCjkBreakdownError(null);
 
     // Check if breakdown is already cached
     if (cjkBreakdownCache[sentence]) {
+      console.log('[CJKBreakdown] Using cached breakdown');
       setCjkCharacterBreakdown(cjkBreakdownCache[sentence]);
+      setCjkBreakdownLoading(false);
       return;
     }
 
     // Not in cache, fetch from API
+    console.log('[CJKBreakdown] Not in cache, fetching from API');
     setCjkCharacterBreakdown([]); // Clear previous breakdown
+    setCjkBreakdownLoading(true);
 
+    // Timeout ID for cleanup
+    let timeoutId: NodeJS.Timeout | null = null;
+    
     try {
-      const breakdown = await geminiService.current.getCJKCharacterBreakdown(
-        sentence,
-      );
+      // Create a timeout promise with clearable timeout
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error('TIMEOUT'));
+        }, 30000); // 30 second timeout
+      });
+
+      // Race between the API call and timeout
+      const breakdown = await Promise.race([
+        geminiService.current.getCJKCharacterBreakdown(sentence),
+        timeoutPromise,
+      ]);
+
+      // Clear timeout on successful completion
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+
+      console.log('[CJKBreakdown] Successfully received breakdown with', breakdown.length, 'characters');
       setCjkCharacterBreakdown(breakdown);
-      // Cache the result with LRU behavior
+      setCjkBreakdownLoading(false);
+      
+      // Cache the result with FIFO behavior
+      // Note: Object.keys() maintains insertion order in modern JavaScript (ES2015+)
+      // which is guaranteed in our target environment (React Native/modern browsers)
       setCjkBreakdownCache(prev => {
         const newCache = {...prev, [sentence]: breakdown};
-        // If cache exceeds max size, remove oldest entry
+        // If cache exceeds max size, remove oldest entry (FIFO)
         const cacheKeys = Object.keys(newCache);
         if (cacheKeys.length > MAX_CJK_CACHE_SIZE) {
-          // Remove the first (oldest) key
+          // Remove the first (oldest) key based on insertion order
           delete newCache[cacheKeys[0]];
         }
         return newCache;
       });
     } catch (error) {
-      console.error('Error getting CJK character breakdown:', error);
+      // Clear timeout on error
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      
+      console.error('[CJKBreakdown] Error getting CJK character breakdown:', error);
       setCjkCharacterBreakdown([]);
+      setCjkBreakdownLoading(false);
+      
+      // Set appropriate error message
+      if (error instanceof Error && error.message === 'TIMEOUT') {
+        console.error('[CJKBreakdown] Request timed out after 30 seconds');
+        setCjkBreakdownError('timeout');
+      } else {
+        console.error('[CJKBreakdown] API call failed:', error);
+        setCjkBreakdownError('error');
+      }
     }
   };
 
@@ -1861,13 +1913,43 @@ const ConversationScreen = ({route, navigation}: any) => {
             style={styles.cjkModalContent}
             onPress={handleCJKModalContentClick}>
             <Text style={styles.modalTitle}>
-              {targetLanguage === 'zh' ? '汉字解析' : '漢字解析'}
+              {t('conversation.cjkBreakdown.modalTitle')}
             </Text>
             <Text style={styles.cjkOriginalSentence}>
               {selectedSentenceForBreakdown}
             </Text>
             <ScrollView style={styles.cjkBreakdownScroll}>
-              {cjkCharacterBreakdown.length > 0 ? (
+              {cjkBreakdownError ? (
+                <View style={styles.cjkErrorContainer}>
+                  <Text style={styles.cjkErrorTitle}>
+                    {cjkBreakdownError === 'timeout'
+                      ? t('conversation.cjkBreakdown.timeout')
+                      : t('conversation.cjkBreakdown.error')}
+                  </Text>
+                  <Text style={styles.cjkErrorMessage}>
+                    {cjkBreakdownError === 'timeout'
+                      ? t('conversation.cjkBreakdown.timeoutMessage')
+                      : t('conversation.cjkBreakdown.errorMessage')}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.cjkRetryButton}
+                    onPress={() => {
+                      setCjkBreakdownError(null);
+                      handleCJKBreakdownRequest(selectedSentenceForBreakdown);
+                    }}>
+                    <Text style={styles.cjkRetryButtonText}>
+                      {t('conversation.cjkBreakdown.retry')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : cjkBreakdownLoading ? (
+                <View style={styles.cjkLoadingContainer}>
+                  <ActivityIndicator size="large" color="#3b82f6" />
+                  <Text style={styles.cjkLoadingText}>
+                    {t('conversation.cjkBreakdown.loading')}
+                  </Text>
+                </View>
+              ) : cjkCharacterBreakdown.length > 0 ? (
                 cjkCharacterBreakdown.map((item, index) => (
                   <View key={index} style={styles.cjkCharacterItem}>
                     <Text style={styles.cjkCharacter}>{item.character}</Text>
@@ -1882,9 +1964,7 @@ const ConversationScreen = ({route, navigation}: any) => {
                     </View>
                   </View>
                 ))
-              ) : (
-                <ActivityIndicator size="large" color="#3b82f6" />
-              )}
+              ) : null}
             </ScrollView>
             <TouchableOpacity
               style={styles.closeButton}
@@ -2308,6 +2388,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4b5563',
     lineHeight: 20,
+  },
+  cjkErrorContainer: {
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cjkErrorTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#ef4444',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  cjkErrorMessage: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 24,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  cjkRetryButton: {
+    backgroundColor: '#3b82f6',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  cjkRetryButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  cjkLoadingContainer: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cjkLoadingText: {
+    fontSize: 14,
+    color: '#3b82f6',
+    marginTop: 16,
+    textAlign: 'center',
   },
   voiceDisplayOverlay: {
     flex: 1,
