@@ -144,6 +144,9 @@
       "placeholder": "Geben Sie Ihre Nachricht ein...",
       "cancel": "Abbrechen",
       "send": "Senden"
+    },
+    "tapToSpeak": {
+      "buttonLabel": "Tippen zum Sprechen"
     }
   },
   "progress": {
