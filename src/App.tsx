@@ -5,7 +5,13 @@
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {StatusBar, StyleSheet, ActivityIndicator, View, BackHandler, Platform} from 'react-native';
+import {
+  StatusBar,
+  StyleSheet,
+  ActivityIndicator,
+  View,
+  BackHandler,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
 
@@ -141,7 +147,7 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
           }
         }
         return false; // Allow default behavior if can't go back
-      }
+      },
     );
 
     return () => backHandler.remove();

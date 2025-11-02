@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,9 @@ import {
   Switch,
 } from 'react-native';
 import {useTheme} from '../../contexts/ThemeContext';
-import {useTranslation} from 'react-i18next';
 
 const AppearanceSettingsScreen = () => {
   const {theme, isDark, toggleTheme} = useTheme();
-  const {t} = useTranslation();
 
   return (
     <SafeAreaView
