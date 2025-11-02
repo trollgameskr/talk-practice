@@ -568,11 +568,24 @@ Please format your response as JSON:
     const targetLangName = LANGUAGE_NAMES[this.targetLanguage] || 'English';
     const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
 
-    const pronunciationPrompt = `Provide a pronunciation guide for the following ${targetLangName} text using ${nativeLangName} phonetic representation that helps ${nativeLangName} speakers pronounce it correctly. Make it simple and easy to read:
+    // For Japanese, generate line-by-line pronunciation that matches character positions
+    let pronunciationPrompt: string;
+    if (this.targetLanguage === 'ja') {
+      pronunciationPrompt = `Provide a pronunciation guide for the following Japanese text using ${nativeLangName} phonetic representation.
+
+Important: Maintain the exact same line structure as the original text. For each line of Japanese text, provide the pronunciation on the same line number. Match the pronunciation character-by-character with proper spacing to align with the original text.
+
+Original text:
+"${text}"
+
+Provide only the pronunciation guide maintaining exact line breaks and character alignment, no explanations.`;
+    } else {
+      pronunciationPrompt = `Provide a pronunciation guide for the following ${targetLangName} text using ${nativeLangName} phonetic representation that helps ${nativeLangName} speakers pronounce it correctly. Make it simple and easy to read:
 
 "${text}"
 
 Provide only the pronunciation guide, no explanations.`;
+    }
 
     try {
       if (!this.model) {
