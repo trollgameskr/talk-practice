@@ -1234,6 +1234,63 @@ const ConversationScreen = ({route, navigation}: any) => {
   };
 
   /**
+   * Render Japanese text with line-by-line pronunciation matching
+   * For Japanese, display pronunciation right below each line of original text
+   */
+  const renderJapaneseTextWithPronunciation = (
+    text: string,
+    pronunciation: string,
+  ) => {
+    // Split both text and pronunciation by lines
+    const textLines = text.split('\n');
+    const pronunciationLines = pronunciation.split('\n');
+
+    return (
+      <View>
+        {textLines.map((line, index) => (
+          <View key={index} style={styles.japaneseLineContainer}>
+            <Text style={[styles.messageText, styles.assistantText]}>
+              {line}
+            </Text>
+            {pronunciationLines[index] && (
+              <Text style={styles.japanesePronunciationLine}>
+                {pronunciationLines[index]}
+              </Text>
+            )}
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  /**
+   * Render Japanese sample text with line-by-line pronunciation matching
+   */
+  const renderJapaneseSampleWithPronunciation = (
+    text: string,
+    pronunciation: string,
+  ) => {
+    // Split both text and pronunciation by lines
+    const textLines = text.split('\n');
+    const pronunciationLines = pronunciation.split('\n');
+
+    return (
+      <View>
+        {textLines.map((line, index) => (
+          <View key={index} style={styles.japaneseLineContainer}>
+            <Text style={styles.sampleText}>{line}</Text>
+            {pronunciationLines[index] && (
+              <Text style={styles.samplePronunciationText}>
+                {pronunciationLines[index]}
+              </Text>
+            )}
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  /**
    * Render text with clickable words and grammar highlights
    */
   const renderClickableWords = (message: Message) => {
@@ -1418,18 +1475,37 @@ const ConversationScreen = ({route, navigation}: any) => {
                   ]}>
                   {message.role === 'assistant' ? (
                     <>
-                      <View style={styles.clickableTextContainer}>
-                        {renderClickableWords(message)}
-                      </View>
-                      {showTranslation && message.translation && (
-                        <Text style={styles.translationText}>
-                          💬 {message.translation}
-                        </Text>
-                      )}
-                      {showPronunciation && message.pronunciation && (
-                        <Text style={styles.pronunciationText}>
-                          🔊 {message.pronunciation}
-                        </Text>
+                      {/* For Japanese with pronunciation, use line-by-line matching display */}
+                      {targetLanguage === 'ja' &&
+                      showPronunciation &&
+                      message.pronunciation ? (
+                        <>
+                          {renderJapaneseTextWithPronunciation(
+                            message.content,
+                            message.pronunciation,
+                          )}
+                          {showTranslation && message.translation && (
+                            <Text style={styles.translationText}>
+                              💬 {message.translation}
+                            </Text>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <View style={styles.clickableTextContainer}>
+                            {renderClickableWords(message)}
+                          </View>
+                          {showPronunciation && message.pronunciation && (
+                            <Text style={styles.pronunciationText}>
+                              🔊 {message.pronunciation}
+                            </Text>
+                          )}
+                          {showTranslation && message.translation && (
+                            <Text style={styles.translationText}>
+                              💬 {message.translation}
+                            </Text>
+                          )}
+                        </>
                       )}
                       {/* CJK Character Breakdown button and Replay button in the same row */}
                       <View style={styles.aiMessageButtonsRow}>
@@ -1586,16 +1662,35 @@ const ConversationScreen = ({route, navigation}: any) => {
                   <View style={styles.sampleButtonContent}>
                     <Text style={styles.sampleNumber}>{index + 1}</Text>
                     <View style={styles.sampleTextContainer}>
-                      <Text style={styles.sampleText}>{sample.text}</Text>
-                      {showTranslation && sample.translation && (
-                        <Text style={styles.sampleTranslationText}>
-                          💬 {sample.translation}
-                        </Text>
-                      )}
-                      {showPronunciation && sample.pronunciation && (
-                        <Text style={styles.samplePronunciationText}>
-                          🔊 {sample.pronunciation}
-                        </Text>
+                      {/* For Japanese with pronunciation, use line-by-line matching display */}
+                      {targetLanguage === 'ja' &&
+                      showPronunciation &&
+                      sample.pronunciation ? (
+                        <>
+                          {renderJapaneseSampleWithPronunciation(
+                            sample.text,
+                            sample.pronunciation,
+                          )}
+                          {showTranslation && sample.translation && (
+                            <Text style={styles.sampleTranslationText}>
+                              💬 {sample.translation}
+                            </Text>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <Text style={styles.sampleText}>{sample.text}</Text>
+                          {showPronunciation && sample.pronunciation && (
+                            <Text style={styles.samplePronunciationText}>
+                              🔊 {sample.pronunciation}
+                            </Text>
+                          )}
+                          {showTranslation && sample.translation && (
+                            <Text style={styles.sampleTranslationText}>
+                              💬 {sample.translation}
+                            </Text>
+                          )}
+                        </>
                       )}
                     </View>
                   </View>
@@ -1708,17 +1803,17 @@ const ConversationScreen = ({route, navigation}: any) => {
             <Text style={styles.voiceDisplayTitle}>🔊 음성 재생 중</Text>
             <Text style={styles.voiceDisplayText}>{voiceDisplayText}</Text>
 
-            {/* Display translation if available */}
-            {showTranslation && voiceDisplayTranslation && (
-              <Text style={styles.voiceDisplayTranslation}>
-                💬 {voiceDisplayTranslation}
-              </Text>
-            )}
-
             {/* Display pronunciation if available */}
             {showPronunciation && voiceDisplayPronunciation && (
               <Text style={styles.voiceDisplayPronunciation}>
                 🔊 {voiceDisplayPronunciation}
+              </Text>
+            )}
+
+            {/* Display translation if available */}
+            {showTranslation && voiceDisplayTranslation && (
+              <Text style={styles.voiceDisplayTranslation}>
+                💬 {voiceDisplayTranslation}
               </Text>
             )}
 
@@ -2451,6 +2546,18 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  // Japanese line-by-line pronunciation styles
+  japaneseLineContainer: {
+    marginBottom: 8,
+  },
+  japanesePronunciationLine: {
+    fontSize: 12,
+    color: '#8b5cf6',
+    fontStyle: 'italic',
+    marginTop: 2,
+    lineHeight: 16,
+    fontFamily: 'monospace', // Use monospace for better character alignment
   },
 });
 
