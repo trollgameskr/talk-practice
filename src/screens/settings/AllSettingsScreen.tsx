@@ -64,7 +64,13 @@ const SettingsScreen = ({navigation, route}: any) => {
 
   // Helper functions to determine which sections to show based on category
   const shouldShowSection = (sectionName: string) => {
-    if (!category) return true; // Show all if no category specified
+    // Appearance and Language should never show in AllSettings (they have dedicated screens)
+    if (sectionName === '🎨 Appearance' || sectionName === '🌐 Language') {
+      return false;
+    }
+    
+    // If no category is specified, don't show any sections (shouldn't happen in normal flow)
+    if (!category) return false;
     
     const categoryMap: {[key: string]: string[]} = {
       'api': ['API Configuration', '🎤 TTS API Configuration (Optional)'],
@@ -550,7 +556,7 @@ const SettingsScreen = ({navigation, route}: any) => {
         </View>
         )}
 
-        {shouldShowSection(t('settings.sections.language.title')) && (
+        {shouldShowSection('🌐 Language') && (
         <View
           style={[
             styles.section,
