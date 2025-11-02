@@ -40,9 +40,10 @@ const storageService = new StorageService();
 const firebaseService = new FirebaseService();
 const GEMINI_API_KEY_URL = 'https://makersuite.google.com/app/apikey';
 
-const SettingsScreen = ({navigation}: any) => {
+const SettingsScreen = ({navigation, route}: any) => {
   const {theme, isDark, toggleTheme} = useTheme();
   const {t, i18n} = useTranslation();
+  const category = route?.params?.category;
   const [apiKey, setApiKey] = useState('');
   const [ttsApiKey, setTtsApiKey] = useState('');
   const [isApiKeyVisible, setIsApiKeyVisible] = useState(false);
@@ -60,6 +61,28 @@ const SettingsScreen = ({navigation}: any) => {
   const [textOnlyMode, setTextOnlyMode] = useState(false);
   const [ttsProvider, setTtsProvider] = useState<TTSProvider>('google-cloud');
   const [sessionDuration, setSessionDuration] = useState(300);
+
+  // Helper functions to determine which sections to show based on category
+  const shouldShowSection = (sectionName: string) => {
+    // Appearance and Language should never show in AllSettings (they have dedicated screens)
+    if (sectionName === '🎨 Appearance' || sectionName === '🌐 Language') {
+      return false;
+    }
+    
+    // If no category is specified, don't show any sections (shouldn't happen in normal flow)
+    if (!category) return false;
+    
+    const categoryMap: {[key: string]: string[]} = {
+      'api': ['API Configuration', '🎤 TTS API Configuration (Optional)'],
+      'tts': ['🎤 TTS Settings', '🎤 TTS API Configuration (Optional)'],
+      'conversation': ['🗣️ Conversation Settings'],
+      'account': ['👤 Guest Mode', 'Account'],
+      'data': ['Data Management'],
+      'about': ['About'],
+    };
+    
+    return categoryMap[category]?.includes(sectionName) ?? false;
+  };
 
   useEffect(() => {
     loadApiKey();
@@ -491,6 +514,7 @@ const SettingsScreen = ({navigation}: any) => {
           Platform.OS === 'web' ? styles.scrollContentWeb : undefined
         }
         showsVerticalScrollIndicator={true}>
+        {shouldShowSection('🎨 Appearance') && (
         <View
           style={[
             styles.section,
@@ -530,7 +554,9 @@ const SettingsScreen = ({navigation}: any) => {
             />
           </View>
         </View>
+        )}
 
+        {shouldShowSection('🌐 Language') && (
         <View
           style={[
             styles.section,
@@ -601,8 +627,9 @@ const SettingsScreen = ({navigation}: any) => {
             />
           </View>
         </View>
+        )}
 
-        {isGuestMode && (
+        {isGuestMode && shouldShowSection('👤 Guest Mode') && (
           <View
             style={[
               styles.section,
@@ -670,7 +697,7 @@ const SettingsScreen = ({navigation}: any) => {
           </View>
         )}
 
-        {userEmail && (
+        {userEmail && shouldShowSection('Account') && (
           <View
             style={[
               styles.section,
@@ -714,6 +741,7 @@ const SettingsScreen = ({navigation}: any) => {
           </View>
         )}
 
+        {shouldShowSection('API Configuration') && (
         <View
           style={[
             styles.section,
@@ -814,7 +842,9 @@ const SettingsScreen = ({navigation}: any) => {
             </Text>
           </View>
         </View>
+        )}
 
+        {shouldShowSection('🎤 TTS API Configuration (Optional)') && (
         <View
           style={[
             styles.section,
@@ -899,7 +929,9 @@ const SettingsScreen = ({navigation}: any) => {
             </Text>
           </View>
         </View>
+        )}
 
+        {shouldShowSection('🎤 TTS Settings') && (
         <View
           style={[
             styles.section,
@@ -1029,7 +1061,9 @@ const SettingsScreen = ({navigation}: any) => {
             </Text>
           </View>
         </View>
+        )}
 
+        {shouldShowSection('🗣️ Conversation Settings') && (
         <View
           style={[
             styles.section,
@@ -1335,14 +1369,16 @@ const SettingsScreen = ({navigation}: any) => {
             </Text>
           </View>
         </View>
+        )}
 
-        {ttsProvider === 'google-cloud' && (
+        {ttsProvider === 'google-cloud' && shouldShowSection('🎤 TTS Settings') && (
           <TTSSettings
             targetLanguage={selectedTargetLanguage}
             ttsApiKey={ttsApiKey}
           />
         )}
 
+        {shouldShowSection('Data Management') && (
         <View
           style={[
             styles.section,
@@ -1393,7 +1429,9 @@ const SettingsScreen = ({navigation}: any) => {
             </Text>
           </TouchableOpacity>
         </View>
+        )}
 
+        {shouldShowSection('About') && (
         <View
           style={[
             styles.section,
@@ -1458,6 +1496,7 @@ const SettingsScreen = ({navigation}: any) => {
             </Text>
           </TouchableOpacity>
         </View>
+        )}
 
         <View style={styles.footer}>
           <Text style={[styles.footerText, {color: theme.colors.textTertiary}]}>
