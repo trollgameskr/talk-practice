@@ -1234,6 +1234,23 @@ const ConversationScreen = ({route, navigation}: any) => {
   };
 
   /**
+   * Helper function to split text and pronunciation into matched line pairs
+   */
+  const splitIntoLinePairs = (
+    text: string,
+    pronunciation: string,
+  ): Array<{textLine: string; pronunciationLine?: string}> => {
+    const textLines = text.split('\n');
+    const pronunciationLines = pronunciation.split('\n');
+
+    return textLines.map((textLine, index) => ({
+      textLine,
+      pronunciationLine:
+        index < pronunciationLines.length ? pronunciationLines[index] : undefined,
+    }));
+  };
+
+  /**
    * Render Japanese text with line-by-line pronunciation matching
    * For Japanese, display pronunciation right below each line of original text
    */
@@ -1241,20 +1258,18 @@ const ConversationScreen = ({route, navigation}: any) => {
     text: string,
     pronunciation: string,
   ) => {
-    // Split both text and pronunciation by lines
-    const textLines = text.split('\n');
-    const pronunciationLines = pronunciation.split('\n');
+    const linePairs = splitIntoLinePairs(text, pronunciation);
 
     return (
       <View>
-        {textLines.map((line, index) => (
+        {linePairs.map((pair, index) => (
           <View key={index} style={styles.japaneseLineContainer}>
             <Text style={[styles.messageText, styles.assistantText]}>
-              {line}
+              {pair.textLine}
             </Text>
-            {pronunciationLines[index] && (
+            {pair.pronunciationLine && (
               <Text style={styles.japanesePronunciationLine}>
-                {pronunciationLines[index]}
+                {pair.pronunciationLine}
               </Text>
             )}
           </View>
@@ -1270,18 +1285,16 @@ const ConversationScreen = ({route, navigation}: any) => {
     text: string,
     pronunciation: string,
   ) => {
-    // Split both text and pronunciation by lines
-    const textLines = text.split('\n');
-    const pronunciationLines = pronunciation.split('\n');
+    const linePairs = splitIntoLinePairs(text, pronunciation);
 
     return (
       <View>
-        {textLines.map((line, index) => (
+        {linePairs.map((pair, index) => (
           <View key={index} style={styles.japaneseLineContainer}>
-            <Text style={styles.sampleText}>{line}</Text>
-            {pronunciationLines[index] && (
+            <Text style={styles.sampleText}>{pair.textLine}</Text>
+            {pair.pronunciationLine && (
               <Text style={styles.samplePronunciationText}>
-                {pronunciationLines[index]}
+                {pair.pronunciationLine}
               </Text>
             )}
           </View>
