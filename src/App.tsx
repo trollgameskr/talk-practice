@@ -233,7 +233,20 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
               <Stack.Screen
                 name="AllSettings"
                 component={AllSettingsScreen}
-                options={{title: t('navigation.settings')}}
+                options={({route}: any) => {
+                  const categoryTitles: {[key: string]: string} = {
+                    api: t('settings.categories.api.title'),
+                    tts: t('settings.categories.tts.title'),
+                    conversation: t('settings.categories.conversation.title'),
+                    account: t('settings.categories.account.title'),
+                    data: t('settings.categories.data.title'),
+                    about: t('settings.categories.about.title'),
+                  };
+                  const category = route?.params?.category;
+                  return {
+                    title: category ? categoryTitles[category] || t('navigation.settings') : t('navigation.settings')
+                  };
+                }}
               />
               <Stack.Screen
                 name="Feedback"

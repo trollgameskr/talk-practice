@@ -91,7 +91,7 @@ const SettingsMainScreen = ({navigation}: any) => {
           borderColor: theme.colors.border,
         },
       ]}
-      onPress={() => navigation.navigate(category.screen)}>
+      onPress={() => navigation.navigate(category.screen, {category: category.id})}>
       <View style={styles.categoryIcon}>
         <Text style={styles.categoryIconText}>{category.icon}</Text>
       </View>
