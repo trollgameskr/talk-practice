@@ -203,6 +203,44 @@
     }
   },
   "settings": {
+    "main": {
+      "title": "Settings",
+      "description": "Configure your app preferences and manage your account"
+    },
+    "categories": {
+      "appearance": {
+        "title": "Appearance",
+        "description": "Customize the look and feel of your app"
+      },
+      "language": {
+        "title": "Language",
+        "description": "Change app language and learning preferences"
+      },
+      "api": {
+        "title": "API Configuration",
+        "description": "Configure your Gemini and TTS API keys"
+      },
+      "tts": {
+        "title": "Text-to-Speech",
+        "description": "Configure voice synthesis settings"
+      },
+      "conversation": {
+        "title": "Conversation",
+        "description": "Adjust conversation and practice settings"
+      },
+      "account": {
+        "title": "Account",
+        "description": "Manage your account and authentication"
+      },
+      "data": {
+        "title": "Data Management",
+        "description": "Export or clear your app data"
+      },
+      "about": {
+        "title": "About",
+        "description": "App information and feedback"
+      }
+    },
     "sections": {
       "guestMode": {
         "title": "👤 Guest Mode",

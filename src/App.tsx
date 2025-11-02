@@ -14,9 +14,14 @@ import HomeScreen from './screens/HomeScreen';
 import TopicSelectionScreen from './screens/TopicSelectionScreen';
 import ConversationScreen from './screens/ConversationScreen';
 import ProgressScreen from './screens/ProgressScreen';
-import SettingsScreen from './screens/SettingsScreen';
 import LoginScreen, {GUEST_MODE_KEY} from './screens/LoginScreen';
 import FeedbackScreen from './screens/FeedbackScreen';
+
+// Settings Screens
+import SettingsMainScreen from './screens/settings/SettingsMainScreen';
+import AppearanceSettingsScreen from './screens/settings/AppearanceSettingsScreen';
+import LanguageSettingsScreen from './screens/settings/LanguageSettingsScreen';
+import AllSettingsScreen from './screens/settings/AllSettingsScreen';
 
 // Services
 import FirebaseService from './services/FirebaseService';
@@ -206,7 +211,22 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
               />
               <Stack.Screen
                 name="Settings"
-                component={SettingsScreen}
+                component={SettingsMainScreen}
+                options={{title: t('navigation.settings')}}
+              />
+              <Stack.Screen
+                name="AppearanceSettings"
+                component={AppearanceSettingsScreen}
+                options={{title: t('settings.categories.appearance.title')}}
+              />
+              <Stack.Screen
+                name="LanguageSettings"
+                component={LanguageSettingsScreen}
+                options={{title: t('settings.categories.language.title')}}
+              />
+              <Stack.Screen
+                name="AllSettings"
+                component={AllSettingsScreen}
                 options={{title: t('navigation.settings')}}
               />
               <Stack.Screen
