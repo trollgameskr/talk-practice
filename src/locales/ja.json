@@ -162,6 +162,44 @@
     }
   },
   "settings": {
+    "main": {
+      "title": "設定",
+      "description": "アプリの設定とアカウントを管理"
+    },
+    "categories": {
+      "appearance": {
+        "title": "外観",
+        "description": "アプリの外観をカスタマイズ"
+      },
+      "language": {
+        "title": "言語",
+        "description": "アプリ言語と学習設定を変更"
+      },
+      "api": {
+        "title": "API設定",
+        "description": "GeminiとTTS APIキーを設定"
+      },
+      "tts": {
+        "title": "音声合成",
+        "description": "音声合成設定を構成"
+      },
+      "conversation": {
+        "title": "会話設定",
+        "description": "会話と練習設定を調整"
+      },
+      "account": {
+        "title": "アカウント",
+        "description": "アカウントと認証を管理"
+      },
+      "data": {
+        "title": "データ管理",
+        "description": "アプリデータをエクスポートまたは削除"
+      },
+      "about": {
+        "title": "情報",
+        "description": "アプリ情報とフィードバック"
+      }
+    },
     "sections": {
       "guestMode": {
         "title": "👤 ゲストモード",

@@ -162,6 +162,44 @@
     }
   },
   "settings": {
+    "main": {
+      "title": "Configuración",
+      "description": "Configure las preferencias de su aplicación y gestione su cuenta"
+    },
+    "categories": {
+      "appearance": {
+        "title": "Apariencia",
+        "description": "Personalice el aspecto de su aplicación"
+      },
+      "language": {
+        "title": "Idioma",
+        "description": "Cambie el idioma de la aplicación y las preferencias de aprendizaje"
+      },
+      "api": {
+        "title": "Configuración de API",
+        "description": "Configure sus claves de API de Gemini y TTS"
+      },
+      "tts": {
+        "title": "Síntesis de voz",
+        "description": "Configure los ajustes de síntesis de voz"
+      },
+      "conversation": {
+        "title": "Conversación",
+        "description": "Ajuste la configuración de conversación y práctica"
+      },
+      "account": {
+        "title": "Cuenta",
+        "description": "Gestione su cuenta y autenticación"
+      },
+      "data": {
+        "title": "Gestión de datos",
+        "description": "Exporte o borre los datos de su aplicación"
+      },
+      "about": {
+        "title": "Acerca de",
+        "description": "Información de la aplicación y comentarios"
+      }
+    },
     "sections": {
       "guestMode": {
         "title": "👤 Modo Invitado",

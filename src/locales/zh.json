@@ -162,6 +162,44 @@
     }
   },
   "settings": {
+    "main": {
+      "title": "设置",
+      "description": "配置应用偏好和管理账户"
+    },
+    "categories": {
+      "appearance": {
+        "title": "外观",
+        "description": "自定义应用外观"
+      },
+      "language": {
+        "title": "语言",
+        "description": "更改应用语言和学习设置"
+      },
+      "api": {
+        "title": "API配置",
+        "description": "配置Gemini和TTS API密钥"
+      },
+      "tts": {
+        "title": "语音合成",
+        "description": "配置语音合成设置"
+      },
+      "conversation": {
+        "title": "对话设置",
+        "description": "调整对话和练习设置"
+      },
+      "account": {
+        "title": "账户",
+        "description": "管理账户和身份验证"
+      },
+      "data": {
+        "title": "数据管理",
+        "description": "导出或清除应用数据"
+      },
+      "about": {
+        "title": "关于",
+        "description": "应用信息和反馈"
+      }
+    },
     "sections": {
       "guestMode": {
         "title": "👤 访客模式",
