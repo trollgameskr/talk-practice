@@ -31,7 +31,7 @@ import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
 import LogCaptureService from '../services/LogCaptureService';
 import SessionInfoModal from '../components/SessionInfoModal';
-import {generateId, formatDuration, openURL} from '../utils/helpers';
+import {generateId, openURL} from '../utils/helpers';
 import {STORAGE_KEYS, CONVERSATION_CONFIG} from '../config/gemini.config';
 import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
 
@@ -186,7 +186,9 @@ const ConversationScreen = ({route, navigation}: any) => {
    */
   const loadSessionDuration = async () => {
     try {
-      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_DURATION);
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.SESSION_DURATION,
+      );
       if (savedValue) {
         const duration = parseInt(savedValue, 10);
         if (!isNaN(duration) && duration > 0) {
@@ -889,7 +891,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             // 세션 저장
             sessionSavedRef.current = true;
             await saveSession();
-            
+
             // 세션 종료 안내 모달 표시
             Alert.alert(
               t('conversation.sessionEnded.title'),
@@ -1247,7 +1249,9 @@ const ConversationScreen = ({route, navigation}: any) => {
     return textLines.map((textLine, index) => ({
       textLine,
       pronunciationLine:
-        index < pronunciationLines.length ? pronunciationLines[index] : undefined,
+        index < pronunciationLines.length
+          ? pronunciationLines[index]
+          : undefined,
     }));
   };
 
@@ -1458,83 +1462,103 @@ const ConversationScreen = ({route, navigation}: any) => {
         </View>
       </View>
 
-      <ScrollView
-        ref={scrollViewRef}
-        style={styles.messagesContainer}
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
-        contentContainerStyle={styles.messagesContent}>
-        {messages.map((message, index) => {
-          const isLastMessage = index === messages.length - 1;
-          // Find the last AI message - check if this is the last message and it's from assistant
-          const isLastAIMessage = isLastMessage && message.role === 'assistant';
-
-          return (
-            <View
-              key={message.id}
-              style={[
-                styles.messageContainer,
-                message.role === 'user' ? styles.userContainer : styles.assistantContainer,
-              ]}>
+      <View style={styles.messagesWrapper}>
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.messagesContainer}
+          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
+          contentContainerStyle={styles.messagesContent}>
+          {messages.map((message, _index) => {
+            return (
               <View
+                key={message.id}
                 style={[
-                  styles.messageRow,
-                  message.role === 'user' ? styles.userRow : styles.assistantRow,
+                  styles.messageContainer,
+                  message.role === 'user'
+                    ? styles.userContainer
+                    : styles.assistantContainer,
                 ]}>
                 <View
                   style={[
-                    styles.messageBubble,
+                    styles.messageRow,
                     message.role === 'user'
-                      ? styles.userBubble
-                      : styles.assistantBubble,
+                      ? styles.userRow
+                      : styles.assistantRow,
                   ]}>
-                  {message.role === 'assistant' ? (
-                    <>
-                      {/* For Japanese with pronunciation, use line-by-line matching display */}
-                      {targetLanguage === 'ja' &&
-                      showPronunciation &&
-                      message.pronunciation ? (
-                        <>
-                          {renderJapaneseTextWithPronunciation(
-                            message.content,
-                            message.pronunciation,
-                          )}
-                          {showTranslation && message.translation && (
-                            <Text style={styles.translationText}>
-                              💬 {message.translation}
-                            </Text>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <View style={styles.clickableTextContainer}>
-                            {renderClickableWords(message)}
-                          </View>
-                          {showPronunciation && message.pronunciation && (
-                            <Text style={styles.pronunciationText}>
-                              🔊 {message.pronunciation}
-                            </Text>
-                          )}
-                          {showTranslation && message.translation && (
-                            <Text style={styles.translationText}>
-                              💬 {message.translation}
-                            </Text>
-                          )}
-                        </>
-                      )}
-                      {/* CJK Character Breakdown button and Replay button in the same row */}
-                      <View style={styles.aiMessageButtonsRow}>
-                        {(targetLanguage === 'zh' || targetLanguage === 'ja') && (
-                          <TouchableOpacity
-                            style={styles.cjkBreakdownButton}
-                            onPress={() =>
-                              handleCJKBreakdownRequest(message.content)
-                            }>
-                            <Text style={styles.cjkBreakdownButtonText}>
-                              📖 {t('conversation.cjkBreakdown.buttonLabel')}
-                            </Text>
-                          </TouchableOpacity>
+                  <View
+                    style={[
+                      styles.messageBubble,
+                      message.role === 'user'
+                        ? styles.userBubble
+                        : styles.assistantBubble,
+                    ]}>
+                    {message.role === 'assistant' ? (
+                      <>
+                        {/* For Japanese with pronunciation, use line-by-line matching display */}
+                        {targetLanguage === 'ja' &&
+                        showPronunciation &&
+                        message.pronunciation ? (
+                          <>
+                            {renderJapaneseTextWithPronunciation(
+                              message.content,
+                              message.pronunciation,
+                            )}
+                            {showTranslation && message.translation && (
+                              <Text style={styles.translationText}>
+                                💬 {message.translation}
+                              </Text>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <View style={styles.clickableTextContainer}>
+                              {renderClickableWords(message)}
+                            </View>
+                            {showPronunciation && message.pronunciation && (
+                              <Text style={styles.pronunciationText}>
+                                🔊 {message.pronunciation}
+                              </Text>
+                            )}
+                            {showTranslation && message.translation && (
+                              <Text style={styles.translationText}>
+                                💬 {message.translation}
+                              </Text>
+                            )}
+                          </>
                         )}
-                        {/* Feature 1: Replay button for AI messages */}
+                        {/* CJK Character Breakdown button and Replay button in the same row */}
+                        <View style={styles.aiMessageButtonsRow}>
+                          {(targetLanguage === 'zh' ||
+                            targetLanguage === 'ja') && (
+                            <TouchableOpacity
+                              style={styles.cjkBreakdownButton}
+                              onPress={() =>
+                                handleCJKBreakdownRequest(message.content)
+                              }>
+                              <Text style={styles.cjkBreakdownButtonText}>
+                                📖 {t('conversation.cjkBreakdown.buttonLabel')}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                          {/* Feature 1: Replay button for AI messages */}
+                          {!textOnlyMode && (
+                            <TouchableOpacity
+                              style={styles.replayButton}
+                              onPress={() => handleReplayAudio(message)}
+                              disabled={isSpeaking}>
+                              <Text style={styles.replayButtonText}>
+                                {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </>
+                    ) : (
+                      <>
+                        <Text style={[styles.messageText, styles.userText]}>
+                          {message.content}
+                        </Text>
+                        {/* Feature 1: Replay button for user messages */}
                         {!textOnlyMode && (
                           <TouchableOpacity
                             style={styles.replayButton}
@@ -1545,74 +1569,57 @@ const ConversationScreen = ({route, navigation}: any) => {
                             </Text>
                           </TouchableOpacity>
                         )}
-                      </View>
-                    </>
-                  ) : (
-                    <>
-                      <Text style={[styles.messageText, styles.userText]}>
-                        {message.content}
-                      </Text>
-                      {/* Feature 1: Replay button for user messages */}
-                      {!textOnlyMode && (
-                        <TouchableOpacity
-                          style={styles.replayButton}
-                          onPress={() => handleReplayAudio(message)}
-                          disabled={isSpeaking}>
-                          <Text style={styles.replayButtonText}>
-                            {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                    </>
-                  )}
+                      </>
+                    )}
+                  </View>
                 </View>
               </View>
+            );
+          })}
 
-              {/* Features 2, 3, 4: Tap to Speak and Text Input buttons below last AI message */}
-              {isLastAIMessage && !textOnlyMode && !isListening && (
-                <View style={styles.actionButtonsContainer}>
-                  {/* Feature 4: Text Input button */}
-                  <TouchableOpacity
-                    style={styles.textInputButton}
-                    onPress={() => setShowTextInputModal(true)}
-                    disabled={isLoading || isSpeaking}
-                    accessibilityLabel="Text Input"
-                    accessibilityRole="button">
-                    <Text style={styles.textInputButtonIcon}>✏️</Text>
-                    <Text style={styles.textInputButtonText}>
-                      {t('conversation.textInput.buttonLabel')}
-                    </Text>
-                  </TouchableOpacity>
-                  
-                  {/* Features 2 & 3: Tap to Speak button - moved below and changed to square */}
-                  <TouchableOpacity
-                    style={styles.tapToSpeakButton}
-                    onPress={handleToggleListening}
-                    disabled={isLoading || isSpeaking}
-                    accessibilityLabel="Tap to Speak"
-                    accessibilityRole="button">
-                    <Text style={styles.tapToSpeakButtonIcon}>🎤</Text>
-                    <Text style={styles.tapToSpeakButtonText}>
-                      {t('conversation.tapToSpeak.buttonLabel')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+          {isLoading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#3b82f6" />
+              {isInitializing && initializationStatus && (
+                <Text style={styles.initializationStatusText}>
+                  {initializationStatus}
+                </Text>
               )}
             </View>
-          );
-        })}
+          )}
+        </ScrollView>
 
-        {isLoading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#3b82f6" />
-            {isInitializing && initializationStatus && (
-              <Text style={styles.initializationStatusText}>
-                {initializationStatus}
+        {/* Floating action buttons at bottom-right of scrollable area */}
+        {messages.length > 0 && !textOnlyMode && !isListening && (
+          <View style={styles.floatingButtonsContainer}>
+            {/* Feature 4: Text Input button */}
+            <TouchableOpacity
+              style={styles.textInputButton}
+              onPress={() => setShowTextInputModal(true)}
+              disabled={isLoading || isSpeaking}
+              accessibilityLabel="Text Input"
+              accessibilityRole="button">
+              <Text style={styles.textInputButtonIcon}>✏️</Text>
+              <Text style={styles.textInputButtonText}>
+                {t('conversation.textInput.buttonLabel')}
               </Text>
-            )}
+            </TouchableOpacity>
+
+            {/* Features 2 & 3: Tap to Speak button */}
+            <TouchableOpacity
+              style={styles.tapToSpeakButton}
+              onPress={handleToggleListening}
+              disabled={isLoading || isSpeaking}
+              accessibilityLabel="Tap to Speak"
+              accessibilityRole="button">
+              <Text style={styles.tapToSpeakButtonIcon}>🎤</Text>
+              <Text style={styles.tapToSpeakButtonText}>
+                {t('conversation.tapToSpeak.buttonLabel')}
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
-      </ScrollView>
+      </View>
 
       <View style={styles.controls}>
         {textOnlyMode ? (
@@ -1987,13 +1994,17 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 2,
   },
+  messagesWrapper: {
+    flex: 1,
+    position: 'relative',
+  },
   messagesContainer: {
     flex: 1,
     flexShrink: 1,
   },
   messagesContent: {
     padding: 16,
-    paddingBottom: 8,
+    paddingBottom: 80, // Add padding to prevent messages from being hidden under floating buttons
   },
   messageRow: {
     marginBottom: 12,
@@ -2456,10 +2467,14 @@ const styles = StyleSheet.create({
   assistantContainer: {
     alignItems: 'flex-start',
   },
-  // Features 2, 3, 4: Action buttons container (below message)
-  actionButtonsContainer: {
-    marginTop: 8,
+  // Floating action buttons container (bottom-right of scrollable area)
+  floatingButtonsContainer: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    flexDirection: 'row',
     gap: 8,
+    zIndex: 10,
   },
   // Feature 4: Text Input button
   textInputButton: {
@@ -2485,7 +2500,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  // Features 2 & 3: Tap to Speak button (square shape, below message)
+  // Features 2 & 3: Tap to Speak button (square shape)
   tapToSpeakButton: {
     flexDirection: 'row',
     alignItems: 'center',
