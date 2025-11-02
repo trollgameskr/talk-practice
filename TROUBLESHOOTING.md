@@ -3,10 +3,81 @@
 This document contains solutions to common issues you might encounter when running GeminiTalk.
 
 ## Table of Contents
+- [CJK Character Breakdown Issues](#cjk-character-breakdown-issues)
 - [AI Speech Issues](#ai-speech-issues)
 - [404 Errors for JavaScript Files](#404-errors-for-javascript-files)
 - [Service Worker Issues](#service-worker-issues)
 - [Build Issues](#build-issues)
+
+## CJK Character Breakdown Issues
+
+### Character Analysis (漢字解析/汉字解析) Not Loading
+
+**Symptoms:**
+- Clicking "한자 분석" (Character Analysis) button shows a loading indicator indefinitely
+- Modal opens but shows only a spinner with no results
+- No error messages are displayed
+
+**Diagnosis:**
+
+The application now includes comprehensive logging to help diagnose these issues. Open your browser's Developer Tools (F12) and check the Console tab for messages prefixed with `[CJKBreakdown]` or `[GeminiService]`.
+
+Common log messages:
+- `[CJKBreakdown] Starting breakdown request for sentence:` - Request initiated
+- `[GeminiService] Sending request to Gemini API for CJK breakdown` - API call started
+- `[GeminiService] Successfully parsed JSON with X items` - Success
+- `[CJKBreakdown] Request timed out after 30 seconds` - Timeout occurred
+- `[GeminiService] Error getting CJK character breakdown:` - API error
+
+**Solutions:**
+
+1. **Check API Key Configuration**
+   - Go to Settings → API Configuration
+   - Ensure your Gemini API key is correctly set
+   - The same API key is used for both conversation and character breakdown
+
+2. **Network Timeout (30 seconds)**
+   - If you see a timeout error in the console, try again
+   - Check your internet connection
+   - Complex sentences may take longer to analyze
+   - Click the "Retry" button in the error message
+
+3. **API Rate Limiting**
+   - If you're making many requests quickly, you may hit API rate limits
+   - Wait a few minutes and try again
+   - Results are cached, so the same sentence won't require another API call
+
+4. **Target Language Not Supported**
+   - Character breakdown only works for Chinese (zh) and Japanese (ja)
+   - Check your target language in Settings → Language
+   - The button will only appear when using Chinese or Japanese
+
+5. **Empty or Invalid Response**
+   - Check console logs for `[GeminiService] No JSON array found in response`
+   - This may indicate an issue with the AI model's response format
+   - Try a different sentence or retry the same one
+
+**Error Messages:**
+
+The modal now displays user-friendly error messages in your language:
+
+- **"Character Analysis Failed"** - General API error, check network and API key
+- **"Timeout"** - Request took too long (>30 seconds), try again
+- **Retry Button** - Click to retry the same sentence
+
+**Cache Behavior:**
+
+- Successfully analyzed sentences are cached (up to 50 sentences)
+- Cached results load instantly without API calls
+- Cache is lost when you refresh the page or restart the app
+
+**Still Having Issues?**
+
+1. Check the browser console for detailed error messages
+2. Verify your Gemini API key has sufficient quota
+3. Try analyzing a shorter sentence
+4. Ensure you're using Chinese or Japanese as the target language
+5. Clear your browser cache and reload the app
 
 ## AI Speech Issues
 
