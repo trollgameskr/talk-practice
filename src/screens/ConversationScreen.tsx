@@ -1100,7 +1100,7 @@ const ConversationScreen = ({route, navigation}: any) => {
     setCjkCharacterBreakdown([]); // Clear previous breakdown
     setCjkBreakdownLoading(true);
 
-    // Create timeout that can be cleared
+    // Timeout ID for cleanup
     let timeoutId: NodeJS.Timeout | null = null;
     
     try {
@@ -1128,12 +1128,14 @@ const ConversationScreen = ({route, navigation}: any) => {
       setCjkBreakdownLoading(false);
       
       // Cache the result with FIFO behavior
+      // Note: Object.keys() maintains insertion order in modern JavaScript (ES2015+)
+      // which is guaranteed in our target environment (React Native/modern browsers)
       setCjkBreakdownCache(prev => {
         const newCache = {...prev, [sentence]: breakdown};
         // If cache exceeds max size, remove oldest entry (FIFO)
         const cacheKeys = Object.keys(newCache);
         if (cacheKeys.length > MAX_CJK_CACHE_SIZE) {
-          // Remove the first (oldest) key
+          // Remove the first (oldest) key based on insertion order
           delete newCache[cacheKeys[0]];
         }
         return newCache;
