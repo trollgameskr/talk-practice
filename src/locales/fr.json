@@ -130,7 +130,14 @@
       "noLogs": "No logs available to copy"
     },
     "cjkBreakdown": {
-      "buttonLabel": "Analyse des Caractères"
+      "buttonLabel": "Analyse des Caractères",
+      "modalTitle": "Analyse des Caractères",
+      "loading": "Analyse des caractères en cours...",
+      "error": "Échec de l'Analyse des Caractères",
+      "errorMessage": "Échec du chargement de l'analyse des caractères. Veuillez vérifier votre connexion réseau et réessayer.",
+      "retry": "Réessayer",
+      "timeout": "Délai d'Attente Dépassé",
+      "timeoutMessage": "L'analyse des caractères a expiré. Veuillez réessayer."
     },
     "textInput": {
       "buttonLabel": "Saisie de Texte",

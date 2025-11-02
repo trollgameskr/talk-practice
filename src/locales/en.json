@@ -171,7 +171,14 @@
       "noLogs": "No logs available to copy"
     },
     "cjkBreakdown": {
-      "buttonLabel": "Character Analysis"
+      "buttonLabel": "Character Analysis",
+      "modalTitle": "Character Analysis",
+      "loading": "Analyzing characters...",
+      "error": "Character Analysis Failed",
+      "errorMessage": "Failed to load character analysis. Please check your network connection and try again.",
+      "retry": "Retry",
+      "timeout": "Timeout",
+      "timeoutMessage": "Character analysis timed out. Please try again."
     },
     "textInput": {
       "buttonLabel": "Text Input",

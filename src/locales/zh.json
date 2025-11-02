@@ -130,7 +130,14 @@
       "noLogs": "No logs available to copy"
     },
     "cjkBreakdown": {
-      "buttonLabel": "汉字解析"
+      "buttonLabel": "汉字解析",
+      "modalTitle": "汉字解析",
+      "loading": "正在解析汉字...",
+      "error": "汉字解析失败",
+      "errorMessage": "加载汉字解析失败。请检查网络连接并重试。",
+      "retry": "重试",
+      "timeout": "超时",
+      "timeoutMessage": "汉字解析超时。请重试。"
     },
     "textInput": {
       "buttonLabel": "文本输入",

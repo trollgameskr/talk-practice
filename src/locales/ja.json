@@ -130,7 +130,14 @@
       "noLogs": "No logs available to copy"
     },
     "cjkBreakdown": {
-      "buttonLabel": "漢字解析"
+      "buttonLabel": "漢字解析",
+      "modalTitle": "漢字解析",
+      "loading": "漢字を解析中...",
+      "error": "漢字解析失敗",
+      "errorMessage": "漢字解析の読み込みに失敗しました。ネットワーク接続を確認して、もう一度お試しください。",
+      "retry": "再試行",
+      "timeout": "タイムアウト",
+      "timeoutMessage": "漢字解析がタイムアウトしました。もう一度お試しください。"
     },
     "textInput": {
       "buttonLabel": "テキスト入力",
