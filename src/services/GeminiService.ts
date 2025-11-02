@@ -662,14 +662,17 @@ Example format:
   async getCJKCharacterBreakdown(
     text: string,
   ): Promise<CJKCharacterBreakdown[]> {
+    console.log('[GeminiService] getCJKCharacterBreakdown called with text:', text);
     const nativeLangName = LANGUAGE_NAMES[this.nativeLanguage] || 'English';
     const isChinese = this.targetLanguage === 'zh';
     const isJapanese = this.targetLanguage === 'ja';
 
     if (!isChinese && !isJapanese) {
+      console.log('[GeminiService] Skipping - not Chinese or Japanese language');
       return [];
     }
 
+    console.log('[GeminiService] Building breakdown prompt for', isChinese ? 'Chinese' : 'Japanese');
     const breakdownPrompt = isChinese
       ? `Analyze the following Chinese text and provide a character-by-character breakdown. For each character or meaningful word unit, provide:
 - character: the Chinese character(s)
@@ -721,27 +724,41 @@ Important: Break down the text into meaningful units (kanji with their readings,
 
     try {
       if (!this.model) {
+        console.error('[GeminiService] Model not initialized!');
         throw new Error('Model not initialized');
       }
 
+      console.log('[GeminiService] Sending request to Gemini API for CJK breakdown');
       const result = await this.model.generateContent(breakdownPrompt);
+      console.log('[GeminiService] Received response from Gemini API');
+      
       const response = result.response.text();
+      console.log('[GeminiService] Response text length:', response.length);
 
       // Try to parse JSON response
       const jsonMatch = response.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
+        console.log('[GeminiService] Found JSON in response');
         try {
           const parsed = JSON.parse(jsonMatch[0]);
+          console.log('[GeminiService] Successfully parsed JSON with', parsed.length, 'items');
           return parsed;
         } catch (parseError) {
-          console.error('Error parsing JSON from response:', parseError);
+          console.error('[GeminiService] Error parsing JSON from response:', parseError);
+          console.error('[GeminiService] JSON that failed to parse:', jsonMatch[0].substring(0, 500));
           return [];
         }
       }
 
+      console.warn('[GeminiService] No JSON array found in response');
+      console.warn('[GeminiService] Response preview:', response.substring(0, 500));
       return [];
     } catch (error) {
-      console.error('Error getting CJK character breakdown:', error);
+      console.error('[GeminiService] Error getting CJK character breakdown:', error);
+      if (error instanceof Error) {
+        console.error('[GeminiService] Error message:', error.message);
+        console.error('[GeminiService] Error stack:', error.stack);
+      }
       return [];
     }
   }
