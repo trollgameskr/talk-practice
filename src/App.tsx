@@ -5,7 +5,13 @@
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {StatusBar, StyleSheet, ActivityIndicator, View} from 'react-native';
+import {
+  StatusBar,
+  StyleSheet,
+  ActivityIndicator,
+  View,
+  BackHandler,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
 
@@ -14,9 +20,14 @@ import HomeScreen from './screens/HomeScreen';
 import TopicSelectionScreen from './screens/TopicSelectionScreen';
 import ConversationScreen from './screens/ConversationScreen';
 import ProgressScreen from './screens/ProgressScreen';
-import SettingsScreen from './screens/SettingsScreen';
 import LoginScreen, {GUEST_MODE_KEY} from './screens/LoginScreen';
 import FeedbackScreen from './screens/FeedbackScreen';
+
+// Settings Screens
+import SettingsMainScreen from './screens/settings/SettingsMainScreen';
+import AppearanceSettingsScreen from './screens/settings/AppearanceSettingsScreen';
+import LanguageSettingsScreen from './screens/settings/LanguageSettingsScreen';
+import AllSettingsScreen from './screens/settings/AllSettingsScreen';
 
 // Services
 import FirebaseService from './services/FirebaseService';
@@ -121,6 +132,26 @@ const AppContent = () => {
 const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
   const {t} = useTranslation();
   const {theme} = useTheme();
+  const navigationRef = React.useRef<any>(null);
+
+  // Handle Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (navigationRef.current) {
+          const canGoBack = navigationRef.current.canGoBack();
+          if (canGoBack) {
+            navigationRef.current.goBack();
+            return true; // Prevent default behavior (app exit)
+          }
+        }
+        return false; // Allow default behavior if can't go back
+      },
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <>
@@ -129,6 +160,7 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
         backgroundColor={theme.colors.statusBarBackground}
       />
       <NavigationContainer
+        ref={navigationRef}
         key={isAuthenticated ? 'authenticated' : 'unauthenticated'}>
         <Stack.Navigator
           initialRouteName={isAuthenticated ? 'Home' : 'Login'}
@@ -185,7 +217,22 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
               />
               <Stack.Screen
                 name="Settings"
-                component={SettingsScreen}
+                component={SettingsMainScreen}
+                options={{title: t('navigation.settings')}}
+              />
+              <Stack.Screen
+                name="AppearanceSettings"
+                component={AppearanceSettingsScreen}
+                options={{title: t('settings.categories.appearance.title')}}
+              />
+              <Stack.Screen
+                name="LanguageSettings"
+                component={LanguageSettingsScreen}
+                options={{title: t('settings.categories.language.title')}}
+              />
+              <Stack.Screen
+                name="AllSettings"
+                component={AllSettingsScreen}
                 options={{title: t('navigation.settings')}}
               />
               <Stack.Screen

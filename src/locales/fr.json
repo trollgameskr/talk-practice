@@ -162,6 +162,44 @@
     }
   },
   "settings": {
+    "main": {
+      "title": "Paramètres",
+      "description": "Configurez vos préférences d'application et gérez votre compte"
+    },
+    "categories": {
+      "appearance": {
+        "title": "Apparence",
+        "description": "Personnalisez l'apparence de votre application"
+      },
+      "language": {
+        "title": "Langue",
+        "description": "Modifier la langue de l'application et les préférences d'apprentissage"
+      },
+      "api": {
+        "title": "Configuration API",
+        "description": "Configurez vos clés API Gemini et TTS"
+      },
+      "tts": {
+        "title": "Synthèse vocale",
+        "description": "Configurer les paramètres de synthèse vocale"
+      },
+      "conversation": {
+        "title": "Conversation",
+        "description": "Ajuster les paramètres de conversation et de pratique"
+      },
+      "account": {
+        "title": "Compte",
+        "description": "Gérez votre compte et votre authentification"
+      },
+      "data": {
+        "title": "Gestion des données",
+        "description": "Exporter ou effacer les données de votre application"
+      },
+      "about": {
+        "title": "À propos",
+        "description": "Informations sur l'application et commentaires"
+      }
+    },
     "sections": {
       "guestMode": {
         "title": "👤 Mode Invité",

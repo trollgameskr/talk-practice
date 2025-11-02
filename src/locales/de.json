@@ -162,6 +162,44 @@
     }
   },
   "settings": {
+    "main": {
+      "title": "Einstellungen",
+      "description": "Konfigurieren Sie Ihre App-Einstellungen und verwalten Sie Ihr Konto"
+    },
+    "categories": {
+      "appearance": {
+        "title": "Erscheinungsbild",
+        "description": "Passen Sie das Aussehen Ihrer App an"
+      },
+      "language": {
+        "title": "Sprache",
+        "description": "Ändern Sie die App-Sprache und Lerneinstellungen"
+      },
+      "api": {
+        "title": "API-Konfiguration",
+        "description": "Konfigurieren Sie Ihre Gemini- und TTS-API-Schlüssel"
+      },
+      "tts": {
+        "title": "Sprachsynthese",
+        "description": "Konfigurieren Sie die Sprachsyntheseeinstellungen"
+      },
+      "conversation": {
+        "title": "Konversation",
+        "description": "Passen Sie Konversations- und Übungseinstellungen an"
+      },
+      "account": {
+        "title": "Konto",
+        "description": "Verwalten Sie Ihr Konto und Ihre Authentifizierung"
+      },
+      "data": {
+        "title": "Datenverwaltung",
+        "description": "Exportieren oder löschen Sie Ihre App-Daten"
+      },
+      "about": {
+        "title": "Über",
+        "description": "App-Informationen und Feedback"
+      }
+    },
     "sections": {
       "guestMode": {
         "title": "👤 Gastmodus",
