@@ -1715,50 +1715,48 @@ const ConversationScreen = ({route, navigation}: any) => {
         {/* 2 Response Test Options - User can select one to practice */}
         {showSamples && enrichedSampleAnswers.length > 0 && (
           <View style={styles.samplesContainer}>
-            <ScrollView style={styles.samplesScrollView}>
-              {enrichedSampleAnswers.map((sample, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.sampleButton}
-                  onPress={() => handleUseSample(sample)}>
-                  <View style={styles.sampleButtonContent}>
-                    <Text style={styles.sampleNumber}>{index + 1}</Text>
-                    <View style={styles.sampleTextContainer}>
-                      {/* For Japanese with pronunciation, use line-by-line matching display */}
-                      {targetLanguage === 'ja' &&
-                      showPronunciation &&
-                      sample.pronunciation ? (
-                        <>
-                          {renderJapaneseSampleWithPronunciation(
-                            sample.text,
-                            sample.pronunciation,
-                          )}
-                          {showTranslation && sample.translation && (
-                            <Text style={styles.sampleTranslationText}>
-                              💬 {sample.translation}
-                            </Text>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <Text style={styles.sampleText}>{sample.text}</Text>
-                          {showPronunciation && sample.pronunciation && (
-                            <Text style={styles.samplePronunciationText}>
-                              🔊 {sample.pronunciation}
-                            </Text>
-                          )}
-                          {showTranslation && sample.translation && (
-                            <Text style={styles.sampleTranslationText}>
-                              💬 {sample.translation}
-                            </Text>
-                          )}
-                        </>
-                      )}
-                    </View>
+            {enrichedSampleAnswers.map((sample, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.sampleButton}
+                onPress={() => handleUseSample(sample)}>
+                <View style={styles.sampleButtonContent}>
+                  <Text style={styles.sampleNumber}>{index + 1}</Text>
+                  <View style={styles.sampleTextContainer}>
+                    {/* For Japanese with pronunciation, use line-by-line matching display */}
+                    {targetLanguage === 'ja' &&
+                    showPronunciation &&
+                    sample.pronunciation ? (
+                      <>
+                        {renderJapaneseSampleWithPronunciation(
+                          sample.text,
+                          sample.pronunciation,
+                        )}
+                        {showTranslation && sample.translation && (
+                          <Text style={styles.sampleTranslationText}>
+                            💬 {sample.translation}
+                          </Text>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <Text style={styles.sampleText}>{sample.text}</Text>
+                        {showPronunciation && sample.pronunciation && (
+                          <Text style={styles.samplePronunciationText}>
+                            🔊 {sample.pronunciation}
+                          </Text>
+                        )}
+                        {showTranslation && sample.translation && (
+                          <Text style={styles.sampleTranslationText}>
+                            💬 {sample.translation}
+                          </Text>
+                        )}
+                      </>
+                    )}
                   </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+                </View>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
       </View>
@@ -2178,10 +2176,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#bfdbfe',
-    maxHeight: 300,
-  },
-  samplesScrollView: {
-    maxHeight: 280,
   },
   sampleButton: {
     backgroundColor: '#ffffff',
