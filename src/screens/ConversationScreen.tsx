@@ -1902,7 +1902,10 @@ const ConversationScreen = ({route, navigation}: any) => {
         animationType="slide"
         onRequestClose={() => setShowTextInputModal(false)}>
         <Pressable
-          style={styles.modalOverlay}
+          style={[
+            styles.modalOverlay,
+            Platform.OS !== 'web' && styles.modalOverlayMobile,
+          ]}
           onPress={() => setShowTextInputModal(false)}>
           <Pressable
             style={styles.textInputModalContent}
@@ -2148,6 +2151,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalOverlayMobile: {
+    justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: '#ffffff',
