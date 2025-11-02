@@ -190,7 +190,9 @@ const ConversationScreen = ({route, navigation}: any) => {
    */
   const loadSessionDuration = async () => {
     try {
-      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_DURATION);
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.SESSION_DURATION,
+      );
       if (savedValue) {
         const duration = parseInt(savedValue, 10);
         if (!isNaN(duration) && duration > 0) {
@@ -893,7 +895,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             // 세션 저장
             sessionSavedRef.current = true;
             await saveSession();
-            
+
             // 세션 종료 안내 모달 표시
             Alert.alert(
               t('conversation.sessionEnded.title'),
@@ -1299,7 +1301,9 @@ const ConversationScreen = ({route, navigation}: any) => {
     return textLines.map((textLine, index) => ({
       textLine,
       pronunciationLine:
-        index < pronunciationLines.length ? pronunciationLines[index] : undefined,
+        index < pronunciationLines.length
+          ? pronunciationLines[index]
+          : undefined,
     }));
   };
 
@@ -1525,12 +1529,16 @@ const ConversationScreen = ({route, navigation}: any) => {
               key={message.id}
               style={[
                 styles.messageContainer,
-                message.role === 'user' ? styles.userContainer : styles.assistantContainer,
+                message.role === 'user'
+                  ? styles.userContainer
+                  : styles.assistantContainer,
               ]}>
               <View
                 style={[
                   styles.messageRow,
-                  message.role === 'user' ? styles.userRow : styles.assistantRow,
+                  message.role === 'user'
+                    ? styles.userRow
+                    : styles.assistantRow,
                 ]}>
                 <View
                   style={[
@@ -1575,7 +1583,8 @@ const ConversationScreen = ({route, navigation}: any) => {
                       )}
                       {/* CJK Character Breakdown button and Replay button in the same row */}
                       <View style={styles.aiMessageButtonsRow}>
-                        {(targetLanguage === 'zh' || targetLanguage === 'ja') && (
+                        {(targetLanguage === 'zh' ||
+                          targetLanguage === 'ja') && (
                           <TouchableOpacity
                             style={styles.cjkBreakdownButton}
                             onPress={() =>
@@ -1620,7 +1629,7 @@ const ConversationScreen = ({route, navigation}: any) => {
                 </View>
               </View>
 
-              {/* Features 2, 3, 4: Tap to Speak and Text Input buttons below last AI message */}
+              {/* Feature 4: Text Input button below last AI message */}
               {isLastAIMessage && !textOnlyMode && !isListening && (
                 <View style={styles.actionButtonsContainer}>
                   {/* Feature 4: Text Input button */}
@@ -1633,19 +1642,6 @@ const ConversationScreen = ({route, navigation}: any) => {
                     <Text style={styles.textInputButtonIcon}>✏️</Text>
                     <Text style={styles.textInputButtonText}>
                       {t('conversation.textInput.buttonLabel')}
-                    </Text>
-                  </TouchableOpacity>
-                  
-                  {/* Features 2 & 3: Tap to Speak button - moved below and changed to square */}
-                  <TouchableOpacity
-                    style={styles.tapToSpeakButton}
-                    onPress={handleToggleListening}
-                    disabled={isLoading || isSpeaking}
-                    accessibilityLabel="Tap to Speak"
-                    accessibilityRole="button">
-                    <Text style={styles.tapToSpeakButtonIcon}>🎤</Text>
-                    <Text style={styles.tapToSpeakButtonText}>
-                      {t('conversation.tapToSpeak.buttonLabel')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1989,7 +1985,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           onPress={() => setShowTextInputModal(false)}>
           <Pressable
             style={styles.textInputModalContent}
-            onPress={(e) => e.stopPropagation()}>
+            onPress={e => e.stopPropagation()}>
             <Text style={styles.modalTitle}>
               {t('conversation.textInput.buttonLabel')}
             </Text>
@@ -2017,7 +2013,8 @@ const ConversationScreen = ({route, navigation}: any) => {
               <TouchableOpacity
                 style={[
                   styles.textInputModalSendButton,
-                  !textInputValue.trim() && styles.textInputModalSendButtonDisabled,
+                  !textInputValue.trim() &&
+                    styles.textInputModalSendButtonDisabled,
                 ]}
                 onPress={handleSendTextInputModal}
                 disabled={!textInputValue.trim()}>
@@ -2610,30 +2607,6 @@ const styles = StyleSheet.create({
   textInputButtonText: {
     color: '#ffffff',
     fontSize: 14,
-    fontWeight: '600',
-  },
-  // Features 2 & 3: Tap to Speak button (square shape, below message)
-  tapToSpeakButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#3b82f6',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    gap: 8,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  tapToSpeakButtonIcon: {
-    fontSize: 20,
-  },
-  tapToSpeakButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
     fontWeight: '600',
   },
   // Text Input Modal styles

@@ -185,9 +185,6 @@
       "placeholder": "Type your message...",
       "cancel": "Cancel",
       "send": "Send"
-    },
-    "tapToSpeak": {
-      "buttonLabel": "Tap to Speak"
     }
   },
   "progress": {

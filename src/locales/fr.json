@@ -144,9 +144,6 @@
       "placeholder": "Tapez votre message...",
       "cancel": "Annuler",
       "send": "Envoyer"
-    },
-    "tapToSpeak": {
-      "buttonLabel": "Appuyez pour Parler"
     }
   },
   "progress": {

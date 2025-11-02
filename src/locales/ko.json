@@ -185,9 +185,6 @@
       "placeholder": "메시지를 입력하세요...",
       "cancel": "취소",
       "send": "전송"
-    },
-    "tapToSpeak": {
-      "buttonLabel": "말하기"
     }
   },
   "progress": {
