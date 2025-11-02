@@ -150,12 +150,12 @@ const ConversationScreen = ({route, navigation}: any) => {
         e.preventDefault();
         // Prompt user to confirm
         Alert.alert(
-          'End Session',
-          'Are you sure you want to end this practice session?',
+          t('conversation.endSession.title'),
+          t('conversation.endSession.message'),
           [
-            {text: 'Cancel', style: 'cancel'},
+            {text: t('conversation.endSession.cancel'), style: 'cancel'},
             {
-              text: 'End Session',
+              text: t('conversation.endSession.confirm'),
               style: 'destructive',
               onPress: async () => {
                 // Mark session as saved to prevent duplicate saves
