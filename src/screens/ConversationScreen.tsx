@@ -1100,10 +1100,13 @@ const ConversationScreen = ({route, navigation}: any) => {
     setCjkCharacterBreakdown([]); // Clear previous breakdown
     setCjkBreakdownLoading(true);
 
+    // Create timeout that can be cleared
+    let timeoutId: NodeJS.Timeout | null = null;
+    
     try {
-      // Create a timeout promise
+      // Create a timeout promise with clearable timeout
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           reject(new Error('TIMEOUT'));
         }, 30000); // 30 second timeout
       });
@@ -1114,14 +1117,20 @@ const ConversationScreen = ({route, navigation}: any) => {
         timeoutPromise,
       ]);
 
+      // Clear timeout on successful completion
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+
       console.log('[CJKBreakdown] Successfully received breakdown with', breakdown.length, 'characters');
       setCjkCharacterBreakdown(breakdown);
       setCjkBreakdownLoading(false);
       
-      // Cache the result with LRU behavior
+      // Cache the result with FIFO behavior
       setCjkBreakdownCache(prev => {
         const newCache = {...prev, [sentence]: breakdown};
-        // If cache exceeds max size, remove oldest entry
+        // If cache exceeds max size, remove oldest entry (FIFO)
         const cacheKeys = Object.keys(newCache);
         if (cacheKeys.length > MAX_CJK_CACHE_SIZE) {
           // Remove the first (oldest) key
@@ -1130,6 +1139,12 @@ const ConversationScreen = ({route, navigation}: any) => {
         return newCache;
       });
     } catch (error) {
+      // Clear timeout on error
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      
       console.error('[CJKBreakdown] Error getting CJK character breakdown:', error);
       setCjkCharacterBreakdown([]);
       setCjkBreakdownLoading(false);
