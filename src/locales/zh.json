@@ -137,9 +137,6 @@
       "placeholder": "输入您的消息...",
       "cancel": "取消",
       "send": "发送"
-    },
-    "tapToSpeak": {
-      "buttonLabel": "点击说话"
     }
   },
   "progress": {

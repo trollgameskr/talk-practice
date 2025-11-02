@@ -137,9 +137,6 @@
       "placeholder": "メッセージを入力してください...",
       "cancel": "キャンセル",
       "send": "送信"
-    },
-    "tapToSpeak": {
-      "buttonLabel": "話す"
     }
   },
   "progress": {
