@@ -40,6 +40,10 @@ const storageService = new StorageService();
 // Maximum number of cached CJK breakdowns to prevent memory issues
 const MAX_CJK_CACHE_SIZE = 50;
 
+// Padding to prevent messages from being hidden under floating buttons
+// Calculated as: button height (~48px) + bottom margin (16px) + extra space (16px)
+const FLOATING_BUTTONS_PADDING = 80;
+
 const ConversationScreen = ({route, navigation}: any) => {
   const {topic} = route.params as {topic: ConversationTopic};
   const {t} = useTranslation();
@@ -1913,7 +1917,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           onPress={() => setShowTextInputModal(false)}>
           <Pressable
             style={styles.textInputModalContent}
-            onPress={(e) => e.stopPropagation()}>
+            onPress={e => e.stopPropagation()}>
             <Text style={styles.modalTitle}>
               {t('conversation.textInput.buttonLabel')}
             </Text>
@@ -1941,7 +1945,8 @@ const ConversationScreen = ({route, navigation}: any) => {
               <TouchableOpacity
                 style={[
                   styles.textInputModalSendButton,
-                  !textInputValue.trim() && styles.textInputModalSendButtonDisabled,
+                  !textInputValue.trim() &&
+                    styles.textInputModalSendButtonDisabled,
                 ]}
                 onPress={handleSendTextInputModal}
                 disabled={!textInputValue.trim()}>
@@ -2004,7 +2009,7 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     padding: 16,
-    paddingBottom: 80, // Add padding to prevent messages from being hidden under floating buttons
+    paddingBottom: FLOATING_BUTTONS_PADDING,
   },
   messageRow: {
     marginBottom: 12,
