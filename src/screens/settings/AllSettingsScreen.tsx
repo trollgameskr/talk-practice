@@ -74,7 +74,7 @@ const SettingsScreen = ({navigation, route}: any) => {
     
     const categoryMap: {[key: string]: string[]} = {
       'api': ['API Configuration', '🎤 TTS API Configuration (Optional)'],
-      'tts': ['🎤 TTS Settings', '🎤 TTS API Configuration (Optional)'],
+      'tts': ['🎤 TTS Settings'],
       'conversation': ['🗣️ Conversation Settings'],
       'account': ['👤 Guest Mode', 'Account'],
       'data': ['Data Management'],
