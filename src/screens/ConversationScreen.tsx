@@ -190,7 +190,9 @@ const ConversationScreen = ({route, navigation}: any) => {
    */
   const loadSessionDuration = async () => {
     try {
-      const savedValue = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_DURATION);
+      const savedValue = await AsyncStorage.getItem(
+        STORAGE_KEYS.SESSION_DURATION,
+      );
       if (savedValue) {
         const duration = parseInt(savedValue, 10);
         if (!isNaN(duration) && duration > 0) {
@@ -893,7 +895,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             // 세션 저장
             sessionSavedRef.current = true;
             await saveSession();
-            
+
             // 세션 종료 안내 모달 표시
             Alert.alert(
               t('conversation.sessionEnded.title'),
@@ -1072,17 +1074,25 @@ const ConversationScreen = ({route, navigation}: any) => {
 
   const handleCJKBreakdownRequest = async (sentence: string) => {
     if (!geminiService.current || !sentence.trim()) {
-      console.log('[CJKBreakdown] Skipping - no gemini service or empty sentence');
+      console.log(
+        '[CJKBreakdown] Skipping - no gemini service or empty sentence',
+      );
       return;
     }
 
     // Check if the target language is Chinese or Japanese
     if (targetLanguage !== 'zh' && targetLanguage !== 'ja') {
-      console.log('[CJKBreakdown] Skipping - target language is not Chinese or Japanese:', targetLanguage);
+      console.log(
+        '[CJKBreakdown] Skipping - target language is not Chinese or Japanese:',
+        targetLanguage,
+      );
       return;
     }
 
-    console.log('[CJKBreakdown] Starting breakdown request for sentence:', sentence);
+    console.log(
+      '[CJKBreakdown] Starting breakdown request for sentence:',
+      sentence,
+    );
     setSelectedSentenceForBreakdown(sentence);
     setShowCJKBreakdownModal(true);
     setCjkBreakdownError(null);
@@ -1102,7 +1112,7 @@ const ConversationScreen = ({route, navigation}: any) => {
 
     // Timeout ID for cleanup
     let timeoutId: NodeJS.Timeout | null = null;
-    
+
     try {
       // Create a timeout promise with clearable timeout
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -1123,10 +1133,14 @@ const ConversationScreen = ({route, navigation}: any) => {
         timeoutId = null;
       }
 
-      console.log('[CJKBreakdown] Successfully received breakdown with', breakdown.length, 'characters');
+      console.log(
+        '[CJKBreakdown] Successfully received breakdown with',
+        breakdown.length,
+        'characters',
+      );
       setCjkCharacterBreakdown(breakdown);
       setCjkBreakdownLoading(false);
-      
+
       // Cache the result with FIFO behavior
       // Note: Object.keys() maintains insertion order in modern JavaScript (ES2015+)
       // which is guaranteed in our target environment (React Native/modern browsers)
@@ -1146,11 +1160,14 @@ const ConversationScreen = ({route, navigation}: any) => {
         clearTimeout(timeoutId);
         timeoutId = null;
       }
-      
-      console.error('[CJKBreakdown] Error getting CJK character breakdown:', error);
+
+      console.error(
+        '[CJKBreakdown] Error getting CJK character breakdown:',
+        error,
+      );
       setCjkCharacterBreakdown([]);
       setCjkBreakdownLoading(false);
-      
+
       // Set appropriate error message
       if (error instanceof Error && error.message === 'TIMEOUT') {
         console.error('[CJKBreakdown] Request timed out after 30 seconds');
@@ -1299,7 +1316,9 @@ const ConversationScreen = ({route, navigation}: any) => {
     return textLines.map((textLine, index) => ({
       textLine,
       pronunciationLine:
-        index < pronunciationLines.length ? pronunciationLines[index] : undefined,
+        index < pronunciationLines.length
+          ? pronunciationLines[index]
+          : undefined,
     }));
   };
 
@@ -1525,12 +1544,16 @@ const ConversationScreen = ({route, navigation}: any) => {
               key={message.id}
               style={[
                 styles.messageContainer,
-                message.role === 'user' ? styles.userContainer : styles.assistantContainer,
+                message.role === 'user'
+                  ? styles.userContainer
+                  : styles.assistantContainer,
               ]}>
               <View
                 style={[
                   styles.messageRow,
-                  message.role === 'user' ? styles.userRow : styles.assistantRow,
+                  message.role === 'user'
+                    ? styles.userRow
+                    : styles.assistantRow,
                 ]}>
                 <View
                   style={[
@@ -1575,7 +1598,8 @@ const ConversationScreen = ({route, navigation}: any) => {
                       )}
                       {/* CJK Character Breakdown button and Replay button in the same row */}
                       <View style={styles.aiMessageButtonsRow}>
-                        {(targetLanguage === 'zh' || targetLanguage === 'ja') && (
+                        {(targetLanguage === 'zh' ||
+                          targetLanguage === 'ja') && (
                           <TouchableOpacity
                             style={styles.cjkBreakdownButton}
                             onPress={() =>
@@ -1635,7 +1659,7 @@ const ConversationScreen = ({route, navigation}: any) => {
                       {t('conversation.textInput.buttonLabel')}
                     </Text>
                   </TouchableOpacity>
-                  
+
                   {/* Features 2 & 3: Tap to Speak button - moved below and changed to square */}
                   <TouchableOpacity
                     style={styles.tapToSpeakButton}
@@ -1692,8 +1716,8 @@ const ConversationScreen = ({route, navigation}: any) => {
             </TouchableOpacity>
           </View>
         ) : (
-          // Only show the main Tap to Speak button if there are no messages or if listening
-          (messages.length === 0 || isListening) && (
+          // Only show the main Tap to Speak button if listening (removed at conversation start)
+          isListening && (
             <Pressable
               style={[styles.micButton, isListening && styles.micButtonActive]}
               onPress={handleToggleListening}
@@ -1987,7 +2011,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           onPress={() => setShowTextInputModal(false)}>
           <Pressable
             style={styles.textInputModalContent}
-            onPress={(e) => e.stopPropagation()}>
+            onPress={e => e.stopPropagation()}>
             <Text style={styles.modalTitle}>
               {t('conversation.textInput.buttonLabel')}
             </Text>
@@ -2015,7 +2039,8 @@ const ConversationScreen = ({route, navigation}: any) => {
               <TouchableOpacity
                 style={[
                   styles.textInputModalSendButton,
-                  !textInputValue.trim() && styles.textInputModalSendButtonDisabled,
+                  !textInputValue.trim() &&
+                    styles.textInputModalSendButtonDisabled,
                 ]}
                 onPress={handleSendTextInputModal}
                 disabled={!textInputValue.trim()}>
