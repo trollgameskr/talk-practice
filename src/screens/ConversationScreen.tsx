@@ -31,9 +31,10 @@ import VoiceService from '../services/VoiceService';
 import StorageService from '../services/StorageService';
 import LogCaptureService from '../services/LogCaptureService';
 import SessionInfoModal from '../components/SessionInfoModal';
-import {generateId, formatDuration, openURL} from '../utils/helpers';
+import {generateId, openURL} from '../utils/helpers';
 import {STORAGE_KEYS, CONVERSATION_CONFIG} from '../config/gemini.config';
 import {getTargetLanguage, getCurrentLanguage} from '../config/i18n.config';
+import UIDebugId from '../components/UIDebugId';
 
 const storageService = new StorageService();
 
@@ -1524,7 +1525,9 @@ const ConversationScreen = ({route, navigation}: any) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <UIDebugId id={33} />
       <View style={styles.header}>
+        <UIDebugId id={34} />
         {/* Compact progress bar */}
         <View style={styles.compactProgressBarContainer}>
           <View

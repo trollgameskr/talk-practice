@@ -15,6 +15,7 @@ import {useTranslation} from 'react-i18next';
 import {ConversationTopic} from '../types';
 import {getTopicIcon} from '../utils/helpers';
 import {useTheme} from '../contexts/ThemeContext';
+import UIDebugId from '../components/UIDebugId';
 
 const TopicSelectionScreen = ({navigation}: any) => {
   const {theme, isDark} = useTheme();
@@ -55,6 +56,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      <UIDebugId id={22} />
       <ScrollView style={styles.scrollView}>
         <View
           style={[
@@ -64,6 +66,7 @@ const TopicSelectionScreen = ({navigation}: any) => {
               borderBottomColor: theme.colors.border,
             },
           ]}>
+          <UIDebugId id={23} />
           <Text style={[styles.title, {color: theme.colors.text}]}>
             {t('topicSelection.title')}
           </Text>
@@ -73,11 +76,12 @@ const TopicSelectionScreen = ({navigation}: any) => {
         </View>
 
         <View style={styles.topicsContainer}>
-          {topics.map(({topic, name, description}) => (
+          {topics.map(({topic, name, description}, index) => (
             <TouchableOpacity
               key={topic}
               style={[styles.topicCard, {backgroundColor: theme.colors.card}]}
               onPress={() => handleTopicSelect(topic)}>
+              <UIDebugId id={24 + index} />
               <View
                 style={[
                   styles.topicIconContainer,

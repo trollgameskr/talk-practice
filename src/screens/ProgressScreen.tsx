@@ -21,6 +21,7 @@ import {
   getScoreColor,
   getScoreLabel,
 } from '../utils/helpers';
+import UIDebugId from '../components/UIDebugId';
 
 const storageService = new StorageService();
 
@@ -42,6 +43,7 @@ const ProgressScreen = () => {
   if (!progress) {
     return (
       <SafeAreaView style={styles.container}>
+        <UIDebugId id={29} />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading progress...</Text>
         </View>
@@ -51,10 +53,12 @@ const ProgressScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <UIDebugId id={30} />
       <View style={styles.tabs}>
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'overview' && styles.activeTab]}
           onPress={() => setSelectedTab('overview')}>
+          <UIDebugId id={31} />
           <Text
             style={[
               styles.tabText,
@@ -66,6 +70,7 @@ const ProgressScreen = () => {
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'topics' && styles.activeTab]}
           onPress={() => setSelectedTab('topics')}>
+          <UIDebugId id={32} />
           <Text
             style={[
               styles.tabText,
