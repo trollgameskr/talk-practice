@@ -20,6 +20,7 @@ import {formatDuration} from '../utils/helpers';
 import CostDisplay from '../components/CostDisplay';
 import {STORAGE_KEYS} from '../config/gemini.config';
 import {useTheme} from '../contexts/ThemeContext';
+import UIDebugId from '../components/UIDebugId';
 
 const storageService = new StorageService();
 
@@ -59,6 +60,7 @@ const HomeScreen = ({navigation}: any) => {
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      <UIDebugId id={14} />
       <ScrollView style={styles.scrollView}>
         <View
           style={[
@@ -68,6 +70,7 @@ const HomeScreen = ({navigation}: any) => {
               borderBottomColor: theme.colors.border,
             },
           ]}>
+          <UIDebugId id={15} />
           <Text style={[styles.title, {color: theme.colors.text}]}>
             {t('home.title')}
           </Text>
@@ -81,6 +84,7 @@ const HomeScreen = ({navigation}: any) => {
             <View style={styles.statsContainer}>
               <View
                 style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
+                <UIDebugId id={16} />
                 <Text style={[styles.statValue, {color: theme.colors.primary}]}>
                   {progress.totalSessions}
                 </Text>
@@ -94,6 +98,7 @@ const HomeScreen = ({navigation}: any) => {
               </View>
               <View
                 style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
+                <UIDebugId id={17} />
                 <Text style={[styles.statValue, {color: theme.colors.primary}]}>
                   {formatDuration(progress.totalDuration)}
                 </Text>
@@ -107,6 +112,7 @@ const HomeScreen = ({navigation}: any) => {
               </View>
               <View
                 style={[styles.statCard, {backgroundColor: theme.colors.card}]}>
+                <UIDebugId id={18} />
                 <Text style={[styles.statValue, {color: theme.colors.primary}]}>
                   {progress.overallScore.toFixed(0)}
                 </Text>
@@ -134,6 +140,7 @@ const HomeScreen = ({navigation}: any) => {
               {backgroundColor: theme.colors.buttonPrimary},
             ]}
             onPress={() => navigation.navigate('TopicSelection')}>
+            <UIDebugId id={19} />
             <Text
               style={[
                 styles.buttonText,
@@ -153,6 +160,7 @@ const HomeScreen = ({navigation}: any) => {
               },
             ]}
             onPress={() => navigation.navigate('Progress')}>
+            <UIDebugId id={20} />
             <Text
               style={[
                 styles.secondaryButtonText,
@@ -172,6 +180,7 @@ const HomeScreen = ({navigation}: any) => {
               },
             ]}
             onPress={() => navigation.navigate('Settings')}>
+            <UIDebugId id={21} />
             <Text
               style={[
                 styles.secondaryButtonText,

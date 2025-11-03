@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useTheme} from '../../contexts/ThemeContext';
+import UIDebugId from '../../components/UIDebugId';
 
 interface SettingsCategory {
   id: string;
@@ -81,7 +82,7 @@ const SettingsMainScreen = ({navigation}: any) => {
     },
   ];
 
-  const renderCategory = (category: SettingsCategory) => (
+  const renderCategory = (category: SettingsCategory, index: number) => (
     <TouchableOpacity
       key={category.id}
       style={[
@@ -91,7 +92,10 @@ const SettingsMainScreen = ({navigation}: any) => {
           borderColor: theme.colors.border,
         },
       ]}
-      onPress={() => navigation.navigate(category.screen, {category: category.id})}>
+      onPress={() =>
+        navigation.navigate(category.screen, {category: category.id})
+      }>
+      <UIDebugId id={6 + index} />
       <View style={styles.categoryIcon}>
         <Text style={styles.categoryIconText}>{category.icon}</Text>
       </View>
@@ -116,6 +120,7 @@ const SettingsMainScreen = ({navigation}: any) => {
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      <UIDebugId id={5} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={true}>
         <View style={styles.header}>
           <Text style={[styles.headerTitle, {color: theme.colors.text}]}>
@@ -131,7 +136,7 @@ const SettingsMainScreen = ({navigation}: any) => {
         </View>
 
         <View style={styles.categoriesContainer}>
-          {categories.map(category => renderCategory(category))}
+          {categories.map((category, index) => renderCategory(category, index))}
         </View>
       </ScrollView>
     </SafeAreaView>

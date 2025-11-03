@@ -68,19 +68,21 @@ const SettingsScreen = ({navigation, route}: any) => {
     if (sectionName === '🎨 Appearance' || sectionName === '🌐 Language') {
       return false;
     }
-    
+
     // If no category is specified, don't show any sections (shouldn't happen in normal flow)
-    if (!category) return false;
-    
+    if (!category) {
+      return false;
+    }
+
     const categoryMap: {[key: string]: string[]} = {
-      'api': ['API Configuration', '🎤 TTS API Configuration (Optional)'],
-      'tts': ['🎤 TTS Settings'],
-      'conversation': ['🗣️ Conversation Settings'],
-      'account': ['👤 Guest Mode', 'Account'],
-      'data': ['Data Management'],
-      'about': ['About'],
+      api: ['API Configuration', '🎤 TTS API Configuration (Optional)'],
+      tts: ['🎤 TTS Settings'],
+      conversation: ['🗣️ Conversation Settings'],
+      account: ['👤 Guest Mode', 'Account'],
+      data: ['Data Management'],
+      about: ['About'],
     };
-    
+
     return categoryMap[category]?.includes(sectionName) ?? false;
   };
 
@@ -515,118 +517,118 @@ const SettingsScreen = ({navigation, route}: any) => {
         }
         showsVerticalScrollIndicator={true}>
         {shouldShowSection('🎨 Appearance') && (
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
-          ]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-            🎨 Appearance
-          </Text>
-          <View style={styles.themeRow}>
-            <View style={styles.themeInfo}>
-              <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
-                Dark Mode
-              </Text>
-              <Text
-                style={[
-                  styles.themeDescription,
-                  {color: theme.colors.textSecondary},
-                ]}>
-                Switch between light and dark theme
-              </Text>
+          <View
+            style={[
+              styles.section,
+              {
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
+              },
+            ]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              🎨 Appearance
+            </Text>
+            <View style={styles.themeRow}>
+              <View style={styles.themeInfo}>
+                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                  Dark Mode
+                </Text>
+                <Text
+                  style={[
+                    styles.themeDescription,
+                    {color: theme.colors.textSecondary},
+                  ]}>
+                  Switch between light and dark theme
+                </Text>
+              </View>
+              <Switch
+                value={isDark}
+                onValueChange={toggleTheme}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={
+                  isDark
+                    ? theme.colors.buttonPrimaryText
+                    : theme.colors.inputBackground
+                }
+              />
             </View>
-            <Switch
-              value={isDark}
-              onValueChange={toggleTheme}
-              trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary,
-              }}
-              thumbColor={
-                isDark
-                  ? theme.colors.buttonPrimaryText
-                  : theme.colors.inputBackground
-              }
-            />
           </View>
-        </View>
         )}
 
         {shouldShowSection('🌐 Language') && (
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
-          ]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-            {t('settings.sections.language.title')}
-          </Text>
-          <Text
+          <View
             style={[
-              styles.sectionDescription,
-              {color: theme.colors.textSecondary},
+              styles.section,
+              {
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
+              },
             ]}>
-            {t('settings.sections.language.description')}
-          </Text>
-
-          <View style={styles.optionGroup}>
-            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-              {t('settings.sections.language.nativeLanguage')}
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              {t('settings.sections.language.title')}
             </Text>
-            <CustomPicker
-              selectedValue={selectedLanguage}
-              onValueChange={async (value: string) => {
-                await saveLanguage(value);
-                await i18n.changeLanguage(value);
-                setSelectedLanguage(value);
-                Alert.alert(
-                  t('common.success'),
-                  t('settings.sections.language.success'),
-                );
-              }}
-              items={getAvailableLanguages().map(lang => ({
-                label: lang.name,
-                value: lang.code,
-              }))}
-              placeholder={t('settings.sections.language.nativeLanguage')}
-              theme={theme}
-              style={styles.pickerContainer}
-            />
-          </View>
-
-          <View style={styles.optionGroup}>
-            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-              {t('settings.sections.language.targetLanguage')}
+            <Text
+              style={[
+                styles.sectionDescription,
+                {color: theme.colors.textSecondary},
+              ]}>
+              {t('settings.sections.language.description')}
             </Text>
-            <CustomPicker
-              selectedValue={selectedTargetLanguage}
-              onValueChange={async (value: string) => {
-                await saveTargetLanguage(value);
-                setSelectedTargetLanguage(value);
-                Alert.alert(
-                  t('common.success'),
-                  t('settings.sections.language.success'),
-                );
-              }}
-              items={getAvailableTargetLanguages().map(lang => ({
-                label: t(
-                  `settings.sections.language.targetLanguages.${lang.code}`,
-                ),
-                value: lang.code,
-              }))}
-              placeholder={t('settings.sections.language.targetLanguage')}
-              theme={theme}
-              style={styles.pickerContainer}
-            />
+
+            <View style={styles.optionGroup}>
+              <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+                {t('settings.sections.language.nativeLanguage')}
+              </Text>
+              <CustomPicker
+                selectedValue={selectedLanguage}
+                onValueChange={async (value: string) => {
+                  await saveLanguage(value);
+                  await i18n.changeLanguage(value);
+                  setSelectedLanguage(value);
+                  Alert.alert(
+                    t('common.success'),
+                    t('settings.sections.language.success'),
+                  );
+                }}
+                items={getAvailableLanguages().map(lang => ({
+                  label: lang.name,
+                  value: lang.code,
+                }))}
+                placeholder={t('settings.sections.language.nativeLanguage')}
+                theme={theme}
+                style={styles.pickerContainer}
+              />
+            </View>
+
+            <View style={styles.optionGroup}>
+              <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+                {t('settings.sections.language.targetLanguage')}
+              </Text>
+              <CustomPicker
+                selectedValue={selectedTargetLanguage}
+                onValueChange={async (value: string) => {
+                  await saveTargetLanguage(value);
+                  setSelectedTargetLanguage(value);
+                  Alert.alert(
+                    t('common.success'),
+                    t('settings.sections.language.success'),
+                  );
+                }}
+                items={getAvailableTargetLanguages().map(lang => ({
+                  label: t(
+                    `settings.sections.language.targetLanguages.${lang.code}`,
+                  ),
+                  value: lang.code,
+                }))}
+                placeholder={t('settings.sections.language.targetLanguage')}
+                theme={theme}
+                style={styles.pickerContainer}
+              />
+            </View>
           </View>
-        </View>
         )}
 
         {isGuestMode && shouldShowSection('👤 Guest Mode') && (
@@ -742,352 +744,29 @@ const SettingsScreen = ({navigation, route}: any) => {
         )}
 
         {shouldShowSection('API Configuration') && (
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
-          ]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-            API Configuration
-          </Text>
-          <Text
+          <View
             style={[
-              styles.sectionDescription,
-              {color: theme.colors.textSecondary},
-            ]}>
-            Enter your Gemini API key to enable conversation features
-          </Text>
-
-          <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
-              Gemini API Key
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: theme.colors.inputBackground,
-                  borderColor: theme.colors.inputBorder,
-                  color: theme.colors.text,
-                },
-              ]}
-              value={apiKey}
-              onChangeText={setApiKey}
-              placeholder="Enter your Gemini API key"
-              placeholderTextColor={theme.colors.textTertiary}
-              secureTextEntry={!isApiKeyVisible}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            <TouchableOpacity
-              style={styles.toggleButton}
-              onPress={() => setIsApiKeyVisible(!isApiKeyVisible)}>
-              <Text
-                style={[
-                  styles.toggleButtonText,
-                  {color: theme.colors.primary},
-                ]}>
-                {isApiKeyVisible ? '👁️ Hide' : '👁️‍🗨️ Show'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.primaryButton,
-              {backgroundColor: theme.colors.buttonPrimary},
-            ]}
-            onPress={handleSaveApiKey}>
-            <Text
-              style={[
-                styles.primaryButtonText,
-                {color: theme.colors.buttonPrimaryText},
-              ]}>
-              Save API Key
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.secondaryButton,
+              styles.section,
               {
-                backgroundColor: theme.colors.buttonSecondary,
+                backgroundColor: theme.colors.card,
                 borderColor: theme.colors.border,
               },
-            ]}
-            onPress={handleGetApiKey}>
-            <Text
-              style={[
-                styles.secondaryButtonText,
-                {color: theme.colors.buttonSecondaryText},
-              ]}>
-              🔑 Get API Key from Google AI Studio
-            </Text>
-          </TouchableOpacity>
-
-          <View
-            style={[
-              styles.infoBox,
-              {
-                backgroundColor: theme.colors.primaryLight,
-                borderLeftColor: theme.colors.primary,
-              },
             ]}>
-            <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-              ℹ️ Don't have an API key? Click the button above to get one from
-              Google AI Studio (free with usage limits)
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              API Configuration
             </Text>
-          </View>
-        </View>
-        )}
-
-        {shouldShowSection('🎤 TTS API Configuration (Optional)') && (
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
-          ]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-            🎤 TTS API Configuration (Optional)
-          </Text>
-          <Text
-            style={[
-              styles.sectionDescription,
-              {color: theme.colors.textSecondary},
-            ]}>
-            Enter your Google Cloud Text-to-Speech API key to enable AI voice
-            synthesis (can use the same key as Gemini)
-          </Text>
-
-          <View style={styles.inputContainer}>
-            <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
-              TTS API Key
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: theme.colors.inputBackground,
-                  borderColor: theme.colors.inputBorder,
-                  color: theme.colors.text,
-                },
-              ]}
-              value={ttsApiKey}
-              onChangeText={setTtsApiKey}
-              placeholder="Enter your TTS API key (optional)"
-              placeholderTextColor={theme.colors.textTertiary}
-              secureTextEntry={!isTtsApiKeyVisible}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            <TouchableOpacity
-              style={styles.toggleButton}
-              onPress={() => setIsTtsApiKeyVisible(!isTtsApiKeyVisible)}>
-              <Text
-                style={[
-                  styles.toggleButtonText,
-                  {color: theme.colors.primary},
-                ]}>
-                {isTtsApiKeyVisible ? '👁️ Hide' : '👁️‍🗨️ Show'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.primaryButton,
-              {backgroundColor: theme.colors.buttonPrimary},
-            ]}
-            onPress={handleSaveTtsApiKey}>
-            <Text
-              style={[
-                styles.primaryButtonText,
-                {color: theme.colors.buttonPrimaryText},
-              ]}>
-              Save TTS API Key
-            </Text>
-          </TouchableOpacity>
-
-          <View
-            style={[
-              styles.infoBox,
-              {
-                backgroundColor: theme.colors.primaryLight,
-                borderLeftColor: theme.colors.primary,
-              },
-            ]}>
-            <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-              💡 You can use the same API key for both Gemini and TTS, or use
-              separate keys. Without this, the app will work in text-only mode
-              for AI responses.
-            </Text>
-          </View>
-        </View>
-        )}
-
-        {shouldShowSection('🎤 TTS Settings') && (
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
-          ]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-            {t('settings.sections.tts.title')}
-          </Text>
-          <Text
-            style={[
-              styles.sectionDescription,
-              {color: theme.colors.textSecondary},
-            ]}>
-            {t('settings.sections.tts.description')}
-          </Text>
-
-          <View style={styles.optionGroup}>
-            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-              {t('settings.sections.tts.provider.label')}
-            </Text>
-
-            <TouchableOpacity
-              style={[
-                styles.optionButton,
-                {
-                  backgroundColor: theme.colors.inputBackground,
-                  borderColor: theme.colors.border,
-                },
-                ttsProvider === 'google-cloud' && {
-                  ...styles.optionButtonActive,
-                  borderColor: theme.colors.primary,
-                  backgroundColor: theme.colors.primaryLight,
-                },
-              ]}
-              onPress={() => handleTtsProviderChange('google-cloud')}>
-              <View style={styles.optionContent}>
-                <View style={styles.optionHeader}>
-                  <Text
-                    style={[
-                      styles.optionTitle,
-                      {color: theme.colors.text},
-                      ttsProvider === 'google-cloud' && {
-                        ...styles.optionTitleActive,
-                        color: theme.colors.primary,
-                      },
-                    ]}>
-                    {t('settings.sections.tts.provider.googleCloud')}
-                  </Text>
-                  {ttsProvider === 'google-cloud' && (
-                    <Text
-                      style={[styles.checkMark, {color: theme.colors.primary}]}>
-                      ✓
-                    </Text>
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.optionButton,
-                {
-                  backgroundColor: theme.colors.inputBackground,
-                  borderColor: theme.colors.border,
-                },
-                ttsProvider === 'device' && {
-                  ...styles.optionButtonActive,
-                  borderColor: theme.colors.primary,
-                  backgroundColor: theme.colors.primaryLight,
-                },
-              ]}
-              onPress={() => handleTtsProviderChange('device')}>
-              <View style={styles.optionContent}>
-                <View style={styles.optionHeader}>
-                  <Text
-                    style={[
-                      styles.optionTitle,
-                      {color: theme.colors.text},
-                      ttsProvider === 'device' && {
-                        ...styles.optionTitleActive,
-                        color: theme.colors.primary,
-                      },
-                    ]}>
-                    {t('settings.sections.tts.provider.device')}
-                  </Text>
-                  {ttsProvider === 'device' && (
-                    <Text
-                      style={[styles.checkMark, {color: theme.colors.primary}]}>
-                      ✓
-                    </Text>
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
-
             <Text
               style={[
                 styles.sectionDescription,
                 {color: theme.colors.textSecondary},
-                {marginTop: 8},
               ]}>
-              {t('settings.sections.tts.provider.description')}
+              Enter your Gemini API key to enable conversation features
             </Text>
-          </View>
 
-          <View
-            style={[
-              styles.infoBox,
-              {
-                backgroundColor: theme.colors.primaryLight,
-                borderLeftColor: theme.colors.primary,
-              },
-            ]}>
-            <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-              {t('settings.sections.tts.apiKeyInfo')}
-            </Text>
-            <Text
-              style={[
-                styles.infoText,
-                {color: theme.colors.primaryDark},
-                {marginTop: 8},
-              ]}>
-              {t('settings.sections.tts.firstTimeInfo')}
-            </Text>
-          </View>
-        </View>
-        )}
-
-        {shouldShowSection('🗣️ Conversation Settings') && (
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
-          ]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-            🗣️ Conversation Settings
-          </Text>
-          <Text
-            style={[
-              styles.sectionDescription,
-              {color: theme.colors.textSecondary},
-            ]}>
-            Adjust the length of AI responses and suggested user responses
-          </Text>
-
-          <View style={styles.optionGroup}>
-            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-              Session Duration (minutes)
-            </Text>
             <View style={styles.inputContainer}>
+              <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+                Gemini API Key
+              </Text>
               <TextInput
                 style={[
                   styles.input,
@@ -1097,405 +776,743 @@ const SettingsScreen = ({navigation, route}: any) => {
                     color: theme.colors.text,
                   },
                 ]}
-                value={(sessionDuration / 60).toString()}
-                onChangeText={text => {
-                  const minutes = parseInt(text, 10);
-                  if (isNaN(minutes)) {
-                    return; // Don't update for non-numeric input
-                  }
-                  if (minutes < 1) {
-                    Alert.alert(
-                      'Invalid Duration',
-                      'Session duration must be at least 1 minute.',
-                    );
-                    return;
-                  }
-                  if (minutes > 60) {
-                    Alert.alert(
-                      'Invalid Duration',
-                      'Session duration cannot exceed 60 minutes.',
-                    );
-                    return;
-                  }
-                  handleSessionDurationChange(minutes * 60);
-                }}
-                placeholder="5"
+                value={apiKey}
+                onChangeText={setApiKey}
+                placeholder="Enter your Gemini API key"
                 placeholderTextColor={theme.colors.textTertiary}
-                keyboardType="numeric"
+                secureTextEntry={!isApiKeyVisible}
+                autoCapitalize="none"
+                autoCorrect={false}
               />
+              <TouchableOpacity
+                style={styles.toggleButton}
+                onPress={() => setIsApiKeyVisible(!isApiKeyVisible)}>
+                <Text
+                  style={[
+                    styles.toggleButtonText,
+                    {color: theme.colors.primary},
+                  ]}>
+                  {isApiKeyVisible ? '👁️ Hide' : '👁️‍🗨️ Show'}
+                </Text>
+              </TouchableOpacity>
             </View>
+
+            <TouchableOpacity
+              style={[
+                styles.primaryButton,
+                {backgroundColor: theme.colors.buttonPrimary},
+              ]}
+              onPress={handleSaveApiKey}>
+              <Text
+                style={[
+                  styles.primaryButtonText,
+                  {color: theme.colors.buttonPrimaryText},
+                ]}>
+                Save API Key
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.secondaryButton,
+                {
+                  backgroundColor: theme.colors.buttonSecondary,
+                  borderColor: theme.colors.border,
+                },
+              ]}
+              onPress={handleGetApiKey}>
+              <Text
+                style={[
+                  styles.secondaryButtonText,
+                  {color: theme.colors.buttonSecondaryText},
+                ]}>
+                🔑 Get API Key from Google AI Studio
+              </Text>
+            </TouchableOpacity>
+
+            <View
+              style={[
+                styles.infoBox,
+                {
+                  backgroundColor: theme.colors.primaryLight,
+                  borderLeftColor: theme.colors.primary,
+                },
+              ]}>
+              <Text
+                style={[styles.infoText, {color: theme.colors.primaryDark}]}>
+                ℹ️ Don't have an API key? Click the button above to get one from
+                Google AI Studio (free with usage limits)
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {shouldShowSection('🎤 TTS API Configuration (Optional)') && (
+          <View
+            style={[
+              styles.section,
+              {
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
+              },
+            ]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              🎤 TTS API Configuration (Optional)
+            </Text>
             <Text
               style={[
                 styles.sectionDescription,
                 {color: theme.colors.textSecondary},
               ]}>
-              Set practice session time limit (1-60 minutes)
+              Enter your Google Cloud Text-to-Speech API key to enable AI voice
+              synthesis (can use the same key as Gemini)
             </Text>
-          </View>
 
-          <View style={styles.optionGroup}>
-            <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
-              Response Length
-            </Text>
-            {(Object.keys(SENTENCE_LENGTH_CONFIG) as SentenceLength[]).map(
-              length => (
-                <TouchableOpacity
-                  key={length}
-                  style={[
-                    styles.optionButton,
-                    {
-                      backgroundColor: theme.colors.inputBackground,
-                      borderColor: theme.colors.border,
-                    },
-                    sentenceLength === length && {
-                      ...styles.optionButtonActive,
-                      borderColor: theme.colors.primary,
-                      backgroundColor: theme.colors.primaryLight,
-                    },
-                  ]}
-                  onPress={() => handleSentenceLengthChange(length)}>
-                  <View style={styles.optionContent}>
-                    <View style={styles.optionHeader}>
-                      <Text
-                        style={[
-                          styles.optionTitle,
-                          {color: theme.colors.text},
-                          sentenceLength === length && {
-                            ...styles.optionTitleActive,
-                            color: theme.colors.primary,
-                          },
-                        ]}>
-                        {SENTENCE_LENGTH_CONFIG[length].label}
-                      </Text>
-                      {sentenceLength === length && (
-                        <Text
-                          style={[
-                            styles.checkMark,
-                            {color: theme.colors.primary},
-                          ]}>
-                          ✓
-                        </Text>
-                      )}
-                    </View>
-                    <Text
-                      style={[
-                        styles.optionDescription,
-                        {color: theme.colors.textSecondary},
-                        sentenceLength === length && {
-                          ...styles.optionDescriptionActive,
-                          color: theme.colors.primaryDark,
-                        },
-                      ]}>
-                      {SENTENCE_LENGTH_CONFIG[length].description}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ),
-            )}
-          </View>
-
-          <View style={styles.optionGroup}>
-            <View style={styles.themeRow}>
-              <View style={styles.themeInfo}>
-                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
-                  {t('settings.sections.conversation.textOnlyMode.label')}
-                </Text>
+            <View style={styles.inputContainer}>
+              <Text style={[styles.inputLabel, {color: theme.colors.text}]}>
+                TTS API Key
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: theme.colors.inputBackground,
+                    borderColor: theme.colors.inputBorder,
+                    color: theme.colors.text,
+                  },
+                ]}
+                value={ttsApiKey}
+                onChangeText={setTtsApiKey}
+                placeholder="Enter your TTS API key (optional)"
+                placeholderTextColor={theme.colors.textTertiary}
+                secureTextEntry={!isTtsApiKeyVisible}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TouchableOpacity
+                style={styles.toggleButton}
+                onPress={() => setIsTtsApiKeyVisible(!isTtsApiKeyVisible)}>
                 <Text
                   style={[
-                    styles.themeDescription,
-                    {color: theme.colors.textSecondary},
+                    styles.toggleButtonText,
+                    {color: theme.colors.primary},
                   ]}>
-                  {t('settings.sections.conversation.textOnlyMode.description')}
+                  {isTtsApiKeyVisible ? '👁️ Hide' : '👁️‍🗨️ Show'}
                 </Text>
-              </View>
-              <Switch
-                value={textOnlyMode}
-                onValueChange={handleTextOnlyModeToggle}
-                trackColor={{
-                  false: theme.colors.border,
-                  true: theme.colors.primary,
-                }}
-                thumbColor={
-                  textOnlyMode
-                    ? theme.colors.buttonPrimaryText
-                    : theme.colors.inputBackground
-                }
-              />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.primaryButton,
+                {backgroundColor: theme.colors.buttonPrimary},
+              ]}
+              onPress={handleSaveTtsApiKey}>
+              <Text
+                style={[
+                  styles.primaryButtonText,
+                  {color: theme.colors.buttonPrimaryText},
+                ]}>
+                Save TTS API Key
+              </Text>
+            </TouchableOpacity>
+
+            <View
+              style={[
+                styles.infoBox,
+                {
+                  backgroundColor: theme.colors.primaryLight,
+                  borderLeftColor: theme.colors.primary,
+                },
+              ]}>
+              <Text
+                style={[styles.infoText, {color: theme.colors.primaryDark}]}>
+                💡 You can use the same API key for both Gemini and TTS, or use
+                separate keys. Without this, the app will work in text-only mode
+                for AI responses.
+              </Text>
             </View>
           </View>
+        )}
 
-          <View style={styles.optionGroup}>
-            <View style={styles.themeRow}>
-              <View style={styles.themeInfo}>
-                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
-                  {t('settings.sections.conversation.autoReadResponse.label')}
-                </Text>
-                <Text
-                  style={[
-                    styles.themeDescription,
-                    {color: theme.colors.textSecondary},
-                  ]}>
-                  {t(
-                    'settings.sections.conversation.autoReadResponse.description',
-                  )}
-                </Text>
-              </View>
-              <Switch
-                value={autoReadResponse}
-                onValueChange={handleAutoReadResponseToggle}
-                trackColor={{
-                  false: theme.colors.border,
-                  true: theme.colors.primary,
-                }}
-                thumbColor={
-                  autoReadResponse
-                    ? theme.colors.buttonPrimaryText
-                    : theme.colors.inputBackground
-                }
-              />
-            </View>
-          </View>
-
-          <View style={styles.optionGroup}>
-            <View style={styles.themeRow}>
-              <View style={styles.themeInfo}>
-                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
-                  {t('settings.sections.conversation.showTranslation.label')}
-                </Text>
-                <Text
-                  style={[
-                    styles.themeDescription,
-                    {color: theme.colors.textSecondary},
-                  ]}>
-                  {t(
-                    'settings.sections.conversation.showTranslation.description',
-                  )}
-                </Text>
-              </View>
-              <Switch
-                value={showTranslation}
-                onValueChange={handleShowTranslationToggle}
-                trackColor={{
-                  false: theme.colors.border,
-                  true: theme.colors.primary,
-                }}
-                thumbColor={
-                  showTranslation
-                    ? theme.colors.buttonPrimaryText
-                    : theme.colors.inputBackground
-                }
-              />
-            </View>
-          </View>
-
-          <View style={styles.optionGroup}>
-            <View style={styles.themeRow}>
-              <View style={styles.themeInfo}>
-                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
-                  {t('settings.sections.conversation.showPronunciation.label')}
-                </Text>
-                <Text
-                  style={[
-                    styles.themeDescription,
-                    {color: theme.colors.textSecondary},
-                  ]}>
-                  {t(
-                    'settings.sections.conversation.showPronunciation.description',
-                  )}
-                </Text>
-              </View>
-              <Switch
-                value={showPronunciation}
-                onValueChange={handleShowPronunciationToggle}
-                trackColor={{
-                  false: theme.colors.border,
-                  true: theme.colors.primary,
-                }}
-                thumbColor={
-                  showPronunciation
-                    ? theme.colors.buttonPrimaryText
-                    : theme.colors.inputBackground
-                }
-              />
-            </View>
-          </View>
-
-          <View style={styles.optionGroup}>
-            <View style={styles.themeRow}>
-              <View style={styles.themeInfo}>
-                <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
-                  {t(
-                    'settings.sections.conversation.showGrammarHighlights.label',
-                  )}
-                </Text>
-                <Text
-                  style={[
-                    styles.themeDescription,
-                    {color: theme.colors.textSecondary},
-                  ]}>
-                  {t(
-                    'settings.sections.conversation.showGrammarHighlights.description',
-                  )}
-                </Text>
-              </View>
-              <Switch
-                value={showGrammarHighlights}
-                onValueChange={handleShowGrammarHighlightsToggle}
-                trackColor={{
-                  false: theme.colors.border,
-                  true: theme.colors.primary,
-                }}
-                thumbColor={
-                  showGrammarHighlights
-                    ? theme.colors.buttonPrimaryText
-                    : theme.colors.inputBackground
-                }
-              />
-            </View>
-          </View>
-
+        {shouldShowSection('🎤 TTS Settings') && (
           <View
             style={[
-              styles.infoBox,
+              styles.section,
               {
-                backgroundColor: theme.colors.primaryLight,
-                borderLeftColor: theme.colors.primary,
-              },
-            ]}>
-            <Text style={[styles.infoText, {color: theme.colors.primaryDark}]}>
-              💡 Shorter responses are easier to follow and respond to, making
-              practice more engaging. Longer responses provide more context and
-              detail.
-            </Text>
-          </View>
-        </View>
-        )}
-
-        {ttsProvider === 'google-cloud' && shouldShowSection('🎤 TTS Settings') && (
-          <TTSSettings
-            targetLanguage={selectedTargetLanguage}
-            ttsApiKey={ttsApiKey}
-          />
-        )}
-
-        {shouldShowSection('Data Management') && (
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
-          ]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-            Data Management
-          </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.secondaryButton,
-              {
-                backgroundColor: theme.colors.buttonSecondary,
+                backgroundColor: theme.colors.card,
                 borderColor: theme.colors.border,
               },
-            ]}
-            onPress={handleExportData}>
+            ]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              {t('settings.sections.tts.title')}
+            </Text>
             <Text
               style={[
-                styles.secondaryButtonText,
-                {color: theme.colors.buttonSecondaryText},
+                styles.sectionDescription,
+                {color: theme.colors.textSecondary},
               ]}>
-              📤 Export Data
+              {t('settings.sections.tts.description')}
             </Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity
+            <View style={styles.optionGroup}>
+              <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+                {t('settings.sections.tts.provider.label')}
+              </Text>
+
+              <TouchableOpacity
+                style={[
+                  styles.optionButton,
+                  {
+                    backgroundColor: theme.colors.inputBackground,
+                    borderColor: theme.colors.border,
+                  },
+                  ttsProvider === 'google-cloud' && {
+                    ...styles.optionButtonActive,
+                    borderColor: theme.colors.primary,
+                    backgroundColor: theme.colors.primaryLight,
+                  },
+                ]}
+                onPress={() => handleTtsProviderChange('google-cloud')}>
+                <View style={styles.optionContent}>
+                  <View style={styles.optionHeader}>
+                    <Text
+                      style={[
+                        styles.optionTitle,
+                        {color: theme.colors.text},
+                        ttsProvider === 'google-cloud' && {
+                          ...styles.optionTitleActive,
+                          color: theme.colors.primary,
+                        },
+                      ]}>
+                      {t('settings.sections.tts.provider.googleCloud')}
+                    </Text>
+                    {ttsProvider === 'google-cloud' && (
+                      <Text
+                        style={[
+                          styles.checkMark,
+                          {color: theme.colors.primary},
+                        ]}>
+                        ✓
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.optionButton,
+                  {
+                    backgroundColor: theme.colors.inputBackground,
+                    borderColor: theme.colors.border,
+                  },
+                  ttsProvider === 'device' && {
+                    ...styles.optionButtonActive,
+                    borderColor: theme.colors.primary,
+                    backgroundColor: theme.colors.primaryLight,
+                  },
+                ]}
+                onPress={() => handleTtsProviderChange('device')}>
+                <View style={styles.optionContent}>
+                  <View style={styles.optionHeader}>
+                    <Text
+                      style={[
+                        styles.optionTitle,
+                        {color: theme.colors.text},
+                        ttsProvider === 'device' && {
+                          ...styles.optionTitleActive,
+                          color: theme.colors.primary,
+                        },
+                      ]}>
+                      {t('settings.sections.tts.provider.device')}
+                    </Text>
+                    {ttsProvider === 'device' && (
+                      <Text
+                        style={[
+                          styles.checkMark,
+                          {color: theme.colors.primary},
+                        ]}>
+                        ✓
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              <Text
+                style={[
+                  styles.sectionDescription,
+                  {color: theme.colors.textSecondary},
+                  {marginTop: 8},
+                ]}>
+                {t('settings.sections.tts.provider.description')}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.infoBox,
+                {
+                  backgroundColor: theme.colors.primaryLight,
+                  borderLeftColor: theme.colors.primary,
+                },
+              ]}>
+              <Text
+                style={[styles.infoText, {color: theme.colors.primaryDark}]}>
+                {t('settings.sections.tts.apiKeyInfo')}
+              </Text>
+              <Text
+                style={[
+                  styles.infoText,
+                  {color: theme.colors.primaryDark},
+                  {marginTop: 8},
+                ]}>
+                {t('settings.sections.tts.firstTimeInfo')}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {shouldShowSection('🗣️ Conversation Settings') && (
+          <View
             style={[
-              styles.secondaryButton,
-              styles.dangerButton,
+              styles.section,
               {
-                backgroundColor: isDark ? '#7f1d1d' : '#fef2f2',
-                borderColor: isDark ? '#991b1b' : '#fecaca',
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
               },
-            ]}
-            onPress={handleClearData}>
+            ]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              🗣️ Conversation Settings
+            </Text>
             <Text
               style={[
-                styles.secondaryButtonText,
-                styles.dangerText,
-                {color: isDark ? '#fca5a5' : '#dc2626'},
+                styles.sectionDescription,
+                {color: theme.colors.textSecondary},
               ]}>
-              🗑️ Clear All Data
+              Adjust the length of AI responses and suggested user responses
             </Text>
-          </TouchableOpacity>
-        </View>
+
+            <View style={styles.optionGroup}>
+              <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+                Session Duration (minutes)
+              </Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: theme.colors.inputBackground,
+                      borderColor: theme.colors.inputBorder,
+                      color: theme.colors.text,
+                    },
+                  ]}
+                  value={(sessionDuration / 60).toString()}
+                  onChangeText={text => {
+                    const minutes = parseInt(text, 10);
+                    if (isNaN(minutes)) {
+                      return; // Don't update for non-numeric input
+                    }
+                    if (minutes < 1) {
+                      Alert.alert(
+                        'Invalid Duration',
+                        'Session duration must be at least 1 minute.',
+                      );
+                      return;
+                    }
+                    if (minutes > 60) {
+                      Alert.alert(
+                        'Invalid Duration',
+                        'Session duration cannot exceed 60 minutes.',
+                      );
+                      return;
+                    }
+                    handleSessionDurationChange(minutes * 60);
+                  }}
+                  placeholder="5"
+                  placeholderTextColor={theme.colors.textTertiary}
+                  keyboardType="numeric"
+                />
+              </View>
+              <Text
+                style={[
+                  styles.sectionDescription,
+                  {color: theme.colors.textSecondary},
+                ]}>
+                Set practice session time limit (1-60 minutes)
+              </Text>
+            </View>
+
+            <View style={styles.optionGroup}>
+              <Text style={[styles.optionLabel, {color: theme.colors.text}]}>
+                Response Length
+              </Text>
+              {(Object.keys(SENTENCE_LENGTH_CONFIG) as SentenceLength[]).map(
+                length => (
+                  <TouchableOpacity
+                    key={length}
+                    style={[
+                      styles.optionButton,
+                      {
+                        backgroundColor: theme.colors.inputBackground,
+                        borderColor: theme.colors.border,
+                      },
+                      sentenceLength === length && {
+                        ...styles.optionButtonActive,
+                        borderColor: theme.colors.primary,
+                        backgroundColor: theme.colors.primaryLight,
+                      },
+                    ]}
+                    onPress={() => handleSentenceLengthChange(length)}>
+                    <View style={styles.optionContent}>
+                      <View style={styles.optionHeader}>
+                        <Text
+                          style={[
+                            styles.optionTitle,
+                            {color: theme.colors.text},
+                            sentenceLength === length && {
+                              ...styles.optionTitleActive,
+                              color: theme.colors.primary,
+                            },
+                          ]}>
+                          {SENTENCE_LENGTH_CONFIG[length].label}
+                        </Text>
+                        {sentenceLength === length && (
+                          <Text
+                            style={[
+                              styles.checkMark,
+                              {color: theme.colors.primary},
+                            ]}>
+                            ✓
+                          </Text>
+                        )}
+                      </View>
+                      <Text
+                        style={[
+                          styles.optionDescription,
+                          {color: theme.colors.textSecondary},
+                          sentenceLength === length && {
+                            ...styles.optionDescriptionActive,
+                            color: theme.colors.primaryDark,
+                          },
+                        ]}>
+                        {SENTENCE_LENGTH_CONFIG[length].description}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ),
+              )}
+            </View>
+
+            <View style={styles.optionGroup}>
+              <View style={styles.themeRow}>
+                <View style={styles.themeInfo}>
+                  <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                    {t('settings.sections.conversation.textOnlyMode.label')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.themeDescription,
+                      {color: theme.colors.textSecondary},
+                    ]}>
+                    {t(
+                      'settings.sections.conversation.textOnlyMode.description',
+                    )}
+                  </Text>
+                </View>
+                <Switch
+                  value={textOnlyMode}
+                  onValueChange={handleTextOnlyModeToggle}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.primary,
+                  }}
+                  thumbColor={
+                    textOnlyMode
+                      ? theme.colors.buttonPrimaryText
+                      : theme.colors.inputBackground
+                  }
+                />
+              </View>
+            </View>
+
+            <View style={styles.optionGroup}>
+              <View style={styles.themeRow}>
+                <View style={styles.themeInfo}>
+                  <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                    {t('settings.sections.conversation.autoReadResponse.label')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.themeDescription,
+                      {color: theme.colors.textSecondary},
+                    ]}>
+                    {t(
+                      'settings.sections.conversation.autoReadResponse.description',
+                    )}
+                  </Text>
+                </View>
+                <Switch
+                  value={autoReadResponse}
+                  onValueChange={handleAutoReadResponseToggle}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.primary,
+                  }}
+                  thumbColor={
+                    autoReadResponse
+                      ? theme.colors.buttonPrimaryText
+                      : theme.colors.inputBackground
+                  }
+                />
+              </View>
+            </View>
+
+            <View style={styles.optionGroup}>
+              <View style={styles.themeRow}>
+                <View style={styles.themeInfo}>
+                  <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                    {t('settings.sections.conversation.showTranslation.label')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.themeDescription,
+                      {color: theme.colors.textSecondary},
+                    ]}>
+                    {t(
+                      'settings.sections.conversation.showTranslation.description',
+                    )}
+                  </Text>
+                </View>
+                <Switch
+                  value={showTranslation}
+                  onValueChange={handleShowTranslationToggle}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.primary,
+                  }}
+                  thumbColor={
+                    showTranslation
+                      ? theme.colors.buttonPrimaryText
+                      : theme.colors.inputBackground
+                  }
+                />
+              </View>
+            </View>
+
+            <View style={styles.optionGroup}>
+              <View style={styles.themeRow}>
+                <View style={styles.themeInfo}>
+                  <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                    {t(
+                      'settings.sections.conversation.showPronunciation.label',
+                    )}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.themeDescription,
+                      {color: theme.colors.textSecondary},
+                    ]}>
+                    {t(
+                      'settings.sections.conversation.showPronunciation.description',
+                    )}
+                  </Text>
+                </View>
+                <Switch
+                  value={showPronunciation}
+                  onValueChange={handleShowPronunciationToggle}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.primary,
+                  }}
+                  thumbColor={
+                    showPronunciation
+                      ? theme.colors.buttonPrimaryText
+                      : theme.colors.inputBackground
+                  }
+                />
+              </View>
+            </View>
+
+            <View style={styles.optionGroup}>
+              <View style={styles.themeRow}>
+                <View style={styles.themeInfo}>
+                  <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                    {t(
+                      'settings.sections.conversation.showGrammarHighlights.label',
+                    )}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.themeDescription,
+                      {color: theme.colors.textSecondary},
+                    ]}>
+                    {t(
+                      'settings.sections.conversation.showGrammarHighlights.description',
+                    )}
+                  </Text>
+                </View>
+                <Switch
+                  value={showGrammarHighlights}
+                  onValueChange={handleShowGrammarHighlightsToggle}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.primary,
+                  }}
+                  thumbColor={
+                    showGrammarHighlights
+                      ? theme.colors.buttonPrimaryText
+                      : theme.colors.inputBackground
+                  }
+                />
+              </View>
+            </View>
+
+            <View
+              style={[
+                styles.infoBox,
+                {
+                  backgroundColor: theme.colors.primaryLight,
+                  borderLeftColor: theme.colors.primary,
+                },
+              ]}>
+              <Text
+                style={[styles.infoText, {color: theme.colors.primaryDark}]}>
+                💡 Shorter responses are easier to follow and respond to, making
+                practice more engaging. Longer responses provide more context
+                and detail.
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {ttsProvider === 'google-cloud' &&
+          shouldShowSection('🎤 TTS Settings') && (
+            <TTSSettings
+              targetLanguage={selectedTargetLanguage}
+              ttsApiKey={ttsApiKey}
+            />
+          )}
+
+        {shouldShowSection('Data Management') && (
+          <View
+            style={[
+              styles.section,
+              {
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
+              },
+            ]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              Data Management
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.secondaryButton,
+                {
+                  backgroundColor: theme.colors.buttonSecondary,
+                  borderColor: theme.colors.border,
+                },
+              ]}
+              onPress={handleExportData}>
+              <Text
+                style={[
+                  styles.secondaryButtonText,
+                  {color: theme.colors.buttonSecondaryText},
+                ]}>
+                📤 Export Data
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.secondaryButton,
+                styles.dangerButton,
+                {
+                  backgroundColor: isDark ? '#7f1d1d' : '#fef2f2',
+                  borderColor: isDark ? '#991b1b' : '#fecaca',
+                },
+              ]}
+              onPress={handleClearData}>
+              <Text
+                style={[
+                  styles.secondaryButtonText,
+                  styles.dangerText,
+                  {color: isDark ? '#fca5a5' : '#dc2626'},
+                ]}>
+                🗑️ Clear All Data
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
 
         {shouldShowSection('About') && (
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
-          ]}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-            About
-          </Text>
-          <View style={styles.infoRow}>
-            <Text
-              style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
-              App Name
-            </Text>
-            <Text style={[styles.infoValue, {color: theme.colors.text}]}>
-              GeminiTalk
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text
-              style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
-              Version
-            </Text>
-            <Text style={[styles.infoValue, {color: theme.colors.text}]}>
-              1.0.0
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text
-              style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
-              Last Modified
-            </Text>
-            <Text style={[styles.infoValue, {color: theme.colors.text}]}>
-              {formatDate(BUILD_INFO.timestamp)}
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text
-              style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
-              Description
-            </Text>
-            <Text style={[styles.infoValue, {color: theme.colors.text}]}>
-              Real-time English Conversation Coach
-            </Text>
-          </View>
-
-          <TouchableOpacity
+          <View
             style={[
-              styles.primaryButton,
-              {backgroundColor: theme.colors.buttonPrimary},
-              {marginTop: 16},
-            ]}
-            onPress={() => navigation.navigate('Feedback')}>
-            <Text
-              style={[
-                styles.primaryButtonText,
-                {color: theme.colors.buttonPrimaryText},
-              ]}>
-              💬 {t('settings.sections.feedback.buttonLabel')}
+              styles.section,
+              {
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
+              },
+            ]}>
+            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+              About
             </Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.infoRow}>
+              <Text
+                style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+                App Name
+              </Text>
+              <Text style={[styles.infoValue, {color: theme.colors.text}]}>
+                GeminiTalk
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text
+                style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+                Version
+              </Text>
+              <Text style={[styles.infoValue, {color: theme.colors.text}]}>
+                1.0.0
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text
+                style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+                Last Modified
+              </Text>
+              <Text style={[styles.infoValue, {color: theme.colors.text}]}>
+                {formatDate(BUILD_INFO.timestamp)}
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text
+                style={[styles.infoLabel, {color: theme.colors.textSecondary}]}>
+                Description
+              </Text>
+              <Text style={[styles.infoValue, {color: theme.colors.text}]}>
+                Real-time English Conversation Coach
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.primaryButton,
+                {backgroundColor: theme.colors.buttonPrimary},
+                {marginTop: 16},
+              ]}
+              onPress={() => navigation.navigate('Feedback')}>
+              <Text
+                style={[
+                  styles.primaryButtonText,
+                  {color: theme.colors.buttonPrimaryText},
+                ]}>
+                💬 {t('settings.sections.feedback.buttonLabel')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
 
         <View style={styles.footer}>

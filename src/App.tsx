@@ -37,6 +37,7 @@ import CostDisplay from './components/CostDisplay';
 
 // Context
 import {ThemeProvider, useTheme} from './contexts/ThemeContext';
+import {DeveloperModeProvider} from './contexts/DeveloperModeContext';
 // i18n
 import {initI18n} from './config/i18n.config';
 
@@ -244,7 +245,9 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
                   };
                   const category = route?.params?.category;
                   return {
-                    title: category ? categoryTitles[category] || t('navigation.settings') : t('navigation.settings')
+                    title: category
+                      ? categoryTitles[category] || t('navigation.settings')
+                      : t('navigation.settings'),
                   };
                 }}
               />
@@ -283,7 +286,9 @@ const styles = StyleSheet.create({
 const App = () => {
   return (
     <ThemeProvider>
-      <AppContent />
+      <DeveloperModeProvider>
+        <AppContent />
+      </DeveloperModeProvider>
     </ThemeProvider>
   );
 };
