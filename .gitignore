@@ -80,3 +80,4 @@ public/*.map
 .vs/VSWorkspaceState.json
 .vs/ProjectSettings.json
 .vs/slnx.sqlite
+public/demo.html
