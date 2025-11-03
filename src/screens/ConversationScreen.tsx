@@ -40,6 +40,9 @@ const storageService = new StorageService();
 // Maximum number of cached CJK breakdowns to prevent memory issues
 const MAX_CJK_CACHE_SIZE = 50;
 
+// Height reserved for fixed action buttons at bottom of conversation area
+const FIXED_BUTTONS_BOTTOM_PADDING = 80;
+
 const ConversationScreen = ({route, navigation}: any) => {
   const {topic} = route.params as {topic: ConversationTopic};
   const {t} = useTranslation();
@@ -123,6 +126,13 @@ const ConversationScreen = ({route, navigation}: any) => {
     (elapsedTime / maxSessionDuration) * 100,
   );
   const isTimeUp = elapsedTime >= maxSessionDuration;
+
+  // Check if we should show the action buttons (last message is from AI, not in text-only mode, not listening)
+  const showActionButtons =
+    messages.length > 0 &&
+    messages[messages.length - 1].role === 'assistant' &&
+    !textOnlyMode &&
+    !isListening;
 
   useEffect(() => {
     // Initialize log capture service
@@ -1661,7 +1671,7 @@ const ConversationScreen = ({route, navigation}: any) => {
         </ScrollView>
 
         {/* Fixed action buttons at bottom-right of scrollable area */}
-        {messages.length > 0 && messages[messages.length - 1].role === 'assistant' && !textOnlyMode && !isListening && (
+        {showActionButtons && (
           <View style={styles.fixedActionButtonsContainer}>
             {/* Feature 4: Text Input button */}
             <TouchableOpacity
@@ -2105,7 +2115,7 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     padding: 16,
-    paddingBottom: 80,
+    paddingBottom: FIXED_BUTTONS_BOTTOM_PADDING,
   },
   messageRow: {
     marginBottom: 12,
