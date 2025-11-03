@@ -1548,7 +1548,8 @@ const ConversationScreen = ({route, navigation}: any) => {
           {messages.map((message, index) => {
             const isLastMessage = index === messages.length - 1;
             // Find the last AI message - check if this is the last message and it's from assistant
-            const isLastAIMessage = isLastMessage && message.role === 'assistant';
+            const isLastAIMessage =
+              isLastMessage && message.role === 'assistant';
 
             return (
               <View

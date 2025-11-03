@@ -8,13 +8,17 @@ import {
   Switch,
 } from 'react-native';
 import {useTheme} from '../../contexts/ThemeContext';
+import {useDeveloperMode} from '../../contexts/DeveloperModeContext';
+import UIDebugId from '../../components/UIDebugId';
 
 const AppearanceSettingsScreen = () => {
   const {theme, isDark, toggleTheme} = useTheme();
+  const {isDeveloperMode, toggleDeveloperMode} = useDeveloperMode();
 
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      <UIDebugId id={1} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={true}>
         <View
           style={[
@@ -24,10 +28,12 @@ const AppearanceSettingsScreen = () => {
               borderColor: theme.colors.border,
             },
           ]}>
+          <UIDebugId id={2} />
           <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
             🎨 Appearance
           </Text>
           <View style={styles.themeRow}>
+            <UIDebugId id={3} />
             <View style={styles.themeInfo}>
               <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
                 Dark Mode
@@ -49,6 +55,37 @@ const AppearanceSettingsScreen = () => {
               }}
               thumbColor={
                 isDark
+                  ? theme.colors.buttonPrimaryText
+                  : theme.colors.inputBackground
+              }
+            />
+          </View>
+          <View
+            style={[styles.separator, {backgroundColor: theme.colors.border}]}
+          />
+          <View style={styles.themeRow}>
+            <UIDebugId id={4} />
+            <View style={styles.themeInfo}>
+              <Text style={[styles.themeLabel, {color: theme.colors.text}]}>
+                Developer Mode
+              </Text>
+              <Text
+                style={[
+                  styles.themeDescription,
+                  {color: theme.colors.textSecondary},
+                ]}>
+                Show UI element IDs for debugging
+              </Text>
+            </View>
+            <Switch
+              value={isDeveloperMode}
+              onValueChange={toggleDeveloperMode}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
+              thumbColor={
+                isDeveloperMode
                   ? theme.colors.buttonPrimaryText
                   : theme.colors.inputBackground
               }
@@ -100,6 +137,10 @@ const styles = StyleSheet.create({
   },
   themeDescription: {
     fontSize: 14,
+  },
+  separator: {
+    height: 1,
+    marginVertical: 12,
   },
 });
 

@@ -304,8 +304,7 @@ describe('GeminiService', () => {
         'en',
       );
 
-      const breakdown =
-        await chineseService.getCJKCharacterBreakdown('你好');
+      const breakdown = await chineseService.getCJKCharacterBreakdown('你好');
 
       expect(Array.isArray(breakdown)).toBe(true);
       if (breakdown.length > 0) {
@@ -325,8 +324,9 @@ describe('GeminiService', () => {
         'en',
       );
 
-      const breakdown =
-        await japaneseService.getCJKCharacterBreakdown('こんにちは');
+      const breakdown = await japaneseService.getCJKCharacterBreakdown(
+        'こんにちは',
+      );
 
       expect(Array.isArray(breakdown)).toBe(true);
       if (breakdown.length > 0) {
@@ -350,8 +350,7 @@ describe('GeminiService', () => {
         'ko',
       );
 
-      const breakdown =
-        await englishService.getCJKCharacterBreakdown('Hello');
+      const breakdown = await englishService.getCJKCharacterBreakdown('Hello');
 
       expect(Array.isArray(breakdown)).toBe(true);
       expect(breakdown.length).toBe(0);
