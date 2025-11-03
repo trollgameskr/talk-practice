@@ -1529,88 +1529,107 @@ const ConversationScreen = ({route, navigation}: any) => {
         </View>
       </View>
 
-      <ScrollView
-        ref={scrollViewRef}
-        style={styles.messagesContainer}
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
-        contentContainerStyle={styles.messagesContent}>
-        {messages.map((message, index) => {
-          const isLastMessage = index === messages.length - 1;
-          // Find the last AI message - check if this is the last message and it's from assistant
-          const isLastAIMessage = isLastMessage && message.role === 'assistant';
+      <View style={styles.messagesContainerWrapper}>
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.messagesContainer}
+          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
+          contentContainerStyle={styles.messagesContent}>
+          {messages.map((message, index) => {
+            const isLastMessage = index === messages.length - 1;
+            // Find the last AI message - check if this is the last message and it's from assistant
+            const isLastAIMessage = isLastMessage && message.role === 'assistant';
 
-          return (
-            <View
-              key={message.id}
-              style={[
-                styles.messageContainer,
-                message.role === 'user'
-                  ? styles.userContainer
-                  : styles.assistantContainer,
-              ]}>
+            return (
               <View
+                key={message.id}
                 style={[
-                  styles.messageRow,
+                  styles.messageContainer,
                   message.role === 'user'
-                    ? styles.userRow
-                    : styles.assistantRow,
+                    ? styles.userContainer
+                    : styles.assistantContainer,
                 ]}>
                 <View
                   style={[
-                    styles.messageBubble,
+                    styles.messageRow,
                     message.role === 'user'
-                      ? styles.userBubble
-                      : styles.assistantBubble,
+                      ? styles.userRow
+                      : styles.assistantRow,
                   ]}>
-                  {message.role === 'assistant' ? (
-                    <>
-                      {/* For Japanese with pronunciation, use line-by-line matching display */}
-                      {targetLanguage === 'ja' &&
-                      showPronunciation &&
-                      message.pronunciation ? (
-                        <>
-                          {renderJapaneseTextWithPronunciation(
-                            message.content,
-                            message.pronunciation,
-                          )}
-                          {showTranslation && message.translation && (
-                            <Text style={styles.translationText}>
-                              💬 {message.translation}
-                            </Text>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <View style={styles.clickableTextContainer}>
-                            {renderClickableWords(message)}
-                          </View>
-                          {showPronunciation && message.pronunciation && (
-                            <Text style={styles.pronunciationText}>
-                              🔊 {message.pronunciation}
-                            </Text>
-                          )}
-                          {showTranslation && message.translation && (
-                            <Text style={styles.translationText}>
-                              💬 {message.translation}
-                            </Text>
-                          )}
-                        </>
-                      )}
-                      {/* CJK Character Breakdown button and Replay button in the same row */}
-                      <View style={styles.aiMessageButtonsRow}>
-                        {(targetLanguage === 'zh' ||
-                          targetLanguage === 'ja') && (
-                          <TouchableOpacity
-                            style={styles.cjkBreakdownButton}
-                            onPress={() =>
-                              handleCJKBreakdownRequest(message.content)
-                            }>
-                            <Text style={styles.cjkBreakdownButtonText}>
-                              📖 {t('conversation.cjkBreakdown.buttonLabel')}
-                            </Text>
-                          </TouchableOpacity>
+                  <View
+                    style={[
+                      styles.messageBubble,
+                      message.role === 'user'
+                        ? styles.userBubble
+                        : styles.assistantBubble,
+                    ]}>
+                    {message.role === 'assistant' ? (
+                      <>
+                        {/* For Japanese with pronunciation, use line-by-line matching display */}
+                        {targetLanguage === 'ja' &&
+                        showPronunciation &&
+                        message.pronunciation ? (
+                          <>
+                            {renderJapaneseTextWithPronunciation(
+                              message.content,
+                              message.pronunciation,
+                            )}
+                            {showTranslation && message.translation && (
+                              <Text style={styles.translationText}>
+                                💬 {message.translation}
+                              </Text>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <View style={styles.clickableTextContainer}>
+                              {renderClickableWords(message)}
+                            </View>
+                            {showPronunciation && message.pronunciation && (
+                              <Text style={styles.pronunciationText}>
+                                🔊 {message.pronunciation}
+                              </Text>
+                            )}
+                            {showTranslation && message.translation && (
+                              <Text style={styles.translationText}>
+                                💬 {message.translation}
+                              </Text>
+                            )}
+                          </>
                         )}
-                        {/* Feature 1: Replay button for AI messages */}
+                        {/* CJK Character Breakdown button and Replay button in the same row */}
+                        <View style={styles.aiMessageButtonsRow}>
+                          {(targetLanguage === 'zh' ||
+                            targetLanguage === 'ja') && (
+                            <TouchableOpacity
+                              style={styles.cjkBreakdownButton}
+                              onPress={() =>
+                                handleCJKBreakdownRequest(message.content)
+                              }>
+                              <Text style={styles.cjkBreakdownButtonText}>
+                                📖 {t('conversation.cjkBreakdown.buttonLabel')}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                          {/* Feature 1: Replay button for AI messages */}
+                          {!textOnlyMode && (
+                            <TouchableOpacity
+                              style={styles.replayButton}
+                              onPress={() => handleReplayAudio(message)}
+                              disabled={isSpeaking}>
+                              <Text style={styles.replayButtonText}>
+                                {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </>
+                    ) : (
+                      <>
+                        <Text style={[styles.messageText, styles.userText]}>
+                          {message.content}
+                        </Text>
+                        {/* Feature 1: Replay button for user messages */}
                         {!textOnlyMode && (
                           <TouchableOpacity
                             style={styles.replayButton}
@@ -1621,74 +1640,57 @@ const ConversationScreen = ({route, navigation}: any) => {
                             </Text>
                           </TouchableOpacity>
                         )}
-                      </View>
-                    </>
-                  ) : (
-                    <>
-                      <Text style={[styles.messageText, styles.userText]}>
-                        {message.content}
-                      </Text>
-                      {/* Feature 1: Replay button for user messages */}
-                      {!textOnlyMode && (
-                        <TouchableOpacity
-                          style={styles.replayButton}
-                          onPress={() => handleReplayAudio(message)}
-                          disabled={isSpeaking}>
-                          <Text style={styles.replayButtonText}>
-                            {isSpeaking ? '⏸️ Playing...' : '🔊 Replay'}
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                    </>
-                  )}
+                      </>
+                    )}
+                  </View>
                 </View>
               </View>
+            );
+          })}
 
-              {/* Features 2, 3, 4: Tap to Speak and Text Input buttons below last AI message */}
-              {isLastAIMessage && !textOnlyMode && !isListening && (
-                <View style={styles.actionButtonsContainer}>
-                  {/* Feature 4: Text Input button */}
-                  <TouchableOpacity
-                    style={styles.textInputButton}
-                    onPress={() => setShowTextInputModal(true)}
-                    disabled={isLoading || isSpeaking}
-                    accessibilityLabel="Text Input"
-                    accessibilityRole="button">
-                    <Text style={styles.textInputButtonIcon}>✏️</Text>
-                    <Text style={styles.textInputButtonText}>
-                      {t('conversation.textInput.buttonLabel')}
-                    </Text>
-                  </TouchableOpacity>
-
-                  {/* Features 2 & 3: Tap to Speak button - moved below and changed to square */}
-                  <TouchableOpacity
-                    style={styles.tapToSpeakButton}
-                    onPress={handleToggleListening}
-                    disabled={isLoading || isSpeaking}
-                    accessibilityLabel="Tap to Speak"
-                    accessibilityRole="button">
-                    <Text style={styles.tapToSpeakButtonIcon}>🎤</Text>
-                    <Text style={styles.tapToSpeakButtonText}>
-                      {t('conversation.tapToSpeak.buttonLabel')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+          {isLoading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#3b82f6" />
+              {isInitializing && initializationStatus && (
+                <Text style={styles.initializationStatusText}>
+                  {initializationStatus}
+                </Text>
               )}
             </View>
-          );
-        })}
+          )}
+        </ScrollView>
 
-        {isLoading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#3b82f6" />
-            {isInitializing && initializationStatus && (
-              <Text style={styles.initializationStatusText}>
-                {initializationStatus}
+        {/* Fixed action buttons at bottom-right of scrollable area */}
+        {messages.length > 0 && messages[messages.length - 1].role === 'assistant' && !textOnlyMode && !isListening && (
+          <View style={styles.fixedActionButtonsContainer}>
+            {/* Feature 4: Text Input button */}
+            <TouchableOpacity
+              style={styles.textInputButton}
+              onPress={() => setShowTextInputModal(true)}
+              disabled={isLoading || isSpeaking}
+              accessibilityLabel="Text Input"
+              accessibilityRole="button">
+              <Text style={styles.textInputButtonIcon}>✏️</Text>
+              <Text style={styles.textInputButtonText}>
+                {t('conversation.textInput.buttonLabel')}
               </Text>
-            )}
+            </TouchableOpacity>
+
+            {/* Features 2 & 3: Tap to Speak button */}
+            <TouchableOpacity
+              style={styles.tapToSpeakButton}
+              onPress={handleToggleListening}
+              disabled={isLoading || isSpeaking}
+              accessibilityLabel="Tap to Speak"
+              accessibilityRole="button">
+              <Text style={styles.tapToSpeakButtonIcon}>🎤</Text>
+              <Text style={styles.tapToSpeakButtonText}>
+                {t('conversation.tapToSpeak.buttonLabel')}
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
-      </ScrollView>
+      </View>
 
       <View style={styles.controls}>
         {textOnlyMode ? (
@@ -2093,13 +2095,17 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 2,
   },
+  messagesContainerWrapper: {
+    flex: 1,
+    position: 'relative',
+  },
   messagesContainer: {
     flex: 1,
     flexShrink: 1,
   },
   messagesContent: {
     padding: 16,
-    paddingBottom: 8,
+    paddingBottom: 80,
   },
   messageRow: {
     marginBottom: 12,
@@ -2602,10 +2608,14 @@ const styles = StyleSheet.create({
   assistantContainer: {
     alignItems: 'flex-start',
   },
-  // Features 2, 3, 4: Action buttons container (below message)
-  actionButtonsContainer: {
-    marginTop: 8,
+  // Fixed action buttons at bottom-right of scrollable area
+  fixedActionButtonsContainer: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    flexDirection: 'row',
     gap: 8,
+    zIndex: 10,
   },
   // Feature 4: Text Input button
   textInputButton: {
@@ -2613,25 +2623,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#8b5cf6',
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    gap: 8,
+    gap: 6,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   textInputButtonIcon: {
-    fontSize: 18,
+    fontSize: 16,
   },
   textInputButtonText: {
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
   },
-  // Features 2 & 3: Tap to Speak button (square shape, below message)
+  // Features 2 & 3: Tap to Speak button (horizontal layout with text input button)
   tapToSpeakButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -2640,7 +2650,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    gap: 8,
+    gap: 6,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.2,
@@ -2648,11 +2658,11 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   tapToSpeakButtonIcon: {
-    fontSize: 20,
+    fontSize: 16,
   },
   tapToSpeakButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
   // Text Input Modal styles
