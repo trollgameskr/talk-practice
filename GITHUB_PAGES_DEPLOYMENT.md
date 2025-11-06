@@ -67,9 +67,50 @@ The build process:
 3. **Output location**: `web-build/` directory
 4. **Assets included**:
    - `index.html` - Main HTML file
+   - `404.html` - SPA routing fallback
    - `bundle.js` - JavaScript bundle
    - `*.png` - Image assets
    - `.nojekyll` - Tells GitHub Pages to serve all files
+
+## 🔄 Client-Side Routing
+
+GeminiTalk는 브라우저 History API를 사용한 클라이언트 사이드 라우팅을 지원합니다:
+
+### URL 구조
+
+모든 화면이 고유한 URL을 가지며, 직접 접근 및 북마크가 가능합니다:
+
+- `/` - 홈 화면
+- `/topics` - 주제 선택
+- `/conversation/:topic` - 대화 화면 (예: `/conversation/daily`)
+- `/progress` - 진도 확인
+- `/settings` - 설정
+- `/settings/appearance` - 외관 설정
+- `/settings/language` - 언어 설정
+- `/settings/:category` - 기타 설정 카테고리
+- `/feedback/:sessionId` - 피드백 화면
+
+### 뒤로가기 동작
+
+- 브라우저 뒤로가기 버튼 또는 Alt+← 사용
+- 안드로이드 뒤로가기 제스처/버튼 지원
+- React Navigation stack과 브라우저 히스토리 자동 동기화
+- 외부 사이트로 이탈하지 않고 이전 화면으로 이동
+
+### 404 Fallback 처리
+
+GitHub Pages는 정적 호스팅이므로 직접 URL 접근 시 404 에러가 발생할 수 있습니다.
+이를 해결하기 위해 다음과 같은 메커니즘을 구현했습니다:
+
+1. `404.html`: 요청된 경로를 sessionStorage에 저장하고 index.html로 리다이렉션
+2. `index.html`: 저장된 경로를 복원하여 History API에 등록
+3. React Navigation: 복원된 URL을 읽어 올바른 화면 렌더링
+
+이를 통해 다음 기능들이 정상 작동합니다:
+- 직접 URL 접근 (예: `/topics` 입력 시 주제 선택 화면 표시)
+- 페이지 새로고침 (F5) 시 현재 화면 유지
+- URL 북마크 및 공유
+- 브라우저 앞으로가기/뒤로가기
 
 ## 🔍 Local Testing
 
@@ -135,10 +176,20 @@ To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)
 ### 404 errors
 
 **Issue**: Getting 404 errors when refreshing the page  
-**Solution**: This is a known limitation of GitHub Pages for SPAs with client-side routing. The `.nojekyll` file prevents Jekyll processing but doesn't solve client-side routing 404s. For a complete solution, you would need to:
-- Create a custom 404.html page that redirects to index.html
-- Configure the app to handle routing properly
-- Consider using hash-based routing instead of browser history API
+**Solution**: ✅ **이제 해결되었습니다!** 클라이언트 사이드 라우팅을 위한 404.html fallback이 구현되어 있습니다:
+- `404.html` 파일이 직접 URL 접근 시 요청된 경로를 저장하고 index.html로 리다이렉션
+- `index.html`이 저장된 경로를 복원하여 React Navigation이 올바른 화면을 렌더링
+- 새로고침(F5) 시 현재 화면 유지
+- 브라우저 뒤로가기/앞으로가기 정상 작동
+- URL 북마크 및 직접 접근 지원
+
+**동작 방식**:
+1. 사용자가 `/talk-practice/topics` 직접 접근
+2. GitHub Pages가 404.html 제공
+3. 404.html이 `/topics` 경로를 sessionStorage에 저장
+4. index.html로 리다이렉션
+5. index.html이 저장된 경로 복원
+6. React Navigation이 올바른 화면(TopicSelection) 렌더링
 
 ### Deployment fails
 

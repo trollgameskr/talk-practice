@@ -5,6 +5,25 @@
 
 import {Platform} from 'react-native';
 
+// Web environment types
+interface PopStateEvent extends Event {
+  state: any;
+}
+
+declare const window: {
+  location: {
+    pathname: string;
+    search: string;
+    href: string;
+  };
+  history: {
+    pushState(state: any, title: string, url?: string): void;
+    replaceState(state: any, title: string, url?: string): void;
+  };
+  addEventListener(type: string, listener: (event: PopStateEvent) => void): void;
+  removeEventListener(type: string, listener: (event: PopStateEvent) => void): void;
+};
+
 export interface RouteConfig {
   path: string;
   screen: string;
