@@ -41,12 +41,13 @@ export interface RouteConfig {
 /**
  * React Navigation linking configuration
  * URL 경로를 React Navigation 화면과 매핑
+ *
+ * Note: <base> 태그가 basePath를 처리하므로,
+ * React Navigation은 basePath 이후의 경로만 처리합니다.
  */
 export const linkingConfig = {
   prefixes: [
-    ...(typeof __BASE_PATH__ !== 'undefined' && __BASE_PATH__
-      ? [`https://trollgameskr.github.io${__BASE_PATH__}`]
-      : []),
+    'https://trollgameskr.github.io/talk-practice/',
     'http://localhost:3000',
     'gemini-talk://',
   ],
@@ -69,77 +70,17 @@ export const linkingConfig = {
       Feedback: 'feedback/:sessionId?',
     },
   },
-  // Web에서 커스텀 URL 처리
-  ...(Platform.OS === 'web'
-    ? {
-        getInitialURL: () => {
-          // basePath를 제거한 경로 반환
-          if (typeof window !== 'undefined' && window.location) {
-            const basePath =
-              typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
-            let path = window.location.pathname;
-
-            // basePath 제거
-            if (basePath && path.startsWith(basePath)) {
-              path = path.substring(basePath.length);
-            }
-
-            // 빈 경로는 '/'로 정규화
-            if (!path || path === '') {
-              path = '/';
-            }
-
-            // 쿼리 문자열과 해시 포함
-            return path + window.location.search + window.location.hash;
-          }
-          return '/';
-        },
-        subscribe: (listener: (url: string) => void) => {
-          // popstate 이벤트 처리 (뒤로/앞으로 버튼)
-          const onPopState = () => {
-            if (typeof window !== 'undefined' && window.location) {
-              const basePath =
-                typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
-              let path = window.location.pathname;
-
-              // basePath 제거
-              if (basePath && path.startsWith(basePath)) {
-                path = path.substring(basePath.length);
-              }
-
-              // 빈 경로는 '/'로 정규화
-              if (!path || path === '') {
-                path = '/';
-              }
-
-              listener(path + window.location.search + window.location.hash);
-            }
-          };
-
-          if (typeof window !== 'undefined') {
-            window.addEventListener('popstate', onPopState);
-            return () => window.removeEventListener('popstate', onPopState);
-          }
-
-          return () => {};
-        },
-      }
-    : {}),
 };
 
 /**
  * 웹 환경에서 브라우저 히스토리 상태를 관리하는 클래스
+ * Note: <base> 태그가 basePath를 처리하므로 이 클래스는 단순화되었습니다.
  */
 class HistoryManager {
   private isWeb: boolean;
-  private basePath: string;
 
   constructor() {
     this.isWeb = Platform.OS === 'web';
-    // GitHub Pages 배포 환경에서는 빌드 시 주입된 BASE_PATH 사용
-    // 개발 환경이나 __BASE_PATH__가 정의되지 않은 경우 빈 문자열 사용
-    this.basePath =
-      this.isWeb && typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
   }
 
   /**
@@ -147,13 +88,6 @@ class HistoryManager {
    */
   get isWebPlatform(): boolean {
     return this.isWeb;
-  }
-
-  /**
-   * 기본 경로 반환
-   */
-  get basePathname(): string {
-    return this.basePath;
   }
 
   /**
@@ -165,8 +99,7 @@ class HistoryManager {
     }
 
     try {
-      const fullUrl = url ? this.basePath + url : undefined;
-      window.history.pushState(state, title, fullUrl);
+      window.history.pushState(state, title, url);
     } catch (error) {
       console.warn('Failed to push history state:', error);
     }
@@ -181,8 +114,7 @@ class HistoryManager {
     }
 
     try {
-      const fullUrl = url ? this.basePath + url : undefined;
-      window.history.replaceState(state, title, fullUrl);
+      window.history.replaceState(state, title, url);
     } catch (error) {
       console.warn('Failed to replace history state:', error);
     }
@@ -211,7 +143,7 @@ class HistoryManager {
   }
 
   /**
-   * 현재 경로에서 basePath를 제거한 순수 경로 반환
+   * 현재 경로 반환
    */
   getCurrentPath(): string {
     if (!this.isWeb || typeof window === 'undefined' || !window.location) {
@@ -219,11 +151,7 @@ class HistoryManager {
     }
 
     try {
-      const pathname = window.location.pathname;
-      if (this.basePath && pathname.startsWith(this.basePath)) {
-        return pathname.slice(this.basePath.length) || '/';
-      }
-      return pathname;
+      return window.location.pathname;
     } catch (e) {
       return '/';
     }
