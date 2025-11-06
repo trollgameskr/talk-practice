@@ -41,12 +41,13 @@ export interface RouteConfig {
 /**
  * React Navigation linking configuration
  * URL 경로를 React Navigation 화면과 매핑
+ *
+ * Note: <base> 태그가 basePath를 처리하므로,
+ * React Navigation은 basePath 이후의 경로만 처리합니다.
  */
 export const linkingConfig = {
   prefixes: [
-    ...(typeof __BASE_PATH__ !== 'undefined' && __BASE_PATH__
-      ? [`https://trollgameskr.github.io${__BASE_PATH__}`]
-      : []),
+    'https://trollgameskr.github.io/talk-practice/',
     'http://localhost:3000',
     'gemini-talk://',
   ],
@@ -69,62 +70,6 @@ export const linkingConfig = {
       Feedback: 'feedback/:sessionId?',
     },
   },
-  // Web에서 커스텀 URL 처리
-  ...(Platform.OS === 'web'
-    ? {
-        getInitialURL: () => {
-          // basePath를 제거한 경로 반환
-          if (typeof window !== 'undefined' && window.location) {
-            const basePath =
-              typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
-            let path = window.location.pathname;
-
-            // basePath 제거
-            if (basePath && path.startsWith(basePath)) {
-              path = path.substring(basePath.length);
-            }
-
-            // 빈 경로는 '/'로 정규화
-            if (!path || path === '') {
-              path = '/';
-            }
-
-            // 쿼리 문자열과 해시 포함
-            return path + window.location.search + window.location.hash;
-          }
-          return '/';
-        },
-        subscribe: (listener: (url: string) => void) => {
-          // popstate 이벤트 처리 (뒤로/앞으로 버튼)
-          const onPopState = () => {
-            if (typeof window !== 'undefined' && window.location) {
-              const basePath =
-                typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
-              let path = window.location.pathname;
-
-              // basePath 제거
-              if (basePath && path.startsWith(basePath)) {
-                path = path.substring(basePath.length);
-              }
-
-              // 빈 경로는 '/'로 정규화
-              if (!path || path === '') {
-                path = '/';
-              }
-
-              listener(path + window.location.search + window.location.hash);
-            }
-          };
-
-          if (typeof window !== 'undefined') {
-            window.addEventListener('popstate', onPopState);
-            return () => window.removeEventListener('popstate', onPopState);
-          }
-
-          return () => {};
-        },
-      }
-    : {}),
 };
 
 /**
