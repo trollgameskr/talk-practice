@@ -103,19 +103,6 @@
       "cancel": "继续",
       "confirm": "结束课程"
     },
-    "sessionEnded": {
-      "title": "练习已结束",
-      "message": "做得好！您的练习课程已成功结束。",
-      "messageWithError": "做得好！您的练习课程已成功结束。\n\n⚠️ 保存课程失败。",
-      "goToHome": "返回主页",
-      "saveFailed": "保存课程失败。"
-    },
-    "saveSessionError": {
-      "title": "课程保存失败",
-      "message": "保存课程失败。是否仍要返回？",
-      "cancel": "取消",
-      "goBack": "返回"
-    },
     "resumeSession": {
       "title": "恢复上次课程？",
       "message": "您有一个未完成的练习课程。是否要从上次停止的地方继续？",
