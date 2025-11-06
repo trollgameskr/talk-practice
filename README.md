@@ -264,6 +264,26 @@ talk-practice/
 - **자동 빌드**: Android/iOS 빌드
 - **문서 배포**: 자동 문서 업데이트
 
+## 🛠️ 개발자 도구 (Developer Tools)
+
+### Favicon 생성
+
+앱 아이콘을 업데이트해야 하는 경우, 다음 명령어로 favicon.ico를 재생성할 수 있습니다:
+
+```bash
+npm run generate:favicon
+```
+
+이 스크립트는:
+- `public/` 디렉토리의 PNG 아이콘 파일들(16x16, 32x32, 72x72)을 사용합니다
+- ImageMagick을 사용하여 멀티 레이어 ICO 파일을 생성합니다
+- 웹, PWA, Windows 브라우저 등 다양한 환경에서 최적의 아이콘 표시를 보장합니다
+
+**참고**: ImageMagick이 시스템에 설치되어 있어야 합니다.
+- Ubuntu/Debian: `sudo apt-get install imagemagick`
+- macOS: `brew install imagemagick`
+- Windows: [공식 사이트](https://imagemagick.org/script/download.php)에서 다운로드
+
 ## 📖 문서 (Documentation)
 
 자세한 문서는 [docs/README.md](./docs/README.md)를 참조하세요.

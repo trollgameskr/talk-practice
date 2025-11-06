@@ -10,6 +10,7 @@
     "web": "webpack serve --mode development --config webpack.config.js",
     "proxy": "node server/proxy.js",
     "build:web": "webpack --mode production --config webpack.config.js",
+    "generate:favicon": "node generate-favicon.js",
     "test": "jest",
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
