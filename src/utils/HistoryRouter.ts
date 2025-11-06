@@ -71,12 +71,18 @@ class HistoryManager {
   constructor() {
     this.isWeb = Platform.OS === 'web';
     // GitHub Pages 배포 환경에서는 /talk-practice/ 기본 경로 사용
-    this.basePath =
-      this.isWeb && typeof window !== 'undefined'
-        ? window.location.pathname.includes('/talk-practice/')
+    this.basePath = '';
+    
+    if (this.isWeb && typeof window !== 'undefined' && window.location) {
+      try {
+        this.basePath = window.location.pathname.includes('/talk-practice/')
           ? '/talk-practice'
-          : ''
-        : '';
+          : '';
+      } catch (e) {
+        // window.location 접근 실패 시 빈 문자열 사용
+        this.basePath = '';
+      }
+    }
   }
 
   /**
@@ -97,7 +103,7 @@ class HistoryManager {
    * 새 히스토리 엔트리 추가
    */
   pushState(state: any, title: string, url?: string): void {
-    if (!this.isWeb || typeof window === 'undefined') {
+    if (!this.isWeb || typeof window === 'undefined' || !window.history) {
       return;
     }
 
@@ -113,7 +119,7 @@ class HistoryManager {
    * 현재 히스토리 엔트리 업데이트
    */
   replaceState(state: any, title: string, url?: string): void {
-    if (!this.isWeb || typeof window === 'undefined') {
+    if (!this.isWeb || typeof window === 'undefined' || !window.history) {
       return;
     }
 
@@ -131,38 +137,50 @@ class HistoryManager {
   addEventListener(
     handler: (event: PopStateEvent) => void,
   ): (() => void) | undefined {
-    if (!this.isWeb || typeof window === 'undefined') {
+    if (!this.isWeb || typeof window === 'undefined' || !window.addEventListener) {
       return undefined;
     }
 
-    window.addEventListener('popstate', handler);
-    return () => window.removeEventListener('popstate', handler);
+    try {
+      window.addEventListener('popstate', handler);
+      return () => window.removeEventListener('popstate', handler);
+    } catch (e) {
+      return undefined;
+    }
   }
 
   /**
    * 현재 경로에서 basePath를 제거한 순수 경로 반환
    */
   getCurrentPath(): string {
-    if (!this.isWeb || typeof window === 'undefined') {
+    if (!this.isWeb || typeof window === 'undefined' || !window.location) {
       return '/';
     }
 
-    const pathname = window.location.pathname;
-    if (this.basePath && pathname.startsWith(this.basePath)) {
-      return pathname.slice(this.basePath.length) || '/';
+    try {
+      const pathname = window.location.pathname;
+      if (this.basePath && pathname.startsWith(this.basePath)) {
+        return pathname.slice(this.basePath.length) || '/';
+      }
+      return pathname;
+    } catch (e) {
+      return '/';
     }
-    return pathname;
   }
 
   /**
    * 전체 URL 반환 (쿼리 파라미터 포함)
    */
   getFullUrl(): string {
-    if (!this.isWeb || typeof window === 'undefined') {
+    if (!this.isWeb || typeof window === 'undefined' || !window.location) {
       return '/';
     }
 
-    return window.location.pathname + window.location.search;
+    try {
+      return window.location.pathname + window.location.search;
+    } catch (e) {
+      return '/';
+    }
   }
 }
 
@@ -174,8 +192,12 @@ export const historyManager = new HistoryManager();
  * 앱 시작 시 URL을 파싱하여 초기 화면 결정
  */
 export const getInitialURL = async (): Promise<string | null> => {
-  if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    return window.location.href;
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
+    try {
+      return window.location.href;
+    } catch (e) {
+      return null;
+    }
   }
   return null;
 };
