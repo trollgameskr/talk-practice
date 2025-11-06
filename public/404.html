@@ -50,13 +50,23 @@
       if (pathname.startsWith(basePath)) {
         var pathWithoutBase = pathname.slice(basePath.length);
         
+        // 빈 경로(trailing slash 없는 base path)인 경우 '/'로 정규화
+        if (pathWithoutBase === '') {
+          pathWithoutBase = '/';
+        }
+        
         // 루트 경로가 아닌 경우 (/, /index.html 제외)
-        if (pathWithoutBase && pathWithoutBase !== '/' && pathWithoutBase !== '/index.html') {
+        if (pathWithoutBase !== '/' && pathWithoutBase !== '/index.html') {
           // 경로와 쿼리 문자열을 세션 스토리지에 저장
           sessionStorage.setItem('redirectPath', pathWithoutBase + window.location.search);
           
           // index.html로 리다이렉션
           window.location.replace(basePath + '/');
+        } else if (pathWithoutBase === '/') {
+          // 루트 경로인 경우 trailing slash를 추가하여 리다이렉션
+          if (pathname !== basePath + '/') {
+            window.location.replace(basePath + '/');
+          }
         }
       } else {
         // basePath가 없는 경로인 경우 (로컬 개발 환경)
