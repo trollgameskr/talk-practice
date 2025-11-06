@@ -16,6 +16,7 @@ import {
   Pressable,
   TextInput,
   Platform,
+  BackHandler,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
@@ -195,6 +196,134 @@ const ConversationScreen = ({route, navigation}: any) => {
       setShowSessionInfoModal(true);
     }
   }, [route.params?.openSessionInfoTrigger]);
+
+  // Handle automatic session end when time is up
+  useEffect(() => {
+    const handleTimeUp = async () => {
+      if (isTimeUp && messages.length > 0 && !sessionSavedRef.current) {
+        // Stop the timer
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
+
+        // Mark session as saved to prevent duplicate saves
+        sessionSavedRef.current = true;
+
+        try {
+          // Save session
+          await saveSession();
+          // Show success alert
+          Alert.alert(
+            t('conversation.sessionEnded.title'),
+            t('conversation.sessionEnded.message'),
+            [
+              {
+                text: t('conversation.sessionEnded.goToHome'),
+                onPress: () => {
+                  // Navigate to home screen and reset navigation stack
+                  navigation.reset({
+                    index: 0,
+                    routes: [{name: 'Home'}],
+                  });
+                },
+              },
+            ],
+            {cancelable: false}, // Prevent dismissal by tapping outside
+          );
+        } catch (error) {
+          console.error('[ConversationScreen] Failed to save session:', error);
+          // Reset flag to allow retry
+          sessionSavedRef.current = false;
+          // Still show the session ended alert but with error message
+          Alert.alert(
+            t('conversation.sessionEnded.title'),
+            t('conversation.sessionEnded.messageWithError'),
+            [
+              {
+                text: t('conversation.sessionEnded.goToHome'),
+                onPress: () => {
+                  navigation.reset({
+                    index: 0,
+                    routes: [{name: 'Home'}],
+                  });
+                },
+              },
+            ],
+            {cancelable: false},
+          );
+        }
+      }
+    };
+
+    handleTimeUp();
+    // saveSession is intentionally not in dependencies because:
+    // 1. It uses refs that are stable across renders
+    // 2. Adding it would cause the effect to re-trigger on every render
+    // 3. The effect only needs to trigger when time is up
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTimeUp, messages.length, navigation, t]);
+
+  // Handle Android hardware back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        // Prevent default behavior if session has messages
+        if (messages.length > 0 && !sessionSavedRef.current) {
+          // Show confirmation dialog
+          Alert.alert(
+            t('conversation.endSession.title'),
+            t('conversation.endSession.message'),
+            [
+              {text: t('conversation.endSession.cancel'), style: 'cancel'},
+              {
+                text: t('conversation.endSession.confirm'),
+                style: 'destructive',
+                onPress: async () => {
+                  // Mark session as saved to prevent duplicate saves
+                  sessionSavedRef.current = true;
+                  try {
+                    await saveSession();
+                    // Navigate back
+                    navigation.goBack();
+                  } catch (error) {
+                    console.error(
+                      '[ConversationScreen] Failed to save session:',
+                      error,
+                    );
+                    // Reset flag to allow retry
+                    sessionSavedRef.current = false;
+                    // Show error and still allow navigation
+                    Alert.alert(
+                      t('conversation.saveSessionError.title'),
+                      t('conversation.saveSessionError.message'),
+                      [
+                        {
+                          text: t('conversation.saveSessionError.cancel'),
+                          style: 'cancel',
+                        },
+                        {
+                          text: t('conversation.saveSessionError.goBack'),
+                          style: 'destructive',
+                          onPress: () => navigation.goBack(),
+                        },
+                      ],
+                    );
+                  }
+                },
+              },
+            ],
+          );
+          return true; // Prevent default back button behavior
+        }
+        return false; // Allow default back button behavior
+      },
+    );
+
+    return () => backHandler.remove();
+    // saveSession is intentionally not in dependencies (same reason as above)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, navigation, t]);
 
   /**
    * Load session duration preference

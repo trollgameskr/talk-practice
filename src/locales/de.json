@@ -103,6 +103,19 @@
       "cancel": "Fortfahren",
       "confirm": "Sitzung Beenden"
     },
+    "sessionEnded": {
+      "title": "Übungssitzung Beendet",
+      "message": "Gut gemacht! Ihre Übungssitzung wurde erfolgreich beendet.",
+      "messageWithError": "Gut gemacht! Ihre Übungssitzung wurde erfolgreich beendet.\n\n⚠️ Sitzung konnte nicht gespeichert werden.",
+      "goToHome": "Zur Startseite",
+      "saveFailed": "Sitzung konnte nicht gespeichert werden."
+    },
+    "saveSessionError": {
+      "title": "Speichern Fehlgeschlagen",
+      "message": "Die Sitzung konnte nicht gespeichert werden. Möchten Sie trotzdem zurückgehen?",
+      "cancel": "Abbrechen",
+      "goBack": "Zurück"
+    },
     "resumeSession": {
       "title": "Vorherige Sitzung Fortsetzen?",
       "message": "Sie haben eine unvollendete Übungssitzung. Möchten Sie dort fortfahren, wo Sie aufgehört haben?",
