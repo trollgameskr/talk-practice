@@ -160,6 +160,25 @@
     </div>
   </div>
   
+  <!-- SPA Routing Support -->
+  <script>
+    /**
+     * GitHub Pages SPA 라우팅 지원
+     * 404.html에서 리다이렉션된 경로를 복원하여 브라우저 히스토리에 추가합니다.
+     */
+    (function() {
+      var redirectPath = sessionStorage.getItem('redirectPath');
+      if (redirectPath) {
+        sessionStorage.removeItem('redirectPath');
+        
+        // History API를 사용하여 경로 복원
+        // React Navigation이 초기 URL을 올바르게 인식할 수 있도록 합니다
+        var basePath = window.location.pathname.includes('/talk-practice/') ? '/talk-practice' : '';
+        history.replaceState(null, '', basePath + redirectPath);
+      }
+    })();
+  </script>
+  
   <!-- Service Worker Registration -->
   <script>
     // Only register the service worker on secure origins (https) or on localhost.
