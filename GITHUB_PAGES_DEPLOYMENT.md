@@ -37,40 +37,39 @@ When the `GITHUB_PAGES` environment variable is set, the build will:
 - Update `manifest.json` with correct `start_url` and `scope`
 - Process `404.html` with the correct base path
 
+### HTML Base Tag
+
+**중요 변경사항**: 이제 HTML `<base>` 태그를 사용하여 basePath를 처리합니다.
+
+`public/index.html`에 추가된 `<base>` 태그:
+
+```html
+<base href="/talk-practice/">
+```
+
+이 태그는 브라우저에게 모든 상대 경로(리소스, 링크, 히스토리 API)를 해석할 때 사용할 기준 URL을 알려줍니다.
+
+**장점**:
+- 브라우저가 자동으로 모든 상대 경로를 basePath 기준으로 해석
+- React Navigation이 basePath를 제거할 필요 없음
+- 코드가 더 단순하고 표준 웹 기술 활용
+
 ### React Navigation Configuration
 
-The app uses custom linking configuration in `src/utils/HistoryRouter.ts` to handle GitHub Pages base path:
+The app uses standard linking configuration in `src/utils/HistoryRouter.ts`:
 
 ```typescript
 export const linkingConfig = {
   prefixes: [
-    'https://trollgameskr.github.io/talk-practice',
+    'https://trollgameskr.github.io/talk-practice/',
     'http://localhost:3000',
+    'gemini-talk://',
   ],
   config: { /* screen mappings */ },
-  // Custom URL handling for web
-  getInitialURL: () => {
-    // Remove basePath from pathname before passing to React Navigation
-    const basePath = __BASE_PATH__ || '';
-    let path = window.location.pathname;
-    if (basePath && path.startsWith(basePath)) {
-      path = path.substring(basePath.length) || '/';
-    }
-    return path + window.location.search + window.location.hash;
-  },
-  subscribe: (listener) => {
-    // Handle browser back/forward buttons
-    const onPopState = () => {
-      // Remove basePath and notify React Navigation
-      // ...
-    };
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  },
 };
 ```
 
-The `NavigationContainer` in `App.tsx` also includes an `onStateChange` handler to ensure URLs maintain the base path when navigation occurs.
+`<base>` 태그 덕분에 React Navigation은 복잡한 basePath 처리 로직 없이 표준 설정만으로 작동합니다.
 
 ### GitHub Actions Workflow
 
@@ -144,12 +143,12 @@ GeminiTalk는 브라우저 History API를 사용한 클라이언트 사이드 �
 
 ### 베이스 경로 처리
 
-GitHub Pages 프로젝트 페이지는 `/<owner>/<repo>/` 형식의 베이스 경로를 사용합니다. 이 앱은 다음과 같이 베이스 경로를 처리합니다:
+GitHub Pages 프로젝트 페이지는 `/<owner>/<repo>/` 형식의 베이스 경로를 사용합니다. 이 앱은 HTML `<base>` 태그를 사용하여 베이스 경로를 처리합니다:
 
-1. **빌드 타임**: Webpack이 `__BASE_PATH__` 상수를 `/talk-practice`로 주입
-2. **런타임**: React Navigation의 커스텀 `getInitialURL`과 `subscribe`가 베이스 경로를 제거하고 순수 경로만 전달
-3. **네비게이션 상태 변경**: `onStateChange` 핸들러가 URL에 베이스 경로를 다시 추가
-4. **결과**: 브라우저 주소창에는 항상 `/talk-practice/` prefix가 유지됨
+1. **빌드 타임**: Webpack이 `index.html`에 `<base href="/talk-practice/">` 태그를 주입
+2. **브라우저**: `<base>` 태그 덕분에 모든 상대 경로(리소스, 링크, 히스토리 API)를 `/talk-practice/` 기준으로 자동 해석
+3. **React Navigation**: 표준 linking 설정만 사용 - 브라우저가 basePath를 자동으로 처리
+4. **결과**: 브라우저 주소창에 항상 `/talk-practice/` prefix가 자연스럽게 유지됨
 
 ### 뒤로가기 동작
 
@@ -223,10 +222,11 @@ To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)
 
 ## ⚠️ Important Notes
 
-1. **Base Path**: The app automatically handles the `/talk-practice/` base path for GitHub Pages deployment
-   - React Navigation's custom linking configuration strips the base path when parsing URLs
-   - The `onStateChange` handler adds the base path back when updating browser history
-   - All URLs in the browser will correctly show `/talk-practice/` prefix
+1. **Base Path**: HTML `<base>` 태그를 사용하여 `/talk-practice/` base path를 처리합니다
+   - `<base href="/talk-practice/">` 태그가 모든 상대 경로의 기준점 설정
+   - React Navigation은 표준 설정만 사용 - 브라우저가 자동으로 basePath 처리
+   - 모든 히스토리 API 호출이 자동으로 basePath 포함
+   - 브라우저 주소창에 항상 `/talk-practice/` prefix 표시
 2. **Jekyll**: The `.nojekyll` file prevents GitHub from processing files through Jekyll
 3. **Cache**: Browser cache may need to be cleared to see updates after deployment
 4. **HTTPS**: GitHub Pages serves sites over HTTPS by default
@@ -242,9 +242,10 @@ To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)
 ### URL에서 베이스 경로가 사라짐
 
 **Issue**: `/talk-practice/`로 접근했는데 브라우저 주소가 `/`로 변경됨  
-**Solution**: ✅ **해결되었습니다!** React Navigation의 커스텀 linking 설정과 `onStateChange` 핸들러가 베이스 경로를 자동으로 유지합니다:
-- `getInitialURL`과 `subscribe`가 베이스 경로를 제거하고 순수 경로만 React Navigation에 전달
-- `onStateChange` 핸들러가 네비게이션 발생 시 URL에 베이스 경로를 다시 추가
+**Solution**: ✅ **해결되었습니다!** HTML `<base>` 태그를 사용하여 브라우저가 자동으로 basePath를 유지합니다:
+- `<base href="/talk-practice/">` 태그가 모든 상대 경로의 기준점 설정
+- React Navigation이 표준 linking 설정만 사용 - 복잡한 커스텀 로직 불필요
+- 브라우저 히스토리 API가 자동으로 basePath 포함
 - 브라우저 주소창에 항상 `/talk-practice/` prefix가 표시됨
 
 ### 404 errors
@@ -262,15 +263,14 @@ To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)
 2. GitHub Pages가 404.html 제공
 3. 404.html이 `/topics` 경로를 sessionStorage에 저장
 4. `/talk-practice/` (index.html)로 리다이렉션
-5. index.html이 저장된 경로 복원하여 `/talk-practice/topics`로 히스토리 업데이트
-6. React Navigation의 커스텀 `getInitialURL`이 베이스 경로를 제거하고 `/topics` 전달
+5. index.html이 저장된 경로 복원 (History API 사용)
+6. `<base>` 태그 덕분에 브라우저가 자동으로 `/talk-practice/topics`로 해석
 7. React Navigation이 올바른 화면(TopicSelection) 렌더링
-8. `onStateChange` 핸들러가 URL에 `/talk-practice/` prefix 유지
 
 **베이스 경로 유지**:
-- 모든 내부 링크 클릭 시 브라우저 주소창에 `/talk-practice/` prefix 유지
-- 뒤로가기/앞으로가기 버튼 사용 시에도 베이스 경로 유지
-- React Navigation과 브라우저 히스토리가 동기화되어 일관된 URL 표시
+- `<base>` 태그가 모든 히스토리 API 호출에 basePath를 자동 적용
+- 내부 링크 클릭, 뒤로가기/앞으로가기 모두 자동으로 `/talk-practice/` prefix 유지
+- React Navigation과 브라우저 히스토리가 자연스럽게 동기화
 
 ### Deployment fails
 
