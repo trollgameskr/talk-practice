@@ -106,6 +106,7 @@
     "sessionEnded": {
       "title": "练习已结束",
       "message": "做得好！您的练习课程已成功结束。",
+      "messageWithError": "做得好！您的练习课程已成功结束。\n\n⚠️ 保存课程失败。",
       "goToHome": "返回主页",
       "saveFailed": "保存课程失败。"
     },

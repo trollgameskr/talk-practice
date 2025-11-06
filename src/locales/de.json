@@ -106,6 +106,7 @@
     "sessionEnded": {
       "title": "Übungssitzung Beendet",
       "message": "Gut gemacht! Ihre Übungssitzung wurde erfolgreich beendet.",
+      "messageWithError": "Gut gemacht! Ihre Übungssitzung wurde erfolgreich beendet.\n\n⚠️ Sitzung konnte nicht gespeichert werden.",
       "goToHome": "Zur Startseite",
       "saveFailed": "Sitzung konnte nicht gespeichert werden."
     },

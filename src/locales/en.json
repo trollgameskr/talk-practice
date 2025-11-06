@@ -106,6 +106,7 @@
     "sessionEnded": {
       "title": "Practice Session Ended",
       "message": "Well done! Your practice session has been successfully ended.",
+      "messageWithError": "Well done! Your practice session has been successfully ended.\n\n⚠️ Failed to save session.",
       "goToHome": "Go to Home",
       "saveFailed": "Failed to save session."
     },

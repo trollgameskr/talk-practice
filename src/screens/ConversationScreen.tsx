@@ -237,9 +237,7 @@ const ConversationScreen = ({route, navigation}: any) => {
           // Still show the session ended alert but with error message
           Alert.alert(
             t('conversation.sessionEnded.title'),
-            t('conversation.sessionEnded.message') +
-              '\n\n⚠️ ' +
-              t('conversation.sessionEnded.saveFailed'),
+            t('conversation.sessionEnded.messageWithError'),
             [
               {
                 text: t('conversation.sessionEnded.goToHome'),

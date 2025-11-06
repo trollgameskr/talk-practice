@@ -106,6 +106,7 @@
     "sessionEnded": {
       "title": "Sesión de Práctica Finalizada",
       "message": "¡Buen trabajo! Tu sesión de práctica ha finalizado exitosamente.",
+      "messageWithError": "¡Buen trabajo! Tu sesión de práctica ha finalizado exitosamente.\n\n⚠️ Error al guardar la sesión.",
       "goToHome": "Ir a Inicio",
       "saveFailed": "Error al guardar la sesión."
     },

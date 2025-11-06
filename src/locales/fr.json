@@ -106,6 +106,7 @@
     "sessionEnded": {
       "title": "Session de Pratique Terminée",
       "message": "Bien joué ! Votre session de pratique s'est terminée avec succès.",
+      "messageWithError": "Bien joué ! Votre session de pratique s'est terminée avec succès.\n\n⚠️ Échec de la sauvegarde de la session.",
       "goToHome": "Retour à l'accueil",
       "saveFailed": "Échec de la sauvegarde de la session."
     },
