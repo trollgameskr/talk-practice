@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <base href="<%= BASE_PATH %>/">
+  <% if (BASE_PATH) { %><base href="<%= BASE_PATH %>/"><% } %>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#3b82f6">
   <meta name="description" content="GeminiTalk - Real-time English Conversation Coach powered by Gemini AI">

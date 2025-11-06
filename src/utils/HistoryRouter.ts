@@ -74,17 +74,13 @@ export const linkingConfig = {
 
 /**
  * 웹 환경에서 브라우저 히스토리 상태를 관리하는 클래스
+ * Note: <base> 태그가 basePath를 처리하므로 이 클래스는 단순화되었습니다.
  */
 class HistoryManager {
   private isWeb: boolean;
-  private basePath: string;
 
   constructor() {
     this.isWeb = Platform.OS === 'web';
-    // GitHub Pages 배포 환경에서는 빌드 시 주입된 BASE_PATH 사용
-    // 개발 환경이나 __BASE_PATH__가 정의되지 않은 경우 빈 문자열 사용
-    this.basePath =
-      this.isWeb && typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
   }
 
   /**
@@ -92,13 +88,6 @@ class HistoryManager {
    */
   get isWebPlatform(): boolean {
     return this.isWeb;
-  }
-
-  /**
-   * 기본 경로 반환
-   */
-  get basePathname(): string {
-    return this.basePath;
   }
 
   /**
@@ -110,8 +99,7 @@ class HistoryManager {
     }
 
     try {
-      const fullUrl = url ? this.basePath + url : undefined;
-      window.history.pushState(state, title, fullUrl);
+      window.history.pushState(state, title, url);
     } catch (error) {
       console.warn('Failed to push history state:', error);
     }
@@ -126,8 +114,7 @@ class HistoryManager {
     }
 
     try {
-      const fullUrl = url ? this.basePath + url : undefined;
-      window.history.replaceState(state, title, fullUrl);
+      window.history.replaceState(state, title, url);
     } catch (error) {
       console.warn('Failed to replace history state:', error);
     }
@@ -156,7 +143,7 @@ class HistoryManager {
   }
 
   /**
-   * 현재 경로에서 basePath를 제거한 순수 경로 반환
+   * 현재 경로 반환
    */
   getCurrentPath(): string {
     if (!this.isWeb || typeof window === 'undefined' || !window.location) {
@@ -164,11 +151,7 @@ class HistoryManager {
     }
 
     try {
-      const pathname = window.location.pathname;
-      if (this.basePath && pathname.startsWith(this.basePath)) {
-        return pathname.slice(this.basePath.length) || '/';
-      }
-      return pathname;
+      return window.location.pathname;
     } catch (e) {
       return '/';
     }
