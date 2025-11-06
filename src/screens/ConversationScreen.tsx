@@ -199,18 +199,20 @@ const ConversationScreen = ({route, navigation}: any) => {
 
   // Handle automatic session end when time is up
   useEffect(() => {
-    if (isTimeUp && messages.length > 0 && !sessionSavedRef.current) {
-      // Stop the timer
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+    const handleTimeUp = async () => {
+      if (isTimeUp && messages.length > 0 && !sessionSavedRef.current) {
+        // Stop the timer
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
 
-      // Mark session as saved to prevent duplicate saves
-      sessionSavedRef.current = true;
+        // Mark session as saved to prevent duplicate saves
+        sessionSavedRef.current = true;
 
-      // Save session and show alert
-      saveSession()
-        .then(() => {
+        try {
+          // Save session
+          await saveSession();
+          // Show success alert
           Alert.alert(
             t('conversation.sessionEnded.title'),
             t('conversation.sessionEnded.message'),
@@ -228,8 +230,7 @@ const ConversationScreen = ({route, navigation}: any) => {
             ],
             {cancelable: false}, // Prevent dismissal by tapping outside
           );
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('[ConversationScreen] Failed to save session:', error);
           // Reset flag to allow retry
           sessionSavedRef.current = false;
@@ -252,8 +253,11 @@ const ConversationScreen = ({route, navigation}: any) => {
             ],
             {cancelable: false},
           );
-        });
-    }
+        }
+      }
+    };
+
+    handleTimeUp();
     // saveSession is intentionally not in dependencies because:
     // 1. It uses refs that are stable across renders
     // 2. Adding it would cause the effect to re-trigger on every render
