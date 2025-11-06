@@ -17,10 +17,60 @@ GeminiTalk is automatically deployed to GitHub Pages whenever changes are pushed
 The `webpack.config.js` has been configured to support GitHub Pages deployment:
 
 ```javascript
-publicPath: process.env.GITHUB_PAGES ? '/talk-practice/' : '/',
+const BASE_PATH = process.env.GITHUB_PAGES ? '/talk-practice' : '';
+
+module.exports = {
+  output: {
+    publicPath: BASE_PATH ? BASE_PATH + '/' : '/',
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      __BASE_PATH__: JSON.stringify(BASE_PATH),
+    }),
+  ],
+};
 ```
 
-When the `GITHUB_PAGES` environment variable is set, the build will use `/talk-practice/` as the base path, which matches the GitHub Pages URL structure.
+When the `GITHUB_PAGES` environment variable is set, the build will:
+- Use `/talk-practice/` as the base path in `publicPath`
+- Inject `__BASE_PATH__` constant into the bundle for runtime use
+- Update `manifest.json` with correct `start_url` and `scope`
+- Process `404.html` with the correct base path
+
+### React Navigation Configuration
+
+The app uses custom linking configuration in `src/utils/HistoryRouter.ts` to handle GitHub Pages base path:
+
+```typescript
+export const linkingConfig = {
+  prefixes: [
+    'https://trollgameskr.github.io/talk-practice',
+    'http://localhost:3000',
+  ],
+  config: { /* screen mappings */ },
+  // Custom URL handling for web
+  getInitialURL: () => {
+    // Remove basePath from pathname before passing to React Navigation
+    const basePath = __BASE_PATH__ || '';
+    let path = window.location.pathname;
+    if (basePath && path.startsWith(basePath)) {
+      path = path.substring(basePath.length) || '/';
+    }
+    return path + window.location.search + window.location.hash;
+  },
+  subscribe: (listener) => {
+    // Handle browser back/forward buttons
+    const onPopState = () => {
+      // Remove basePath and notify React Navigation
+      // ...
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  },
+};
+```
+
+The `NavigationContainer` in `App.tsx` also includes an `onStateChange` handler to ensure URLs maintain the base path when navigation occurs.
 
 ### GitHub Actions Workflow
 
@@ -80,15 +130,26 @@ GeminiTalk는 브라우저 History API를 사용한 클라이언트 사이드 �
 
 모든 화면이 고유한 URL을 가지며, 직접 접근 및 북마크가 가능합니다:
 
-- `/` - 홈 화면
-- `/topics` - 주제 선택
-- `/conversation/:topic` - 대화 화면 (예: `/conversation/daily`)
-- `/progress` - 진도 확인
-- `/settings` - 설정
-- `/settings/appearance` - 외관 설정
-- `/settings/language` - 언어 설정
-- `/settings/:category` - 기타 설정 카테고리
-- `/feedback/:sessionId` - 피드백 화면
+- `/talk-practice/` - 홈 화면
+- `/talk-practice/topics` - 주제 선택
+- `/talk-practice/conversation/:topic` - 대화 화면 (예: `/talk-practice/conversation/daily`)
+- `/talk-practice/progress` - 진도 확인
+- `/talk-practice/settings` - 설정
+- `/talk-practice/settings/appearance` - 외관 설정
+- `/talk-practice/settings/language` - 언어 설정
+- `/talk-practice/settings/:category` - 기타 설정 카테고리
+- `/talk-practice/feedback/:sessionId` - 피드백 화면
+
+**참고**: 모든 URL은 GitHub Pages 프로젝트 페이지 베이스 경로 `/talk-practice/`를 포함합니다.
+
+### 베이스 경로 처리
+
+GitHub Pages 프로젝트 페이지는 `/<owner>/<repo>/` 형식의 베이스 경로를 사용합니다. 이 앱은 다음과 같이 베이스 경로를 처리합니다:
+
+1. **빌드 타임**: Webpack이 `__BASE_PATH__` 상수를 `/talk-practice`로 주입
+2. **런타임**: React Navigation의 커스텀 `getInitialURL`과 `subscribe`가 베이스 경로를 제거하고 순수 경로만 전달
+3. **네비게이션 상태 변경**: `onStateChange` 핸들러가 URL에 베이스 경로를 다시 추가
+4. **결과**: 브라우저 주소창에는 항상 `/talk-practice/` prefix가 유지됨
 
 ### 뒤로가기 동작
 
@@ -96,6 +157,7 @@ GeminiTalk는 브라우저 History API를 사용한 클라이언트 사이드 �
 - 안드로이드 뒤로가기 제스처/버튼 지원
 - React Navigation stack과 브라우저 히스토리 자동 동기화
 - 외부 사이트로 이탈하지 않고 이전 화면으로 이동
+- 베이스 경로 `/talk-practice/`는 모든 네비게이션에서 유지됨
 
 ### 404 Fallback 처리
 
@@ -161,17 +223,29 @@ To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)
 
 ## ⚠️ Important Notes
 
-1. **Base Path**: All URLs in the app must account for the `/talk-practice/` base path when deployed to GitHub Pages
+1. **Base Path**: The app automatically handles the `/talk-practice/` base path for GitHub Pages deployment
+   - React Navigation's custom linking configuration strips the base path when parsing URLs
+   - The `onStateChange` handler adds the base path back when updating browser history
+   - All URLs in the browser will correctly show `/talk-practice/` prefix
 2. **Jekyll**: The `.nojekyll` file prevents GitHub from processing files through Jekyll
 3. **Cache**: Browser cache may need to be cleared to see updates after deployment
 4. **HTTPS**: GitHub Pages serves sites over HTTPS by default
+5. **Manifest**: The `manifest.json` is automatically updated during build with correct `start_url` and `scope` for PWA support
 
 ## 🐛 Troubleshooting
 
 ### Assets not loading
 
 **Issue**: CSS, JavaScript, or images not loading  
-**Solution**: Ensure webpack's `publicPath` is correctly set to `/talk-practice/`
+**Solution**: ✅ **이제 자동으로 처리됩니다!** Webpack의 `publicPath`가 빌드 시 자동으로 `/talk-practice/`로 설정됩니다.
+
+### URL에서 베이스 경로가 사라짐
+
+**Issue**: `/talk-practice/`로 접근했는데 브라우저 주소가 `/`로 변경됨  
+**Solution**: ✅ **해결되었습니다!** React Navigation의 커스텀 linking 설정과 `onStateChange` 핸들러가 베이스 경로를 자동으로 유지합니다:
+- `getInitialURL`과 `subscribe`가 베이스 경로를 제거하고 순수 경로만 React Navigation에 전달
+- `onStateChange` 핸들러가 네비게이션 발생 시 URL에 베이스 경로를 다시 추가
+- 브라우저 주소창에 항상 `/talk-practice/` prefix가 표시됨
 
 ### 404 errors
 
@@ -187,9 +261,16 @@ To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)
 1. 사용자가 `/talk-practice/topics` 직접 접근
 2. GitHub Pages가 404.html 제공
 3. 404.html이 `/topics` 경로를 sessionStorage에 저장
-4. index.html로 리다이렉션
-5. index.html이 저장된 경로 복원
-6. React Navigation이 올바른 화면(TopicSelection) 렌더링
+4. `/talk-practice/` (index.html)로 리다이렉션
+5. index.html이 저장된 경로 복원하여 `/talk-practice/topics`로 히스토리 업데이트
+6. React Navigation의 커스텀 `getInitialURL`이 베이스 경로를 제거하고 `/topics` 전달
+7. React Navigation이 올바른 화면(TopicSelection) 렌더링
+8. `onStateChange` 핸들러가 URL에 `/talk-practice/` prefix 유지
+
+**베이스 경로 유지**:
+- 모든 내부 링크 클릭 시 브라우저 주소창에 `/talk-practice/` prefix 유지
+- 뒤로가기/앞으로가기 버튼 사용 시에도 베이스 경로 유지
+- React Navigation과 브라우저 히스토리가 동기화되어 일관된 URL 표시
 
 ### Deployment fails
 
