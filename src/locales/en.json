@@ -106,7 +106,14 @@
     "sessionEnded": {
       "title": "Practice Session Ended",
       "message": "Well done! Your practice session has been successfully ended.",
-      "goToHome": "Go to Home"
+      "goToHome": "Go to Home",
+      "saveFailed": "Failed to save session."
+    },
+    "saveSessionError": {
+      "title": "Session Save Failed",
+      "message": "Failed to save the session. Do you still want to go back?",
+      "cancel": "Cancel",
+      "goBack": "Go Back"
     },
     "resumeSession": {
       "title": "Resume Previous Session?",

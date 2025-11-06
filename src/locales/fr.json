@@ -103,6 +103,18 @@
       "cancel": "Continuer",
       "confirm": "Terminer la Session"
     },
+    "sessionEnded": {
+      "title": "Session de Pratique Terminée",
+      "message": "Bien joué ! Votre session de pratique s'est terminée avec succès.",
+      "goToHome": "Retour à l'accueil",
+      "saveFailed": "Échec de la sauvegarde de la session."
+    },
+    "saveSessionError": {
+      "title": "Échec de Sauvegarde",
+      "message": "La sauvegarde de la session a échoué. Voulez-vous quand même revenir en arrière ?",
+      "cancel": "Annuler",
+      "goBack": "Retour"
+    },
     "resumeSession": {
       "title": "Reprendre la Session Précédente ?",
       "message": "Vous avez une session de pratique inachevée. Voulez-vous continuer là où vous vous êtes arrêté ?",

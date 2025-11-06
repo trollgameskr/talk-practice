@@ -237,7 +237,8 @@ const ConversationScreen = ({route, navigation}: any) => {
           Alert.alert(
             t('conversation.sessionEnded.title'),
             t('conversation.sessionEnded.message') +
-              '\n\n⚠️ 세션 저장에 실패했습니다.',
+              '\n\n⚠️ ' +
+              t('conversation.sessionEnded.saveFailed'),
             [
               {
                 text: t('conversation.sessionEnded.goToHome'),
@@ -292,12 +293,15 @@ const ConversationScreen = ({route, navigation}: any) => {
                     sessionSavedRef.current = false;
                     // Show error and still allow navigation
                     Alert.alert(
-                      '세션 저장 실패',
-                      '세션 저장에 실패했습니다. 그래도 뒤로 가시겠습니까?',
+                      t('conversation.saveSessionError.title'),
+                      t('conversation.saveSessionError.message'),
                       [
-                        {text: '취소', style: 'cancel'},
                         {
-                          text: '뒤로 가기',
+                          text: t('conversation.saveSessionError.cancel'),
+                          style: 'cancel',
+                        },
+                        {
+                          text: t('conversation.saveSessionError.goBack'),
                           style: 'destructive',
                           onPress: () => navigation.goBack(),
                         },

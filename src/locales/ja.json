@@ -103,6 +103,18 @@
       "cancel": "続ける",
       "confirm": "セッションを終了"
     },
+    "sessionEnded": {
+      "title": "練習が終了しました",
+      "message": "お疲れ様でした！練習セッションが正常に終了しました。",
+      "goToHome": "ホームへ",
+      "saveFailed": "セッションの保存に失敗しました。"
+    },
+    "saveSessionError": {
+      "title": "セッション保存失敗",
+      "message": "セッションの保存に失敗しました。それでも戻りますか？",
+      "cancel": "キャンセル",
+      "goBack": "戻る"
+    },
     "resumeSession": {
       "title": "前回のセッションを再開しますか？",
       "message": "未完了の練習セッションがあります。中断したところから続けますか？",
