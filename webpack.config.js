@@ -82,9 +82,7 @@ module.exports = {
       template: './public/index.html',
       inject: true,
       templateParameters: {
-        // BASE_PATH를 빈 문자열이 아닌 실제 경로로 설정
-        // 예: '/talk-practice' 또는 '' (로컬 개발)
-        BASE_PATH: BASE_PATH || '',
+        BASE_PATH: BASE_PATH,
       },
     }),
     new webpack.DefinePlugin({
