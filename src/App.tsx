@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   View,
   BackHandler,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
@@ -156,6 +157,46 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
     return () => backHandler.remove();
   }, []);
 
+  // Handle navigation state changes for web to update URL with basePath
+  const handleNavigationStateChange = React.useCallback(() => {
+    // Web 환경에서만 실행
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
+    // window 객체 확인 (웹 환경)
+    const win = (global as any).window;
+    if (!win || !win.location || !win.history) {
+      return;
+    }
+
+    const basePath =
+      typeof (global as any).__BASE_PATH__ !== 'undefined'
+        ? (global as any).__BASE_PATH__
+        : '';
+    if (!basePath) {
+      return;
+    }
+
+    // 현재 URL 경로 가져오기
+    const currentPath = win.location.pathname;
+
+    // 이미 basePath가 포함되어 있으면 아무것도 하지 않음
+    if (currentPath.startsWith(basePath)) {
+      return;
+    }
+
+    // basePath를 추가한 새 경로 생성
+    const newPath = basePath + currentPath;
+
+    // URL 업데이트 (히스토리 항목 추가하지 않음)
+    win.history.replaceState(
+      win.history.state,
+      '',
+      newPath + win.location.search + win.location.hash,
+    );
+  }, []);
+
   return (
     <>
       <StatusBar
@@ -165,6 +206,7 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
       <NavigationContainer
         ref={navigationRef}
         linking={linkingConfig}
+        onStateChange={handleNavigationStateChange}
         fallback={
           <View
             style={[
