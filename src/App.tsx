@@ -164,20 +164,21 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
       return;
     }
 
-    // window 객체 확인 (웹 환경)
-    const win = (global as any).window;
-    if (!win || !win.location || !win.history) {
+    // Type-safe access to window and __BASE_PATH__ (web-only)
+    const globalAny = global as any;
+    if (
+      typeof globalAny.window === 'undefined' ||
+      typeof __BASE_PATH__ === 'undefined'
+    ) {
       return;
     }
 
-    const basePath =
-      typeof (global as any).__BASE_PATH__ !== 'undefined'
-        ? (global as any).__BASE_PATH__
-        : '';
+    const basePath = __BASE_PATH__ || '';
     if (!basePath) {
       return;
     }
 
+    const win = globalAny.window;
     // 현재 URL 경로 가져오기
     const currentPath = win.location.pathname;
 
