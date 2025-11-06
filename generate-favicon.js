@@ -8,11 +8,11 @@
  * 사용법: node generate-favicon.js
  */
 
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-async function generateFavicon() {
+function generateFavicon() {
   try {
     console.log('🎨 Favicon.ico 생성 시작...');
     
@@ -35,13 +35,24 @@ async function generateFavicon() {
       console.log(`   - ${file}`);
     }
     
-    // ImageMagick convert 명령어 사용
+    // ImageMagick convert 명령어 사용 (안전한 방식)
     const outputPath = path.join(publicDir, 'favicon.ico');
-    const inputPaths = iconFiles.map(f => path.join(publicDir, f)).join(' ');
-    const command = `convert ${inputPaths} ${outputPath}`;
+    const inputPaths = iconFiles.map(f => path.join(publicDir, f));
+    const args = [...inputPaths, outputPath];
     
     console.log('🔨 ICO 파일 변환 중...');
-    execSync(command, { cwd: publicDir });
+    const result = spawnSync('convert', args, { 
+      cwd: publicDir,
+      encoding: 'utf-8'
+    });
+    
+    if (result.error) {
+      throw new Error(`convert 명령어 실행 실패: ${result.error.message}`);
+    }
+    
+    if (result.status !== 0) {
+      throw new Error(`convert 명령어가 0이 아닌 코드로 종료됨: ${result.status}\n${result.stderr}`);
+    }
     
     if (!fs.existsSync(outputPath)) {
       throw new Error('favicon.ico 파일이 생성되지 않았습니다.');
@@ -64,4 +75,3 @@ async function generateFavicon() {
 }
 
 generateFavicon();
-
