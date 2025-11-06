@@ -14,14 +14,22 @@ declare const window: {
   location: {
     pathname: string;
     search: string;
+    hash: string;
     href: string;
   };
   history: {
     pushState(state: any, title: string, url?: string): void;
     replaceState(state: any, title: string, url?: string): void;
+    state: any;
   };
-  addEventListener(type: string, listener: (event: PopStateEvent) => void): void;
-  removeEventListener(type: string, listener: (event: PopStateEvent) => void): void;
+  addEventListener(
+    type: string,
+    listener: (event: PopStateEvent) => void,
+  ): void;
+  removeEventListener(
+    type: string,
+    listener: (event: PopStateEvent) => void,
+  ): void;
 };
 
 export interface RouteConfig {
@@ -61,6 +69,62 @@ export const linkingConfig = {
       Feedback: 'feedback/:sessionId?',
     },
   },
+  // Web에서 커스텀 URL 처리
+  ...(Platform.OS === 'web'
+    ? {
+        getInitialURL: () => {
+          // basePath를 제거한 경로 반환
+          if (typeof window !== 'undefined' && window.location) {
+            const basePath =
+              typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
+            let path = window.location.pathname;
+
+            // basePath 제거
+            if (basePath && path.startsWith(basePath)) {
+              path = path.substring(basePath.length);
+            }
+
+            // 빈 경로는 '/'로 정규화
+            if (!path || path === '') {
+              path = '/';
+            }
+
+            // 쿼리 문자열과 해시 포함
+            return path + window.location.search + window.location.hash;
+          }
+          return '/';
+        },
+        subscribe: (listener: (url: string) => void) => {
+          // popstate 이벤트 처리 (뒤로/앞으로 버튼)
+          const onPopState = () => {
+            if (typeof window !== 'undefined' && window.location) {
+              const basePath =
+                typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
+              let path = window.location.pathname;
+
+              // basePath 제거
+              if (basePath && path.startsWith(basePath)) {
+                path = path.substring(basePath.length);
+              }
+
+              // 빈 경로는 '/'로 정규화
+              if (!path || path === '') {
+                path = '/';
+              }
+
+              listener(path + window.location.search + window.location.hash);
+            }
+          };
+
+          if (typeof window !== 'undefined') {
+            window.addEventListener('popstate', onPopState);
+            return () => window.removeEventListener('popstate', onPopState);
+          }
+
+          return () => {};
+        },
+      }
+    : {}),
 };
 
 /**
@@ -130,7 +194,11 @@ class HistoryManager {
   addEventListener(
     handler: (event: PopStateEvent) => void,
   ): (() => void) | undefined {
-    if (!this.isWeb || typeof window === 'undefined' || !window.addEventListener) {
+    if (
+      !this.isWeb ||
+      typeof window === 'undefined' ||
+      !window.addEventListener
+    ) {
       return undefined;
     }
 
@@ -185,7 +253,11 @@ export const historyManager = new HistoryManager();
  * 앱 시작 시 URL을 파싱하여 초기 화면 결정
  */
 export const getInitialURL = async (): Promise<string | null> => {
-  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
+  if (
+    Platform.OS === 'web' &&
+    typeof window !== 'undefined' &&
+    window.location
+  ) {
     try {
       return window.location.href;
     } catch (e) {

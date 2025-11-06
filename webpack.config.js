@@ -109,7 +109,12 @@ module.exports = {
           from: 'public',
           to: '',
           globOptions: {
-            ignore: ['**/index.html', '**/service-worker.js', '**/404.html'], // index.html and 404.html need template processing
+            ignore: [
+              '**/index.html',
+              '**/service-worker.js',
+              '**/404.html',
+              '**/manifest.json',
+            ], // These files need template processing
           },
         },
         {
@@ -120,6 +125,19 @@ module.exports = {
             return content
               .toString()
               .replace(/__BASE_PATH__/g, BASE_PATH);
+          },
+        },
+        {
+          from: 'public/manifest.json',
+          to: 'manifest.json',
+          transform(content) {
+            // Update manifest.json with correct base path
+            const manifest = JSON.parse(content.toString());
+            if (BASE_PATH) {
+              manifest.start_url = BASE_PATH + '/';
+              manifest.scope = BASE_PATH + '/';
+            }
+            return JSON.stringify(manifest, null, 2);
           },
         },
         {
