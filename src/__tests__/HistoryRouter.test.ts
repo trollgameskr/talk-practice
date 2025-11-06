@@ -56,16 +56,17 @@ describe('HistoryRouter', () => {
     it('should detect web platform', () => {
       expect(historyManager.isWebPlatform).toBe(true);
     });
+  });
 
-    it('should return basePath for GitHub Pages', () => {
-      // Mock window.location for GitHub Pages
-      const mockLocation = {
-        pathname: '/talk-practice/topics',
-      };
+  describe('Custom linking functions', () => {
+    it('should have getPathFromState function', () => {
+      expect(linkingConfig.getPathFromState).toBeDefined();
+      expect(typeof linkingConfig.getPathFromState).toBe('function');
+    });
 
-      // Note: In actual implementation, basePath is determined at construction time
-      // This test verifies the logic exists
-      expect(historyManager.basePathname).toBeDefined();
+    it('should have getStateFromPath function', () => {
+      expect(linkingConfig.getStateFromPath).toBeDefined();
+      expect(typeof linkingConfig.getStateFromPath).toBe('function');
     });
   });
 });
