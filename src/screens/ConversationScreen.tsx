@@ -209,25 +209,49 @@ const ConversationScreen = ({route, navigation}: any) => {
       sessionSavedRef.current = true;
 
       // Save session and show alert
-      saveSession().then(() => {
-        Alert.alert(
-          t('conversation.sessionEnded.title'),
-          t('conversation.sessionEnded.message'),
-          [
-            {
-              text: t('conversation.sessionEnded.goToHome'),
-              onPress: () => {
-                // Navigate to home screen and reset navigation stack
-                navigation.reset({
-                  index: 0,
-                  routes: [{name: 'Home'}],
-                });
+      saveSession()
+        .then(() => {
+          Alert.alert(
+            t('conversation.sessionEnded.title'),
+            t('conversation.sessionEnded.message'),
+            [
+              {
+                text: t('conversation.sessionEnded.goToHome'),
+                onPress: () => {
+                  // Navigate to home screen and reset navigation stack
+                  navigation.reset({
+                    index: 0,
+                    routes: [{name: 'Home'}],
+                  });
+                },
               },
-            },
-          ],
-          {cancelable: false}, // Prevent dismissal by tapping outside
-        );
-      });
+            ],
+            {cancelable: false}, // Prevent dismissal by tapping outside
+          );
+        })
+        .catch(error => {
+          console.error('[ConversationScreen] Failed to save session:', error);
+          // Reset flag to allow retry
+          sessionSavedRef.current = false;
+          // Still show the session ended alert but with error message
+          Alert.alert(
+            t('conversation.sessionEnded.title'),
+            t('conversation.sessionEnded.message') +
+              '\n\n⚠️ 세션 저장에 실패했습니다.',
+            [
+              {
+                text: t('conversation.sessionEnded.goToHome'),
+                onPress: () => {
+                  navigation.reset({
+                    index: 0,
+                    routes: [{name: 'Home'}],
+                  });
+                },
+              },
+            ],
+            {cancelable: false},
+          );
+        });
     }
     // saveSession is intentionally not in dependencies because:
     // 1. It uses refs that are stable across renders
@@ -255,9 +279,31 @@ const ConversationScreen = ({route, navigation}: any) => {
                 onPress: async () => {
                   // Mark session as saved to prevent duplicate saves
                   sessionSavedRef.current = true;
-                  await saveSession();
-                  // Navigate back
-                  navigation.goBack();
+                  try {
+                    await saveSession();
+                    // Navigate back
+                    navigation.goBack();
+                  } catch (error) {
+                    console.error(
+                      '[ConversationScreen] Failed to save session:',
+                      error,
+                    );
+                    // Reset flag to allow retry
+                    sessionSavedRef.current = false;
+                    // Show error and still allow navigation
+                    Alert.alert(
+                      '세션 저장 실패',
+                      '세션 저장에 실패했습니다. 그래도 뒤로 가시겠습니까?',
+                      [
+                        {text: '취소', style: 'cancel'},
+                        {
+                          text: '뒤로 가기',
+                          style: 'destructive',
+                          onPress: () => navigation.goBack(),
+                        },
+                      ],
+                    );
+                  }
                 },
               },
             ],
