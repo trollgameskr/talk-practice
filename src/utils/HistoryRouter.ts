@@ -5,9 +5,6 @@
 
 import {Platform} from 'react-native';
 
-// Build-time constants
-declare const __BASE_PATH__: string;
-
 // Web environment types
 interface PopStateEvent extends Event {
   state: any;
@@ -76,17 +73,9 @@ class HistoryManager {
   constructor() {
     this.isWeb = Platform.OS === 'web';
     // GitHub Pages 배포 환경에서는 빌드 시 주입된 BASE_PATH 사용
-    this.basePath = '';
-    
-    if (this.isWeb) {
-      try {
-        // 빌드 시 webpack DefinePlugin으로 주입된 BASE_PATH 사용
-        this.basePath = typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
-      } catch (e) {
-        // __BASE_PATH__가 정의되지 않은 경우 (개발 환경) 빈 문자열 사용
-        this.basePath = '';
-      }
-    }
+    // 개발 환경이나 __BASE_PATH__가 정의되지 않은 경우 빈 문자열 사용
+    this.basePath =
+      this.isWeb && typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
   }
 
   /**
