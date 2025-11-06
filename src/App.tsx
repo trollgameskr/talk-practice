@@ -40,6 +40,8 @@ import {ThemeProvider, useTheme} from './contexts/ThemeContext';
 import {DeveloperModeProvider} from './contexts/DeveloperModeContext';
 // i18n
 import {initI18n} from './config/i18n.config';
+// History Router
+import {linkingConfig} from './utils/HistoryRouter';
 
 const firebaseService = new FirebaseService();
 
@@ -162,6 +164,16 @@ const AppContentInner = ({isAuthenticated}: {isAuthenticated: boolean}) => {
       />
       <NavigationContainer
         ref={navigationRef}
+        linking={linkingConfig}
+        fallback={
+          <View
+            style={[
+              styles.loadingContainer,
+              {backgroundColor: theme.colors.background},
+            ]}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        }
         key={isAuthenticated ? 'authenticated' : 'unauthenticated'}>
         <Stack.Navigator
           initialRouteName={isAuthenticated ? 'Home' : 'Login'}

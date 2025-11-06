@@ -184,6 +184,25 @@ Firebase를 사용하면 클라우드 저장 및 다중 기기 동기화가 가�
 6. **피드백 확인**: 세션 종료 후 상세한 피드백 확인
 7. **진도 확인**: Progress 화면에서 학습 진도 추적
 
+### 🔙 뒤로가기 동작 (Back Navigation)
+
+웹 및 모바일 환경에서 자연스러운 뒤로가기 동작을 지원합니다:
+
+- **웹 브라우저**: 브라우저의 뒤로가기 버튼(←) 또는 Alt+← 사용
+- **모바일**: 안드로이드 뒤로가기 제스처 또는 버튼 사용
+- **동작**: 현재 화면에서 이전 화면으로 자연스럽게 이동
+  - 대화 화면 → 주제 선택 화면
+  - 주제 선택 화면 → 홈 화면
+  - 설정 화면 → 홈 화면
+  - 등...
+
+**직접 URL 접근**: 웹에서 특정 화면의 URL을 직접 입력하거나 북마크로 접근 가능
+- 예: `https://trollgameskr.github.io/talk-practice/topics` (주제 선택)
+- 예: `https://trollgameskr.github.io/talk-practice/progress` (진도 확인)
+- 예: `https://trollgameskr.github.io/talk-practice/settings` (설정)
+
+**새로고침**: 웹에서 페이지 새로고침(F5 또는 Ctrl+R) 시 현재 화면 유지
+
 ## 🏗️ 프로젝트 구조 (Project Structure)
 
 ```
