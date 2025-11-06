@@ -3,12 +3,15 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+// GitHub Pages base path configuration
+const BASE_PATH = process.env.GITHUB_PAGES ? '/talk-practice' : '';
+
 module.exports = {
   entry: './index.web.js',
   output: {
     path: path.resolve(__dirname, 'web-build'),
     filename: 'bundle.js',
-    publicPath: process.env.GITHUB_PAGES ? '/talk-practice/' : '/',
+    publicPath: BASE_PATH ? BASE_PATH + '/' : '/',
     clean: true, // Clean the output directory before emit
   },
   optimization: {
@@ -78,10 +81,14 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html',
       inject: true,
+      templateParameters: {
+        BASE_PATH: BASE_PATH,
+      },
     }),
     new webpack.DefinePlugin({
       __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
       __BUILD_TIMESTAMP__: JSON.stringify(new Date().toISOString()),
+      __BASE_PATH__: JSON.stringify(BASE_PATH),
       'process.env': JSON.stringify({
         NODE_ENV: process.env.NODE_ENV || 'development',
         FIREBASE_API_KEY: process.env.FIREBASE_API_KEY || '',
@@ -102,7 +109,17 @@ module.exports = {
           from: 'public',
           to: '',
           globOptions: {
-            ignore: ['**/index.html', '**/service-worker.js'], // index.html is handled by HtmlWebpackPlugin, service-worker.js is handled separately
+            ignore: ['**/index.html', '**/service-worker.js', '**/404.html'], // index.html and 404.html need template processing
+          },
+        },
+        {
+          from: 'public/404.html',
+          to: '404.html',
+          transform(content) {
+            // Replace __BASE_PATH__ placeholder with actual base path
+            return content
+              .toString()
+              .replace(/__BASE_PATH__/g, BASE_PATH);
           },
         },
         {

@@ -5,6 +5,9 @@
 
 import {Platform} from 'react-native';
 
+// Build-time constants
+declare const __BASE_PATH__: string;
+
 // Web environment types
 interface PopStateEvent extends Event {
   state: any;
@@ -36,7 +39,9 @@ export interface RouteConfig {
  */
 export const linkingConfig = {
   prefixes: [
-    'https://trollgameskr.github.io/talk-practice',
+    ...(typeof __BASE_PATH__ !== 'undefined' && __BASE_PATH__
+      ? [`https://trollgameskr.github.io${__BASE_PATH__}`]
+      : []),
     'http://localhost:3000',
     'gemini-talk://',
   ],
@@ -70,16 +75,15 @@ class HistoryManager {
 
   constructor() {
     this.isWeb = Platform.OS === 'web';
-    // GitHub Pages 배포 환경에서는 /talk-practice/ 기본 경로 사용
+    // GitHub Pages 배포 환경에서는 빌드 시 주입된 BASE_PATH 사용
     this.basePath = '';
     
-    if (this.isWeb && typeof window !== 'undefined' && window.location) {
+    if (this.isWeb) {
       try {
-        this.basePath = window.location.pathname.includes('/talk-practice/')
-          ? '/talk-practice'
-          : '';
+        // 빌드 시 webpack DefinePlugin으로 주입된 BASE_PATH 사용
+        this.basePath = typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '';
       } catch (e) {
-        // window.location 접근 실패 시 빈 문자열 사용
+        // __BASE_PATH__가 정의되지 않은 경우 (개발 환경) 빈 문자열 사용
         this.basePath = '';
       }
     }

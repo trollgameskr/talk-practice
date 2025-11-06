@@ -173,7 +173,7 @@
         
         // History API를 사용하여 경로 복원
         // React Navigation이 초기 URL을 올바르게 인식할 수 있도록 합니다
-        var basePath = window.location.pathname.includes('/talk-practice/') ? '/talk-practice' : '';
+        var basePath = '<%= BASE_PATH %>';
         history.replaceState(null, '', basePath + redirectPath);
       }
     })();

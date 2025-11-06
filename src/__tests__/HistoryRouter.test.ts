@@ -16,9 +16,8 @@ describe('HistoryRouter', () => {
   describe('linkingConfig', () => {
     it('should have correct prefixes', () => {
       expect(linkingConfig.prefixes).toContain('http://localhost:3000');
-      expect(linkingConfig.prefixes).toContain(
-        'https://trollgameskr.github.io/talk-practice',
-      );
+      expect(linkingConfig.prefixes).toContain('gemini-talk://');
+      // GitHub Pages prefix는 __BASE_PATH__가 설정된 경우에만 추가됨
     });
 
     it('should map screens to correct paths', () => {
