@@ -8,11 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Favicon support**: 멀티 레이어 favicon.ico 파일 추가
-  - Windows 브라우저, PWA 및 다양한 환경에서 앱 아이콘이 올바르게 표시됩니다
-  - 16x16, 32x32, 72x72 크기를 포함하는 멀티 레이어 ICO 파일
-  - `npm run generate:favicon` 명령어로 favicon.ico를 재생성할 수 있습니다
-  - ImageMagick을 사용한 자동 favicon 생성 스크립트 추가
 - Session end confirmation modal with clear user feedback
   - After ending a session, users now see a "연습이 종료되었습니다" (Practice Session Ended) confirmation modal
   - Modal includes a "처음으로 이동" (Go to Home) button that navigates directly to the home screen
