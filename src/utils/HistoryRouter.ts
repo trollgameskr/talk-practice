@@ -44,10 +44,8 @@ export interface RouteConfig {
 
 /**
  * GitHub Pages 베이스 경로
- * __BASE_PATH__는 Webpack에서 주입되는 전역 변수
+ * __BASE_PATH__는 Webpack에서 주입되는 전역 변수 (src/types/global.d.ts에 선언됨)
  */
-declare const __BASE_PATH__: string;
-
 const BASE_PATH =
   typeof __BASE_PATH__ !== 'undefined' && __BASE_PATH__ ? __BASE_PATH__ : '';
 
@@ -108,13 +106,9 @@ export const linkingConfig = {
     if (BASE_PATH && Platform.OS === 'web') {
       if (path.startsWith(BASE_PATH)) {
         processedPath = path.substring(BASE_PATH.length);
-        // BASE_PATH 제거 후 빈 문자열이면 '/'로 정규화
-        if (!processedPath || processedPath === '') {
-          processedPath = '/';
-        }
-        // '/'로 시작하지 않으면 추가
-        if (!processedPath.startsWith('/')) {
-          processedPath = `/${processedPath}`;
+        // BASE_PATH 제거 후 빈 문자열이거나 '/'로 시작하지 않으면 '/'로 정규화
+        if (!processedPath || !processedPath.startsWith('/')) {
+          processedPath = processedPath ? `/${processedPath}` : '/';
         }
       }
     }
