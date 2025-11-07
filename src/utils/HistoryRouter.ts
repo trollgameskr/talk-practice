@@ -103,7 +103,7 @@ export const linkingConfig = {
    */
   getStateFromPath(path: string, config: any): any {
     let processedPath = path;
-    
+
     // BASE_PATH가 있고 경로가 BASE_PATH로 시작하면 제거
     if (BASE_PATH && Platform.OS === 'web') {
       if (path.startsWith(BASE_PATH)) {
@@ -118,7 +118,7 @@ export const linkingConfig = {
         }
       }
     }
-    
+
     return defaultGetStateFromPath(processedPath, config);
   },
 };

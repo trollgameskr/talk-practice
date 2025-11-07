@@ -3,7 +3,6 @@
  */
 
 import {linkingConfig, historyManager} from '../utils/HistoryRouter';
-import {Platform} from 'react-native';
 
 // Mock Platform to simulate web environment
 jest.mock('react-native', () => ({
@@ -83,9 +82,9 @@ describe('HistoryRouter - Non-web platform', () => {
   });
 
   it('should not be web platform on mobile', () => {
-    const {historyManager: mobileHistoryManager} =
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../utils/HistoryRouter');
+    const {
+      historyManager: mobileHistoryManager,
+    } = require('../utils/HistoryRouter');
     expect(mobileHistoryManager.isWebPlatform).toBe(false);
   });
 });
