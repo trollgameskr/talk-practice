@@ -39,24 +39,21 @@ When the `GITHUB_PAGES` environment variable is set, the build will:
 
 ### HTML Base Tag
 
-**중요 변경사항**: 이제 HTML `<base>` 태그를 사용하여 basePath를 처리합니다.
-
 `public/index.html`에 추가된 `<base>` 태그:
 
 ```html
 <base href="/talk-practice/">
 ```
 
-이 태그는 브라우저에게 모든 상대 경로(리소스, 링크, 히스토리 API)를 해석할 때 사용할 기준 URL을 알려줍니다.
+이 태그는 브라우저에게 모든 상대 경로(리소스, 링크)를 해석할 때 사용할 기준 URL을 알려줍니다.
 
-**장점**:
-- 브라우저가 자동으로 모든 상대 경로를 basePath 기준으로 해석
-- React Navigation이 basePath를 제거할 필요 없음
-- 코드가 더 단순하고 표준 웹 기술 활용
+**용도**:
+- 정적 리소스(이미지, CSS, JS 파일) 경로 해석
+- 상대 링크 해석
 
 ### React Navigation Configuration
 
-The app uses standard linking configuration in `src/utils/HistoryRouter.ts`:
+The app uses custom linking configuration in `src/utils/HistoryRouter.ts`:
 
 ```typescript
 export const linkingConfig = {
@@ -66,10 +63,25 @@ export const linkingConfig = {
     'gemini-talk://',
   ],
   config: { /* screen mappings */ },
+  // 커스텀 URL 생성 함수: BASE_PATH를 포함한 URL 생성
+  getPathFromState(state, config) {
+    const path = defaultGetPathFromState(state, config);
+    return BASE_PATH ? `${BASE_PATH}${path}` : path;
+  },
+  // 커스텀 URL 파싱 함수: BASE_PATH를 제거하여 화면 식별
+  getStateFromPath(path, config) {
+    const processedPath = path.startsWith(BASE_PATH) 
+      ? path.substring(BASE_PATH.length) || '/'
+      : path;
+    return defaultGetStateFromPath(processedPath, config);
+  },
 };
 ```
 
-`<base>` 태그 덕분에 React Navigation은 복잡한 basePath 처리 로직 없이 표준 설정만으로 작동합니다.
+**동작 방식**:
+- `getPathFromState`: 네비게이션 시 URL 생성 시 자동으로 `/talk-practice/` prefix 추가
+- `getStateFromPath`: URL에서 화면 식별 시 `/talk-practice/` prefix 제거
+- 브라우저 주소창에 항상 올바른 전체 경로 표시
 
 ### GitHub Actions Workflow
 
@@ -143,12 +155,14 @@ GeminiTalk는 브라우저 History API를 사용한 클라이언트 사이드 �
 
 ### 베이스 경로 처리
 
-GitHub Pages 프로젝트 페이지는 `/<owner>/<repo>/` 형식의 베이스 경로를 사용합니다. 이 앱은 HTML `<base>` 태그를 사용하여 베이스 경로를 처리합니다:
+GitHub Pages 프로젝트 페이지는 `/<owner>/<repo>/` 형식의 베이스 경로를 사용합니다. 이 앱은 두 가지 방법으로 베이스 경로를 처리합니다:
 
 1. **빌드 타임**: Webpack이 `index.html`에 `<base href="/talk-practice/">` 태그를 주입
-2. **브라우저**: `<base>` 태그 덕분에 모든 상대 경로(리소스, 링크, 히스토리 API)를 `/talk-practice/` 기준으로 자동 해석
-3. **React Navigation**: 표준 linking 설정만 사용 - 브라우저가 basePath를 자동으로 처리
-4. **결과**: 브라우저 주소창에 항상 `/talk-practice/` prefix가 자연스럽게 유지됨
+2. **정적 리소스**: `<base>` 태그 덕분에 모든 상대 경로(이미지, CSS, JS 파일)가 자동으로 `/talk-practice/` 기준으로 해석됨
+3. **React Navigation**: 커스텀 `getPathFromState`와 `getStateFromPath` 함수 사용
+   - `getPathFromState`: 네비게이션 시 URL 생성 → `/talk-practice/` prefix 자동 추가
+   - `getStateFromPath`: URL 파싱 시 → `/talk-practice/` prefix 제거하여 화면 식별
+4. **결과**: 브라우저 주소창에 항상 `/talk-practice/` prefix가 표시되고, React Navigation은 올바른 화면을 렌더링
 
 ### 뒤로가기 동작
 
@@ -222,10 +236,11 @@ To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)
 
 ## ⚠️ Important Notes
 
-1. **Base Path**: HTML `<base>` 태그를 사용하여 `/talk-practice/` base path를 처리합니다
-   - `<base href="/talk-practice/">` 태그가 모든 상대 경로의 기준점 설정
-   - React Navigation은 표준 설정만 사용 - 브라우저가 자동으로 basePath 처리
-   - 모든 히스토리 API 호출이 자동으로 basePath 포함
+1. **Base Path**: 
+   - HTML `<base>` 태그: 정적 리소스 로딩 경로 설정
+   - React Navigation 커스텀 함수: URL 생성/파싱 시 `/talk-practice/` 자동 처리
+   - `getPathFromState`: 네비게이션 → URL 변환 시 basePath 추가
+   - `getStateFromPath`: URL → 화면 식별 시 basePath 제거
    - 브라우저 주소창에 항상 `/talk-practice/` prefix 표시
 2. **Jekyll**: The `.nojekyll` file prevents GitHub from processing files through Jekyll
 3. **Cache**: Browser cache may need to be cleared to see updates after deployment
@@ -242,11 +257,11 @@ To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)
 ### URL에서 베이스 경로가 사라짐
 
 **Issue**: `/talk-practice/`로 접근했는데 브라우저 주소가 `/`로 변경됨  
-**Solution**: ✅ **해결되었습니다!** HTML `<base>` 태그를 사용하여 브라우저가 자동으로 basePath를 유지합니다:
-- `<base href="/talk-practice/">` 태그가 모든 상대 경로의 기준점 설정
-- React Navigation이 표준 linking 설정만 사용 - 복잡한 커스텀 로직 불필요
-- 브라우저 히스토리 API가 자동으로 basePath 포함
+**Solution**: ✅ **해결되었습니다!** React Navigation의 커스텀 `getPathFromState`와 `getStateFromPath` 함수를 사용:
+- `getPathFromState`: 네비게이션 시 자동으로 `/talk-practice/` prefix 추가
+- `getStateFromPath`: URL 파싱 시 `/talk-practice/` prefix 제거하여 올바른 화면 식별
 - 브라우저 주소창에 항상 `/talk-practice/` prefix가 표시됨
+- 모든 내부 링크와 뒤로가기/앞으로가기에서 basePath 유지
 
 ### 404 errors
 
@@ -264,11 +279,11 @@ To get these values, follow the [Firebase Setup Guide](./docs/FIREBASE_SETUP.md)
 3. 404.html이 `/topics` 경로를 sessionStorage에 저장
 4. `/talk-practice/` (index.html)로 리다이렉션
 5. index.html이 저장된 경로 복원 (History API 사용)
-6. `<base>` 태그 덕분에 브라우저가 자동으로 `/talk-practice/topics`로 해석
-7. React Navigation이 올바른 화면(TopicSelection) 렌더링
+6. React Navigation의 `getStateFromPath`가 `/topics`를 파싱하여 올바른 화면 식별
+7. 사용자는 TopicSelection 화면을 보게 됨
 
 **베이스 경로 유지**:
-- `<base>` 태그가 모든 히스토리 API 호출에 basePath를 자동 적용
+- React Navigation의 `getPathFromState`가 모든 네비게이션에서 basePath 자동 추가
 - 내부 링크 클릭, 뒤로가기/앞으로가기 모두 자동으로 `/talk-practice/` prefix 유지
 - React Navigation과 브라우저 히스토리가 자연스럽게 동기화
 

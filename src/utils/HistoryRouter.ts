@@ -4,6 +4,10 @@
  */
 
 import {Platform} from 'react-native';
+import {
+  getPathFromState as defaultGetPathFromState,
+  getStateFromPath as defaultGetStateFromPath,
+} from '@react-navigation/native';
 
 // Web environment types
 interface PopStateEvent extends Event {
@@ -39,11 +43,18 @@ export interface RouteConfig {
 }
 
 /**
+ * GitHub Pages 베이스 경로
+ * __BASE_PATH__는 Webpack에서 주입되는 전역 변수 (src/types/global.d.ts에 선언됨)
+ */
+const BASE_PATH =
+  typeof __BASE_PATH__ !== 'undefined' && __BASE_PATH__ ? __BASE_PATH__ : '';
+
+/**
  * React Navigation linking configuration
  * URL 경로를 React Navigation 화면과 매핑
  *
- * Note: <base> 태그가 basePath를 처리하므로,
- * React Navigation은 basePath 이후의 경로만 처리합니다.
+ * getPathFromState: 네비게이션 상태에서 URL 경로를 생성할 때 BASE_PATH를 추가
+ * getStateFromPath: URL 경로를 파싱하여 네비게이션 상태를 생성할 때 BASE_PATH를 제거
  */
 export const linkingConfig = {
   prefixes: [
@@ -69,6 +80,40 @@ export const linkingConfig = {
       AllSettings: 'settings/:category',
       Feedback: 'feedback/:sessionId?',
     },
+  },
+  /**
+   * 네비게이션 상태에서 URL 경로 생성
+   * BASE_PATH를 항상 포함하여 브라우저 주소창에 올바른 URL이 표시되도록 함
+   */
+  getPathFromState(state: any, config: any): string {
+    const path = defaultGetPathFromState(state, config);
+    // BASE_PATH가 있을 때만 추가
+    if (BASE_PATH && Platform.OS === 'web') {
+      // path가 '/'로 시작하지 않으면 '/'를 추가
+      const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+      return `${BASE_PATH}${normalizedPath}`;
+    }
+    return path;
+  },
+  /**
+   * URL 경로에서 네비게이션 상태 생성
+   * BASE_PATH를 제거하여 React Navigation이 올바른 화면을 인식하도록 함
+   */
+  getStateFromPath(path: string, config: any): any {
+    let processedPath = path;
+
+    // BASE_PATH가 있고 경로가 BASE_PATH로 시작하면 제거
+    if (BASE_PATH && Platform.OS === 'web') {
+      if (path.startsWith(BASE_PATH)) {
+        processedPath = path.substring(BASE_PATH.length);
+        // BASE_PATH 제거 후 빈 문자열이거나 '/'로 시작하지 않으면 '/'로 정규화
+        if (!processedPath || !processedPath.startsWith('/')) {
+          processedPath = processedPath ? `/${processedPath}` : '/';
+        }
+      }
+    }
+
+    return defaultGetStateFromPath(processedPath, config);
   },
 };
 
